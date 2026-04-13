@@ -1,148 +1,101 @@
-# 骨架使用方法
+# Web Quick Start Light
 
-## 本地安装骨架
+> Spring Boot 4.x + Java 25 多模块四层架构脚手架，开箱即用。
 
-##### 1、引入骨架构建插件
+## 技术栈
 
-在项目的根pom中引入构架骨架插件
+| 类别 | 技术 | 版本 |
+|------|------|------|
+| 语言 | Java | 25 |
+| 框架 | Spring Boot | 4.x |
+| ORM | MyBatis-Plus | 3.5.x |
+| 对象转换 | MapStruct | 1.6.x |
+| 认证 | Sa-Token | 1.45.x |
+| 限流 | Bucket4j | 8.17.x |
+| 工具库 | Hutool | 5.8.x |
+| 数据库 | SQLite | 3.x |
+| 测试 | JUnit 5 + Mockito + ArchUnit | - |
+| 构建 | Maven 多模块 | - |
 
-```xml
+> 精确版本号见 `pom.xml` 或 [docs/architecture/system-overview.md](docs/architecture/system-overview.md)。
 
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-archetype-plugin</artifactId>
-            <version>3.4.0</version>
-        </plugin>
-    </plugins>
-</build>
+## 项目结构
+
+```
+web-quick-start-light/                     (根 POM, packaging=pom)
+├── common/                                (异常体系)
+├── clients/                               (parent POM, packaging=pom)
+│   ├── client-cache/                      (Caffeine 本地缓存)
+│   ├── client-oss/                        (本地对象存储)
+│   ├── client-email/                      (Jakarta Mail 邮件)
+│   ├── client-sms/                        (短信)
+│   ├── client-search/                     (内存搜索)
+│   ├── client-log/                        (日志客户端)
+│   ├── client-ratelimit/                  (限流客户端)
+│   ├── client-idempotent/                 (幂等客户端)
+│   └── client-auth/                       (认证客户端)
+└── app/                                   (主应用, 依赖 common + 所有 client-*)
 ```
 
-##### 2、创建骨架文件
+> 详细模块依赖和四层架构说明见 [docs/architecture/module-structure.md](docs/architecture/module-structure.md)。
 
-在项目根目录下执行如下命令
+## 快速开始
 
-```shell
-mvn archetype:create-from-project -s <你的maven的setting.xml文件位置>
-```
-
-执行完毕后，会发现项目中多了一个`target`文件夹，此文件夹记录骨架的相关配置信息
-
-##### 3、本地安装骨架
-
-进入上一步生成的target文件目录，具体路径：`<你的项目根目录>\target\generated-sources\archetype`
-
-```shell
-cd  .\_output\archetype\
-```
-
-然后执行`mvn install`命令安装骨架到本地maven仓库。安装完成后，会输出本地骨架的路径，并在本地仓库中创建一个骨架坐标文件。坐标文件记录着本地骨架对于本地仓库的相对路径。
-
-###### 错误信息
-如果出现下面错误，则需要手动进入`archetype-metadata.xml`文件修改各个模块的`dir`目录（此项目中是加上`app/`前缀）
 ```bash
-[ERROR] ResourceManager: unable to find resource 'archetype-resources/testing/pom.xml' in any resource loader.
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD FAILURE
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  0.728 s
-[INFO] Finished at: 2025-07-16T02:21:46+08:00
-[INFO] ------------------------------------------------------------------------
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-archetype-plugin:3.4.0:integration-test (default-integration-test) on project web-quick-start-light:
-[ERROR] Archetype IT 'basic' failed: Error merging velocity templates: Unable to find resource 'archetype-resources/testing/pom.xml'
-[ERROR] -> [Help 1]
-[ERROR]
-[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR]
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
-[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
-```
-`archetype-metadata.xml`位置
-```shell
-target/generated-sources/archetype/src/main/resources/META-INF/maven/archetype-metadata.xml
-```
+# 构建（跳过测试）
+mvn clean package -DskipTests
 
+# 运行全部测试
+mvn test
 
-**安装成功输出的内容**
+# 仅单元测试（*UTest）
+mvn test -Dtest="*UTest"
 
-```shell
-[INFO] --- install:3.1.1:install (default-install) @ habit-reminder-portal ---
-[INFO] Installing E:\Dev\code\scaffolding\nexa-app-archetype\target\generated-sources\archetype\pom.xml to E:\Dev\software\apache-maven-3.9.6\local_reposity\org\ssm\start\habit-reminder-portal\1.0.0\habit-reminder-portal-1.0.0.pom
-[INFO] Installing E:\Dev\code\scaffolding\nexa-app-archetype\target\generated-sources\archetype\target\habit-reminder-portal-1.0.0.jar to E:\Dev\software\apache-maven-3.9.6\local_reposity\org\ssm\start\habit-reminder-portal\1.0.0\habit-reminder-portal-1.0.0.jar
+# 仅集成测试（*ITest）
+mvn test -Dtest="*ITest"
+
+# 启动应用（开发环境）—— 必须指定 -pl app
+mvn spring-boot:run -pl app
+
+# 启动应用（生产环境）
+scripts/start.sh prod
+
+# 停止应用
+scripts/stop.sh
 ```
 
-**坐标文件：本地仓库/archetype-catalog.xml**
+## 多环境配置
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<archetype-catalog
-        xsi:schemaLocation="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-catalog/1.0.0 https://maven.apache.org/xsd/archetype-catalog-1.0.0.xsd"
-        xmlns="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-catalog/1.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <archetypes>
-        <archetype>
-            <groupId>org.smm.archetype</groupId>
-            <artifactId>web-quick-start-light</artifactId>
-            <version>1.0.0</version>
-            <description>Parent pom providing dependency and plugin management for applications built with Maven</description>
-        </archetype>
-    </archetypes>
-</archetype-catalog>
+```bash
+# 开发环境（默认，SQLite）
+mvn spring-boot:run -pl app
+
+# 生产环境
+scripts/start.sh prod
+
+# 指定可选配置
+mvn spring-boot:run -pl app -Dspring-boot.run.profiles=prod
 ```
 
-## 使用骨架
+## 核心特性
 
-有两种创建骨架的方式
+- **四层架构**：Controller → Facade → Service → Repository，ArchUnit 守护依赖规则
+- **9 个技术客户端**：缓存/存储/邮件/短信/搜索/日志/限流/幂等/认证，Template Method + 条件装配
+- **ScopedValue 线程上下文**：基于 Java 25 ScopedValue 的 userId/traceId 全链路传递
+- **完善日志体系**：@BusinessLog 注解 + 8 个 Appender + 采样 + 慢 SQL 监控
+- **高覆盖率测试**：UTest + ITest 双分类，JaCoCo Instruction ≥ 95%
 
-1. 在IDEA中通过界面创建骨架
+> 详细架构、编码规范、模块文档见 [docs/](docs/)。
 
-2. 通过命令行指定骨架并创建项目
+## 骨架使用
 
-### 通过IDEA界面创建骨架
+骨架安装、使用、故障排查详见 [docs/architecture/archetype-usage.md](docs/architecture/archetype-usage.md)。
 
-在IDEA中指定骨架文件`archetype-catalog.xml`的位置（一般在本地maven仓库的根目录下），然后在新建项目时指定使用这个骨架文件，此时就会出现骨架配置文件中所有可用的骨架。
+## 文档
 
-### 通过命令行创建骨架（推荐）
+| 文档 | 说明 |
+|------|------|
+| [AGENTS.md](AGENTS.md) | AI 编码规范入口 |
+| [docs/README.md](docs/README.md) | 文档系统导航 |
 
-```shell
-mvn archetype:generate -DarchetypeCatalog=local
-    -DarchetypeGroupId=<骨架的groupId>
-    -DarchetypeArtifactId=<骨架的artifactId>
-    -DarchetypeVersion=<骨架的版本号>
-    -DgroupId=<新项目的groupId>
-    -DartifactId=<新项目的artifactId>
-    -Dversion=<新项目的version>
-```
-
-比如在windows终端中创建：
-
-```shell
-mvn archetype:generate -DarchetypeCatalog=local ^
-  -DinteractiveMode=false ^
-  -DarchetypeGroupId=org.smm.archetype ^
-  -DarchetypeArtifactId=web-quick-start-light ^
-  -DarchetypeVersion=1.0.1 ^
-  -DgroupId=org.ssm ^
-  -DartifactId=web-demo ^
-  -Dversion=1.0.0-SNAPSHOT
-```
-
-> 注意`^`后不能有任意其他字符，否则会被windwos终端识别成下一行导致失败
-
-## 骨架配置信息
-
-```shell
-archetype.groupId=org.smm.archetype
-archetype.artifactId=web-quick-start-light
-archetype.version=1.0.0
-# 排除的文件
-excludePatterns=**/.idea/**,**/target/*,logs/**,modules/**,**/*.iml,**/logs,**/logs/*,**/logs/**,README.md,data_h2/**
-```
-
-### 有可能的错误
-
-##### The specified user settings file does not exist: C:\Users\Administrator\.m2\settings.xml
-
-如果显示找不到settings位置，可以使用`-s`手动指定settings文件的位置
+> 本项目采用三轨文档体系：**Contract 轨**（docs/，跟随代码变化）、**Constraint 轨**（AGENTS.md + conventions/，驱动代码行为）和 **Intent 轨**（OpenSpec，编码前冻结的设计意图）。Intent 轨文档不在 docs/ 目录下，位于独立的 [openspec/specs/](openspec/specs/) 目录，记录各功能的设计初衷和决策理由。详见 [docs/README.md](docs/README.md)。
