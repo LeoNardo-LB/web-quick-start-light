@@ -39,3 +39,8 @@ build/
 /.idea/
 
 _output
+### Runtime files ###
+app/.logs/
+app/data_sqlite/
+app/logs/
+.opencode/
