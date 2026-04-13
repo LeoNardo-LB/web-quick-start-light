@@ -1,0 +1,51 @@
+server:
+  port: 0
+
+spring:
+  datasource:
+    url: "jdbc:sqlite::memory:"
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:init.sql
+      continue-on-error: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: assign_id
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [%X{traceId}] - %msg%n"
+  level:
+    org.smm.archetype: DEBUG
+
+# Sa-Token 配置（测试环境）
+sa-token:
+  token-name: Authorization
+  timeout: 86400
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: false
+
+# 认证中间件（测试环境）
+middleware:
+  auth:
+    enabled: true
+    exclude-paths:
+      - /api/auth/**
+      - /api/test/**
+      - /api/system/**
+      - /actuator/**
+      - /swagger-ui/**
+      - /v3/api-docs/**

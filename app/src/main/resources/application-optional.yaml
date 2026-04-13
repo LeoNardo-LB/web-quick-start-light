@@ -1,0 +1,25 @@
+# Optional middleware configurations
+# Uncomment and configure as needed
+
+# middleware:
+#   cache:
+#     default-expire-seconds: 3600
+#     maximum-size: 10000
+# 
+#   object-storage:
+#     type: local
+#     local-storage-path: ./uploads
+# 
+#   email:
+#     host: smtp.example.com
+#     port: 587
+#     username: ${EMAIL_USERNAME}
+#     password: ${EMAIL_PASSWORD}
+#     ssl-enable: true
+#     from: noreply@example.com
+# 
+#   sms:
+#     provider: aliyun
+#     access-key-id: ${SMS_ACCESS_KEY_ID}
+#     access-key-secret: ${SMS_ACCESS_KEY_SECRET}
+#     sign-name: MyApp

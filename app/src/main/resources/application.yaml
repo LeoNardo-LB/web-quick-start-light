@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: quickstart-light
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  mvc:
+    apiversion:
+      default: "1.0"
+      use:
+        header: "API-Version"
+  messages:
+    basename: messages
+    encoding: UTF-8
+
+server:
+  port: 9201
+  servlet:
+    context-path: /${spring.application.name}
+
+springdoc:
+  show-actuator: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /openapi-doc.html
+
+logging:
+  config: classpath:logback-spring.xml
+
+# App info (used by AppInfoProperties for startup banner)
+app:
+  port: ${server.port}
+  context-path: ${server.servlet.context-path}
+  app-name: ${spring.application.name}
+  openapi-url: ${springdoc.swagger-ui.path}
+  api-doc-url: ${springdoc.api-docs.path}
+
+# Thread pool defaults
+thread-pool:
+  io-core-size: 4
+  io-max-size: 8
+  cpu-core-size: 3
+  daemon-core-size: 2
+  scheduler-pool-size: 2
+
+# Sa-Token 配置
+sa-token:
+  token-name: Authorization
+  timeout: 86400
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: false
+
+# 认证中间件
+middleware:
+  auth:
+    enabled: true
+    exclude-paths:
+      - /api/auth/**
+      - /api/test/**
+      - /actuator/**
+      - /swagger-ui/**
+      - /v3/api-docs/**

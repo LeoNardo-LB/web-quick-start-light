@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:./data_sqlite/mydb.db
+    driver-class-name: org.sqlite.JDBC
+
+# MyBatis-Plus
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: assign_id
+
+logging:
+  level:
+    root: warn
+    org.smm.archetype: info
+  slow-query:
+    enabled: true
+    threshold-ms: 1000
+  sampling:
+    enabled: false
+    rate: 0.1
