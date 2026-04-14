@@ -162,10 +162,10 @@ org.smm.archetype/
 │   │   ├── ratelimit/           ← 限流（@RateLimit + RateLimitAspect + 辅助类）
 │   │   ├── idempotent/          ← 幂等（@Idempotent + IdempotentAspect + 辅助类）
 │   │   └── operationlog/        ← 操作日志（@BusinessLog + LogAspect + OperationLogWriter 等）
-│   ├── logging/                 ← 日志基础设施（慢查询拦截、采样、脱敏、Marker）
 │   └── util/                    ← 通用工具类
 │       ├── context/             ← ScopedThreadContext / ContextRunnable / ContextCallable
-│       └── dal/                 ← MyMetaObjectHandler 等 DAL 横切
+│       ├── dal/                 ← MyMetaObjectHandler 等 DAL 横切
+│       └── logging/             ← 日志基础设施（慢查询拦截、采样、脱敏、Marker）
 │
 │  ═══ 配置与生成器 ═══
 │
@@ -183,7 +183,7 @@ org.smm.archetype/
 | 区域     | 第一级                                       | 第二级                           | 说明                             |
 |--------|-------------------------------------------|-------------------------------|--------------------------------|
 | 业务流转   | 技术层（controller/facade/service/repository） | 业务子包（system/operationlog/...） | 四层架构严格单向依赖                     |
-| 共享基础设施 | `shared`                                  | 职责子包（aspect/logging/util）     | 被多层共享，不参与四层流转                  |
+| 共享基础设施 | `shared`                                  | 职责子包（aspect/util）            | 被多层共享，不参与四层流转                  |
 | 配置     | `config`                                  | 无（扁平）                         | @Configuration 类 + properties/ |
 | 生成器    | `generated`                               | 按类型（mapper/entity）            | 禁止手动修改                         |
 
@@ -191,11 +191,11 @@ org.smm.archetype/
 
 `shared` 放置被多个技术层共享使用的横切关注点和基础设施，不参与四层业务流转。
 
-| 子包                | 职责          | 典型内容                          |
-|-------------------|-------------|-------------------------------|
-| `shared/aspect/`  | AOP 切面及配套组件 | 注解定义、切面类、Key 解析器、工厂类、枚举       |
-| `shared/logging/` | 日志基础设施      | 慢查询拦截器、日志采样过滤器、脱敏工具、Marker 常量 |
-| `shared/util/`    | 通用工具        | 线程上下文传递、DAL 横切处理、序列化、IP 工具等   |
+| 子包                    | 职责          | 典型内容                          |
+|-----------------------|-------------|-------------------------------|
+| `shared/aspect/`      | AOP 切面及配套组件 | 注解定义、切面类、Key 解析器、工厂类、枚举       |
+| `shared/util/`        | 通用工具        | 线程上下文传递、DAL 横切处理、序列化、IP 工具、日志工具等 |
+| `shared/util/logging/` | 日志基础设施（util 子包） | 慢查询拦截器、日志采样过滤器、脱敏工具、Marker 常量 |
 
 > **注意**：`shared/aspect/` 下每个业务子包（如 `ratelimit/`）是自包含的，包含注解、切面、辅助类等该横切功能所需的全部组件。不需要跨子包引用。
 
@@ -292,3 +292,4 @@ org.smm.archetype/
 |------------|-------------------------------------------------------------------------------------------------------------------|
 | 2026-04-14 | 初始创建                                                                                                              |
 | 2026-04-14 | 新增「app 内部包组织」章节；clients 模块精简为纯中间件接入层（移除 client-log/client-ratelimit/client-idempotent）；横切关注点纳入 app 模块 `shared/` 包 |
+| 2026-04-15 | `shared/logging/` 合并到 `shared/util/logging/`，统一 shared 下 aspect/util 两个维度 |
