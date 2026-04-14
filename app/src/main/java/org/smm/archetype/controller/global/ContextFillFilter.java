@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.smm.archetype.client.auth.AuthClient;
-import org.smm.archetype.util.context.ScopedThreadContext;
+import org.smm.archetype.shared.util.context.ScopedThreadContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;

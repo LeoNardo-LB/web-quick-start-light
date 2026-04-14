@@ -1,12 +1,12 @@
 package org.smm.archetype.entity.api;
 
-import java.time.Instant;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.smm.archetype.exception.CommonErrorCode;
 import org.smm.archetype.exception.ErrorCode;
-import org.smm.archetype.util.context.ScopedThreadContext;
+import org.smm.archetype.shared.util.context.ScopedThreadContext;
+
+import java.time.Instant;
 
 /**
  * @param <T> 结果类型

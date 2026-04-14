@@ -4,8 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.smm.archetype.exception.CommonErrorCode;
+import org.smm.archetype.shared.util.context.ScopedThreadContext;
 import org.smm.archetype.support.UnitTestBase;
-import org.smm.archetype.util.context.ScopedThreadContext;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;

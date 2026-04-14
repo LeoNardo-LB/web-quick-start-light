@@ -2,7 +2,7 @@ package org.smm.archetype.cases.integrationtest;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.smm.archetype.client.log.LogAspect;
+import org.smm.archetype.shared.aspect.operationlog.LogAspect;
 import org.smm.archetype.support.IntegrationTestBase;
 
 import static org.assertj.core.api.Assertions.assertThat;

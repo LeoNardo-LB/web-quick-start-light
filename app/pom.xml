@@ -50,17 +50,18 @@
             <groupId>org.smm.archetype</groupId>
             <artifactId>client-search</artifactId>
         </dependency>
+        <!-- client-log、client-ratelimit、client-idempotent 已迁移到 app/shared/ 包下 -->
+        <!-- Bucket4j：限流令牌桶（原 client-ratelimit 依赖提升） -->
         <dependency>
-            <groupId>org.smm.archetype</groupId>
-            <artifactId>client-log</artifactId>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
         </dependency>
+        <!-- Fastjson2：日志序列化（原 client-log 依赖提升） -->
         <dependency>
-            <groupId>org.smm.archetype</groupId>
-            <artifactId>client-ratelimit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.smm.archetype</groupId>
-            <artifactId>client-idempotent</artifactId>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>${fastjson2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.smm.archetype</groupId>

@@ -53,27 +53,27 @@ class NoRedundantConfigureUTest extends UnitTestBase {
     }
 
     @Test
-    @DisplayName("INV: LogConfigure.java 不应存在（迁移至 client-log）")
-    void should_notHaveLogConfigure() {
-        assertThat(Files.exists(Path.of(CONFIG_DIR, "LogConfigure.java")))
-                .as("LogConfigure.java 应已被删除（client-log LogAutoConfiguration 替代）")
-                .isFalse();
+    @DisplayName("INV: LoggingConfigure.java 应存在（从 client-log 迁移）")
+    void should_haveLoggingConfigure() {
+        assertThat(Files.exists(Path.of(CONFIG_DIR, "LoggingConfigure.java")))
+                .as("LoggingConfigure.java 应存在（从 client-log 迁移到 app/config/）")
+                .isTrue();
     }
 
     @Test
     @DisplayName("INV: config/logging/ 目录不应存在")
     void should_notHaveLoggingConfigDirectory() {
         assertThat(Files.exists(Path.of(CONFIG_DIR, "logging")))
-                .as("config/logging/ 目录应已被删除（迁移至 client-log）")
+                .as("config/logging/ 目录应已被删除（迁移至 shared/logging/）")
                 .isFalse();
     }
 
     @Test
-    @DisplayName("INV: config/properties/LoggingProperties.java 不应存在")
-    void should_notHaveLoggingProperties() {
+    @DisplayName("INV: config/properties/LoggingProperties.java 应存在（从 client-log 迁移）")
+    void should_haveLoggingProperties() {
         assertThat(Files.exists(Path.of(CONFIG_DIR, "properties", "LoggingProperties.java")))
-                .as("LoggingProperties.java 应已被删除（迁移至 client-log）")
-                .isFalse();
+                .as("LoggingProperties.java 应存在（从 client-log 迁移到 app/config/properties/）")
+                .isTrue();
     }
 
     @Test

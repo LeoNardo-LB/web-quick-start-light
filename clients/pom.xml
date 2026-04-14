@@ -19,9 +19,6 @@
         <module>client-email</module>
         <module>client-sms</module>
         <module>client-search</module>
-        <module>client-log</module>
-        <module>client-ratelimit</module>
-        <module>client-idempotent</module>
         <module>client-auth</module>
     </modules>
 

@@ -52,7 +52,7 @@ public class BasePageResult<T> extends BaseResult<List<T>> {
         basePageResult.setData(page.getRecords());
         basePageResult.setSuccess(true);
         basePageResult.setTime(Instant.now());
-        basePageResult.setTraceId(org.smm.archetype.util.context.ScopedThreadContext.getTraceId());
+        basePageResult.setTraceId(org.smm.archetype.shared.util.context.ScopedThreadContext.getTraceId());
         return basePageResult;
     }
     

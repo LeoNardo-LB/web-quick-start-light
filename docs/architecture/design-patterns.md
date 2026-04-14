@@ -96,7 +96,8 @@ classDiagram
 | client-search | `SearchClient` | `AbstractSearchClient` | `SimpleSearchClient` | 15 |
 | client-auth | `AuthClient` | `AbstractAuthClient` | `SaTokenAuthClient` / `NoOpAuthClient` | 5 |
 
-> 注：`client-ratelimit` 和 `client-idempotent` 采用 AOP 切面模式（`@RateLimit` + `RateLimitAspect`），不使用 Template Method。
+> 注：限流（`shared/aspect/ratelimit`）、幂等（`shared/aspect/idempotent`）和操作日志（`shared/aspect/operationlog`）采用 AOP 切面模式，集成在 app
+> 模块的 `shared/` 包下，不使用 Template Method。详见 [模块结构 - app 内部包组织](module-structure.md#app-内部包组织)。
 
 ## 条件装配模式
 
