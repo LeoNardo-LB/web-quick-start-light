@@ -71,9 +71,32 @@ public class CacheService {
 
 > ⚠️ **日志模块特殊**：使用 `logging` 前缀而非 `middleware.logging`，因为日志配置对接 Spring Boot 日志配置惯例（`logging.level`、`logging.file` 等）。
 
+**应用级配置映射表**（从源码验证）：
+
+| 配置域 | 配置前缀 | Properties 类 | 源码位置 |
+|--------|----------|---------------|----------|
+| 应用信息 | `app` | `AppInfoProperties` | `app/.../config/properties/AppInfoProperties.java` |
+| 线程池 | `thread-pool` | `ThreadPoolProperties` | `app/.../config/properties/ThreadPoolProperties.java` |
+
+> **注意**：应用级配置使用独立前缀（`app`、`thread-pool`），不纳入 `middleware.*` 命名空间，因为它们属于应用自身的基础设施配置而非中间件客户端配置。
+
 **配置示例**：
 
 ```yaml
+app:
+  port: "9201"
+  context-path: /quickstart-light
+  app-name: quickstart-light
+  openapi-url: /openapi-doc.html
+  api-doc-url: /v3/api-docs
+
+thread-pool:
+  io-core-size: 4
+  io-max-size: 8
+  cpu-core-size: 3
+  daemon-core-size: 2
+  scheduler-pool-size: 2
+
 middleware:
   cache:
     initial-capacity: 1000

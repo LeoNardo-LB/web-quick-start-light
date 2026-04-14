@@ -287,4 +287,5 @@ public BaseResult<OrderVO> createOrder(CreateOrderRequest request) {
 ## 变更历史
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-04-15 | 补充下游消费者引用（IdempotentAspect 使用 CacheClient 作为幂等 Key 存储后端） |
 | 2025-04-14 | 初始创建 |
