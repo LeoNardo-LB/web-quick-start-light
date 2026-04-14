@@ -7,11 +7,21 @@ import org.junit.jupiter.api.Test;
 import org.smm.archetype.support.UnitTestBase;
 
 import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.net.URL;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -166,6 +176,62 @@ class KryoSerializerUTest extends UnitTestBase {
             assertThat(result).isEqualTo(original);
         }
 
+        @Test
+        @DisplayName("LocalDate 序列化与反序列化应保持值一致")
+        void should_roundtrip_localdate() {
+            // given
+            LocalDate original = LocalDate.of(2025, 7, 14);
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            LocalDate result = KryoSerializer.deserialize(bytes, LocalDate.class);
+
+            // then
+            assertThat(result).isEqualTo(original);
+        }
+
+        @Test
+        @DisplayName("LocalTime 序列化与反序列化应保持值一致")
+        void should_roundtrip_localtime() {
+            // given
+            LocalTime original = LocalTime.of(10, 30, 45);
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            LocalTime result = KryoSerializer.deserialize(bytes, LocalTime.class);
+
+            // then
+            assertThat(result).isEqualTo(original);
+        }
+
+        @Test
+        @DisplayName("ZonedDateTime 序列化与反序列化应保持值一致")
+        void should_roundtrip_zoneddatetime() {
+            // given
+            ZonedDateTime original = ZonedDateTime.of(2025, 7, 14, 10, 30, 0, 0, ZoneId.of("Asia/Shanghai"));
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            ZonedDateTime result = KryoSerializer.deserialize(bytes, ZonedDateTime.class);
+
+            // then
+            assertThat(result).isEqualTo(original);
+        }
+
+        @Test
+        @DisplayName("Duration 序列化与反序列化应保持值一致")
+        void should_roundtrip_duration() {
+            // given
+            Duration original = Duration.ofHours(2).plusMinutes(30);
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            Duration result = KryoSerializer.deserialize(bytes, Duration.class);
+
+            // then
+            assertThat(result).isEqualTo(original);
+        }
+
     }
 
     // ──────────────────────────────────────────────
@@ -217,6 +283,78 @@ class KryoSerializerUTest extends UnitTestBase {
 
             // then
             assertThat(result).isEqualByComparingTo(original);
+        }
+
+        @Test
+        @DisplayName("Currency 序列化与反序列化应保持值一致")
+        void should_roundtrip_currency() {
+            // given
+            Currency original = Currency.getInstance("USD");
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            Currency result = KryoSerializer.deserialize(bytes, Currency.class);
+
+            // then
+            assertThat(result).isEqualTo(original);
+        }
+
+        @Test
+        @DisplayName("Locale 序列化与反序列化应保持值一致")
+        void should_roundtrip_locale() {
+            // given
+            Locale original = Locale.CHINA;
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            Locale result = KryoSerializer.deserialize(bytes, Locale.class);
+
+            // then
+            assertThat(result).isEqualTo(original);
+        }
+
+        @Test
+        @DisplayName("InetAddress 序列化与反序列化应保持值一致")
+        @org.junit.jupiter.api.Disabled("Java 25 模块系统禁止 Kryo 反射访问 InetAddress.holder 字段，需要 --add-opens java.base/java.net=ALL-UNNAMED")
+        void should_roundtrip_inetaddress() throws Exception {
+            // given
+            InetAddress original = InetAddress.getByName("127.0.0.1");
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            InetAddress result = KryoSerializer.deserialize(bytes, InetAddress.class);
+
+            // then
+            assertThat(result).isEqualTo(original);
+        }
+
+        @Test
+        @DisplayName("URL 序列化与反序列化应保持值一致")
+        void should_roundtrip_url() throws Exception {
+            // given
+            URL original = new URL("https://example.com/path?q=1");
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            URL result = KryoSerializer.deserialize(bytes, URL.class);
+
+            // then
+            assertThat(result).isEqualTo(original);
+        }
+
+        @Test
+        @DisplayName("Pattern 序列化与反序列化应保持正则和标志一致")
+        void should_roundtrip_pattern() {
+            // given
+            Pattern original = Pattern.compile("^[a-z]+$", Pattern.CASE_INSENSITIVE);
+
+            // when
+            byte[] bytes = KryoSerializer.serialize(original);
+            Pattern result = KryoSerializer.deserialize(bytes, Pattern.class);
+
+            // then
+            assertThat(result.pattern()).isEqualTo(original.pattern());
+            assertThat(result.flags()).isEqualTo(original.flags());
         }
 
     }
