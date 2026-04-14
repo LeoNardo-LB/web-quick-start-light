@@ -27,10 +27,9 @@
 | [client-email.md](client-email.md) | 邮件客户端：Jakarta Mail + NoOp 默认 |
 | [client-sms.md](client-sms.md) | 短信客户端：3 方法 + NoOp 默认 |
 | [client-search.md](client-search.md) | 搜索客户端：内存搜索 + 15 方法 |
-| [client-log.md](client-log.md) | 日志客户端：@BusinessLog + 8 Appender |
-| [client-ratelimit.md](client-ratelimit.md) | 限流客户端：Bucket4j + SpEL |
-| [client-idempotent.md](client-idempotent.md) | 幂等客户端：@Idempotent + Caffeine |
 | [client-auth.md](client-auth.md) | 认证客户端：AuthClient 接口 + Sa-Token |
+
+> **注意**：`client-log.md`、`client-ratelimit.md`、`client-idempotent.md` 已迁移至 `app/.../shared/aspect/` 下，旧文档已归档至 `docs/archived/`。操作日志见 [operation-log.md](operation-log.md)。
 
 ## 模板结构
 

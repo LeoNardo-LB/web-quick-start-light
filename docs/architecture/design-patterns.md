@@ -122,10 +122,9 @@ classDiagram
 | client-email | - | `middleware.email.enabled` | ❌ | ✅ `NoOpEmailClient` | Template Method |
 | client-sms | - | `middleware.sms.enabled` | ❌ | ✅ `NoOpSmsClient` | Template Method |
 | client-search | - | `middleware.search.enabled` | ✅ | ✅ `SimpleSearchClient`（内存） | Template Method |
-| client-log | `MeterRegistry.class` + `Aspect.class` | 无（Class 存在即加载） | ✅ | ❌ | AOP 切面 |
-| client-ratelimit | `Bucket.class` + `Aspect.class` | `middleware.ratelimit.enabled` | ✅ | ❌ | AOP 切面 |
-| client-idempotent | `Caffeine.class` + `Aspect.class` | `middleware.idempotent.enabled` | ❌ | ❌ | AOP 切面 |
 | client-auth | Bean 级别条件 | `middleware.auth.enabled` | ✅ | ✅ `NoOpAuthClient` | Template Method |
+
+> **注意**：`client-log`、`client-ratelimit`、`client-idempotent` 已迁移至 `app/.../shared/aspect/` 下，不再作为独立客户端模块，故不在此表中列出。
 
 ### 装配策略分类
 
@@ -135,15 +134,12 @@ graph TD
         CACHE["client-cache<br/>Caffeine + matchIfMissing=true"]
         OSS["client-oss<br/>matchIfMissing=true"]
         SEARCH["client-search<br/>SimpleSearchClient 内存实现"]
-        LOG["client-log<br/>Micrometer + AspectJ"]
-        RATE["client-ratelimit<br/>Bucket4j + matchIfMissing=true"]
         AUTH["client-auth<br/>Sa-Token / NoOp 双分支"]
     end
 
     subgraph "默认禁用（需显式启用）"
         EMAIL["client-email<br/>middleware.email.enabled=true"]
         SMS["client-sms<br/>middleware.sms.enabled=true"]
-        IDEM["client-idempotent<br/>middleware.idempotent.enabled=true"]
     end
 
     subgraph "NoOp 兜底（无外部依赖也能启动）"
@@ -156,6 +152,8 @@ graph TD
     SMS --> SMS_NOOP
     AUTH --> AUTH_NOOP
 ```
+
+> **注意**：`client-log`、`client-ratelimit`、`client-idempotent` 已迁移至 `app/.../shared/aspect/` 下，不再作为独立客户端模块参与条件装配。
 
 ## 代码示例
 

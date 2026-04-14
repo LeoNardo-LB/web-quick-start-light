@@ -171,7 +171,7 @@ mvn clean verify
 - 每个客户端模块独立 artifactId，依赖 `common`
 - **Template Method 模式**：`AbstractXxxClient` 的公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点
 - **条件装配**：`@AutoConfiguration` + `@ConditionalOnClass` + `@ConditionalOnProperty`
-- **Properties 前缀统一**：`middleware.*`（middleware.cache / middleware.object-storage / middleware.email / middleware.sms / middleware.search / middleware.ratelimit / middleware.idempotent / middleware.auth），日志前缀为 `logging`（对接 Spring Boot 日志配置惯例）
+- **Properties 前缀统一**：`middleware.*`（middleware.cache / middleware.object-storage / middleware.email / middleware.sms / middleware.search / middleware.ratelimit / middleware.auth），日志前缀为 `logging`（对接 Spring Boot 日志配置惯例）。幂等模块不再有独立 Properties（参数在 @Idempotent 注解上定义）
 
 ### 10. 时间类型规范
 - 所有时间存储与传输统一使用 `java.time.Instant`
@@ -255,7 +255,7 @@ mvn clean verify
 | 💡 MAY | 搜索客户端 | [client-search.md](docs/modules/client-search.md) | 内存搜索 + 15 方法 |
 | ⚠️ SHOULD | 认证客户端 | [client-auth.md](docs/modules/client-auth.md) | AuthClient 接口 + Sa-Token |
 
-> **注意**：限流、幂等、操作日志横切关注点已移至 app 模块 `shared/` 包下，对应的旧文档（client-ratelimit.md、client-idempotent.md、client-log.md）待迁移完成后归档。
+> **注意**：限流、幂等、操作日志横切关注点已移至 app 模块 `shared/` 包下，对应的旧文档（client-ratelimit.md、client-idempotent.md、client-log.md）已归档至 `docs/archived/`。
 
 ### 文档系统说明
 

@@ -65,9 +65,8 @@ public class CacheService {
 | 邮件 | `middleware.email` | `EmailProperties` | `client-email/...email/EmailProperties.java` |
 | 短信 | `middleware.sms` | `SmsProperties` | `client-sms/...sms/SmsProperties.java` |
 | 搜索 | `middleware.search` | `SearchProperties` | `client-search/...search/SearchProperties.java` |
-| 日志 | `logging` ⚠️ | `LoggingProperties` | `client-log/...log/properties/LoggingProperties.java` |
-| 限流 | `middleware.ratelimit` | `RateLimitProperties` | `client-ratelimit/...ratelimit/RateLimitProperties.java` |
-| 幂等 | `middleware.idempotent` | `IdempotentProperties` | `client-idempotent/...idempotent/properties/IdempotentProperties.java` |
+| 日志 | `logging` ⚠️ | `LoggingProperties` | `app/.../config/properties/LoggingProperties.java` |
+| 限流 | `middleware.ratelimit` | `RateLimitProperties` | `app/.../config/properties/RateLimitProperties.java` |
 | 认证 | `middleware.auth` | `AuthProperties` | `client-auth/...auth/AuthProperties.java` |
 
 > ⚠️ **日志模块特殊**：使用 `logging` 前缀而非 `middleware.logging`，因为日志配置对接 Spring Boot 日志配置惯例（`logging.level`、`logging.file` 等）。
@@ -104,8 +103,6 @@ middleware:
     default-capacity: 10
     default-refill-tokens: 10
     default-refill-duration: 1
-  idempotent:
-    enabled: false
   auth:
     enabled: true
     exclude-paths:

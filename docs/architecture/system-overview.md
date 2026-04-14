@@ -34,9 +34,6 @@ graph TD
         EMAIL["client-email<br/>Jakarta Mail 邮件"]
         SMS["client-sms<br/>短信"]
         SEARCH["client-search<br/>内存搜索"]
-        LOG["client-log<br/>业务日志（AOP）"]
-        RATE["client-ratelimit<br/>限流（Bucket4j）"]
-        IDEM["client-idempotent<br/>幂等（Caffeine）"]
         AUTH["client-auth<br/>认证（Sa-Token）"]
     end
 
@@ -50,9 +47,6 @@ graph TD
     APP --> EMAIL
     APP --> SMS
     APP --> SEARCH
-    APP --> LOG
-    APP --> RATE
-    APP --> IDEM
     APP --> AUTH
     APP --> SQLITE
 
@@ -61,9 +55,6 @@ graph TD
     EMAIL --> COMMON
     SMS --> COMMON
     SEARCH --> COMMON
-    LOG --> COMMON
-    RATE --> COMMON
-    IDEM --> COMMON
     AUTH --> COMMON
 ```
 
@@ -157,9 +148,9 @@ graph TD
 | 邮件发送 | Jakarta Mail + NoOp 默认实现 | 详见[邮件客户端](../modules/client-email.md) |
 | 短信发送 | 接口 + NoOp 默认实现 | 详见[短信客户端](../modules/client-sms.md) |
 | 内存搜索 | 基于 Java Collection | 详见[搜索客户端](../modules/client-search.md) |
-| 业务日志 | SLF4J + Micrometer | 详见[日志客户端](../modules/client-log.md) |
-| 限流 | Bucket4j | 详见[限流客户端](../modules/client-ratelimit.md) |
-| 幂等保护 | Caffeine | 详见[幂等客户端](../modules/client-idempotent.md) |
+| 业务日志 | SLF4J + Micrometer | 详见[操作日志模块](../modules/operation-log.md) |
+| 限流 | Bucket4j | 已迁移至 `app/.../shared/aspect/ratelimit/` |
+| 幂等保护 | Caffeine | 已迁移至 `app/.../shared/aspect/idempotent/` |
 | 认证 | Sa-Token + NoOp 默认实现 | 详见[认证模块](../modules/auth.md) |
 
 ### 不包含

@@ -236,7 +236,7 @@ public class SystemConfigController {}
 - 使用 `@Slf4j` 声明日志对象
 - 使用参数化日志（`{}` 占位符），禁止字符串拼接
 - 禁止 `System.out.println` / `System.err.println`
-- 业务方法日志使用 `@BusinessLog` 注解（`org.smm.archetype.client.log.BusinessLog`）
+- 业务方法日志使用 `@BusinessLog` 注解（`org.smm.archetype.shared.aspect.operationlog.BusinessLog`）
 
 ✅ 正确：
 ```java

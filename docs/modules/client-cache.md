@@ -35,7 +35,7 @@
 | 会话数据缓存 | 缓存用户会话信息，加速请求处理 |
 | 列表数据缓存 | 缓存分页查询结果，支持范围读取避免全量加载 |
 | 计算结果缓存 | 缓存耗时计算结果，提升响应速度 |
-| 限流/幂等辅助 | 为 `client-ratelimit` 和 `client-idempotent` 提供底层存储支持 |
+| 限流/幂等辅助 | 为 `app/.../shared/aspect/ratelimit` 和 `app/.../shared/aspect/idempotent` 提供底层存储支持 |
 
 ## 技术设计
 
@@ -240,12 +240,12 @@ middleware:
     expire-after-write: 1h
 ```
 
-### 与限流/幂等客户端集成
+### 与限流/幂等模块集成
 
-`client-cache` 作为底层存储，为 `client-ratelimit` 和 `client-idempotent` 提供缓存支持。这些模块在内部注入 `CacheClient` 实现令牌桶状态和幂等 Key 的本地存储：
+`client-cache` 作为底层存储，为限流（`app/.../shared/aspect/ratelimit`）和幂等（`app/.../shared/aspect/idempotent`）模块提供缓存支持。这些模块在内部注入 `CacheClient` 实现令牌桶状态和幂等 Key 的本地存储：
 
 ```java
-// client-ratelimit 内部使用示例（无需手动调用）
+// 限流模块内部使用示例（无需手动调用）
 @RateLimit(key = "#request.userId", maxRequests = 10, period = "1m")
 @GetMapping("/api/data")
 public BaseResult<List<Data>> getData(DataRequest request) {
@@ -253,7 +253,7 @@ public BaseResult<List<Data>> getData(DataRequest request) {
     return BaseResult.success(dataService.query(request));
 }
 
-// client-idempotent 内部使用示例（无需手动调用）
+// 幂等模块内部使用示例（无需手动调用）
 @Idempotent(key = "#request.orderId", expireTime = 24)
 @PostMapping("/api/orders")
 public BaseResult<OrderVO> createOrder(CreateOrderRequest request) {
@@ -268,8 +268,8 @@ public BaseResult<OrderVO> createOrder(CreateOrderRequest request) {
 - [docs/architecture/design-patterns.md](../architecture/design-patterns.md) — Template Method 模式详细说明（AbstractCacheClient 骨架实现）
 
 ### 下游消费者
-- [docs/modules/client-ratelimit.md](client-ratelimit.md) — 限流客户端，使用 CacheClient 存储令牌桶状态
-- [docs/modules/client-idempotent.md](client-idempotent.md) — 幂等客户端，使用 CacheClient 存储幂等 Key
+- `app/.../shared/aspect/ratelimit/` — 限流模块，使用 CacheClient 存储令牌桶状态
+- `app/.../shared/aspect/idempotent/` — 幂等模块，使用 CacheClient 存储幂等 Key
 
 ### 设计考量
 

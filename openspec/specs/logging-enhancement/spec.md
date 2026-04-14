@@ -1,23 +1,40 @@
 ## MODIFIED Requirements
 
-### Requirement: BusinessLog 注解属性扩展
-BusinessLog 注解 SHALL 新增 module（String，模块名）、operation（OperationType 枚举，操作类型）、samplingRate（double，采集率 0.0-1.0，默认 1.0）属性。原 value 属性保持不变。
+### Requirement: 操作日志 AOP 包路径
 
-#### Scenario: 使用扩展属性
-- **WHEN** 方法标注 `@BusinessLog(value="更新配置", module="SYSTEM", operation=OperationType.UPDATE, samplingRate=0.5)`
-- **THEN** LogAspect SHALL 正确提取 module、operation、samplingRate 属性
+@BusinessLog 注解及 LogAspect SHALL 位于 `org.smm.archetype.shared.aspect.operationlog` 包下。
 
-#### Scenario: 旧代码向后兼容
-- **WHEN** 方法仅使用 `@BusinessLog("描述")` 格式
-- **THEN** LogAspect SHALL 正常工作，新属性使用默认值
+#### Scenario: 包路径变更
 
-### Requirement: LogAspect 异步 DB 写入
-LogAspect SHALL 在方法执行后异步将操作日志写入 operation_log 数据库表。异步写入 SHALL 使用 ioThreadPool 线程池，通过 ContextRunnable 传递 ScopedValue 上下文。
+- **WHEN** 开发者使用 @BusinessLog 注解
+- **THEN** 导入路径 SHALL 为 `org.smm.archetype.shared.aspect.operationlog.BusinessLog`
 
-#### Scenario: 日志异步写入数据库
-- **WHEN** 标注了 @BusinessLog 的方法执行完成
-- **THEN** 系统 SHALL 通过 ioThreadPool 异步写入 operation_log 表
+#### Scenario: OperationLogWriter 接口路径
 
-#### Scenario: 采集率控制 DB 写入
-- **WHEN** @BusinessLog 配置了 samplingRate = 0.5
-- **THEN** 系统 SHALL 以约 50% 的概率写入 DB，Micrometer 指标仍全量记录
+- **WHEN** app 模块实现操作日志写入
+- **THEN** 接口路径 SHALL 为 `org.smm.archetype.shared.aspect.operationlog.OperationLogWriter`
+
+### Requirement: 日志基础设施工具包路径
+
+SlowQueryInterceptor、SamplingTurboFilter、SensitiveLogUtils、LogMarkers、LoggingConfiguration SHALL 位于 `org.smm.archetype.shared.logging` 包下。
+
+#### Scenario: LoggingConfigure Bean 注册
+
+- **WHEN** 应用启动
+- **THEN** LogAspect、SlowQueryInterceptor、SamplingTurboFilter SHALL 由 `org.smm.archetype.config.LoggingConfigure` 通过 `@Bean` 方法注册
+
+### Requirement: LoggingProperties 配置路径
+
+LoggingProperties SHALL 位于 `org.smm.archetype.config.properties` 包下，配置前缀保持 `logging` 不变。
+
+#### Scenario: 配置属性绑定
+
+- **WHEN** 应用加载 logging.slow-query.enabled=true
+- **THEN** LoggingProperties SHALL 正确绑定到 `config/properties/LoggingProperties.java`
+
+## REMOVED Requirements
+
+### Requirement: client-log 独立模块
+
+**Reason**: 日志是应用层横切关注点，且依赖了 mybatis-plus（SlowQueryInterceptor），超出 client 模块应有的依赖范围
+**Migration**: AOP 部分迁移到 `shared/aspect/operationlog/`，日志基础设施迁移到 `shared/logging/`

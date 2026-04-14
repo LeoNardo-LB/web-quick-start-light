@@ -79,21 +79,7 @@
                 <artifactId>client-search</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.smm.archetype</groupId>
-                <artifactId>client-log</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.smm.archetype</groupId>
-                <artifactId>client-ratelimit</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.smm.archetype</groupId>
-                <artifactId>client-idempotent</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+            <!-- client-log、client-ratelimit、client-idempotent 已迁移到 app/shared/ 包下，不再作为独立模块 -->
             <dependency>
                 <groupId>org.smm.archetype</groupId>
                 <artifactId>client-auth</artifactId>
