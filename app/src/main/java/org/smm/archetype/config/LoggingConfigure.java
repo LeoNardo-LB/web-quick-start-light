@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.smm.archetype.config.properties.LoggingProperties;
 import org.smm.archetype.shared.aspect.operationlog.LogAspect;
 import org.smm.archetype.shared.aspect.operationlog.OperationLogWriter;
-import org.smm.archetype.shared.logging.LoggingConfiguration;
 import org.smm.archetype.shared.logging.SamplingTurboFilter;
 import org.smm.archetype.shared.logging.SlowQueryInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;

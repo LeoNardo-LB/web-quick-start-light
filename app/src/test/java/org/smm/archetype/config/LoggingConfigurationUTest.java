@@ -1,4 +1,4 @@
-package org.smm.archetype.shared.logging;
+package org.smm.archetype.config;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
