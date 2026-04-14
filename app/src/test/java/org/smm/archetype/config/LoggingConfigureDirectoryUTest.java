@@ -11,20 +11,20 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * LoggingConfiguration 纯逻辑测试。
+ * LoggingConfigure 日志目录验证逻辑测试。
  * <p>
  * 不使用 Mockito — 通过匿名 Environment 实现直接传入配置值，
  * 测试日志目录创建的分支逻辑。
  */
-@DisplayName("LoggingConfiguration 日志配置验证")
-class LoggingConfigurationUTest {
+@DisplayName("LoggingConfigure 日志目录验证")
+class LoggingConfigureDirectoryUTest {
 
     // ApplicationReadyEvent 不被读取任何属性，传 null 即可
     private static final org.springframework.boot.context.event.ApplicationReadyEvent STUB_EVENT = null;
 
     @TempDir
     Path tempDir;
-    private LoggingConfiguration configuration;
+    private LoggingConfigure configure;
 
     private Environment envWithPath(String path) {
         return new Environment() {
@@ -79,9 +79,9 @@ class LoggingConfigurationUTest {
         @DisplayName("目录不存在时自动创建")
         void should_create_directory_when_not_exists() {
             Path newDir = tempDir.resolve("new-logs-dir");
-            configuration = new LoggingConfiguration(envWithPath(newDir.toString()));
+            configure = new LoggingConfigure(envWithPath(newDir.toString()));
 
-            configuration.onApplicationEvent(STUB_EVENT);
+            configure.onApplicationEvent(STUB_EVENT);
 
             assertThat(newDir.toFile()).exists();
             assertThat(newDir.toFile()).isDirectory();
@@ -90,9 +90,9 @@ class LoggingConfigurationUTest {
         @Test
         @DisplayName("目录已存在且可写时正常完成")
         void should_succeed_when_directory_exists_and_writable() {
-            configuration = new LoggingConfiguration(envWithPath(tempDir.toString()));
+            configure = new LoggingConfigure(envWithPath(tempDir.toString()));
 
-            configuration.onApplicationEvent(STUB_EVENT);
+            configure.onApplicationEvent(STUB_EVENT);
 
             assertThat(tempDir.toFile()).exists();
         }
@@ -100,19 +100,19 @@ class LoggingConfigurationUTest {
         @Test
         @DisplayName("使用默认路径 .logs 当属性未配置时")
         void should_use_default_path_when_property_not_set() {
-            configuration = new LoggingConfiguration(envWithPath(".logs"));
+            configure = new LoggingConfigure(envWithPath(".logs"));
 
             // 不应抛出异常（.logs 目录在当前工作目录创建）
-            configuration.onApplicationEvent(STUB_EVENT);
+            configure.onApplicationEvent(STUB_EVENT);
         }
 
         @Test
         @DisplayName("使用自定义 logging.file.path 属性")
         void should_use_custom_path_from_property() {
             Path customDir = tempDir.resolve("custom-log-path");
-            configuration = new LoggingConfiguration(envWithPath(customDir.toString()));
+            configure = new LoggingConfigure(envWithPath(customDir.toString()));
 
-            configuration.onApplicationEvent(STUB_EVENT);
+            configure.onApplicationEvent(STUB_EVENT);
 
             assertThat(customDir.toFile()).exists();
         }
@@ -121,9 +121,9 @@ class LoggingConfigurationUTest {
         @DisplayName("创建多级目录结构")
         void should_create_nested_directory_structure() {
             Path nestedDir = tempDir.resolve("a/b/c/logs");
-            configuration = new LoggingConfiguration(envWithPath(nestedDir.toString()));
+            configure = new LoggingConfigure(envWithPath(nestedDir.toString()));
 
-            configuration.onApplicationEvent(STUB_EVENT);
+            configure.onApplicationEvent(STUB_EVENT);
 
             assertThat(nestedDir.toFile()).exists();
         }
