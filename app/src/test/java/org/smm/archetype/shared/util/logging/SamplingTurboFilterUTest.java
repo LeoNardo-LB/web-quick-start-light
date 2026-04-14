@@ -1,4 +1,4 @@
-package org.smm.archetype.shared.logging;
+package org.smm.archetype.shared.util.logging;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;

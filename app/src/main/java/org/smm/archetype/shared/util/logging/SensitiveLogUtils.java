@@ -1,4 +1,4 @@
-package org.smm.archetype.shared.logging;
+package org.smm.archetype.shared.util.logging;
 
 import cn.hutool.core.util.StrUtil;
 

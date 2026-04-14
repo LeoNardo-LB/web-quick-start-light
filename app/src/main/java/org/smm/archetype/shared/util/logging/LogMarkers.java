@@ -1,4 +1,4 @@
-package org.smm.archetype.shared.logging;
+package org.smm.archetype.shared.util.logging;
 
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
