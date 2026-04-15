@@ -7,7 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.smm.archetype.client.auth.AuthClient;
+import org.smm.archetype.component.auth.AuthComponent;
 import org.smm.archetype.shared.util.context.ScopedThreadContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,22 +20,22 @@ public class ContextFillFilter extends OncePerRequestFilter {
     private static final String ANONYMOUS_USER = "ANONYMOUS";
     private static final String SYSTEM_USER = "SYSTEM";
 
-    private final AuthClient authClient;
+    private final AuthComponent authComponent;
 
     /**
-     * 兼容旧调用方式：无 AuthClient 时使用 SYSTEM 作为 userId。
+     * 兼容旧调用方式：无 AuthComponent 时使用 SYSTEM 作为 userId。
      */
     public ContextFillFilter() {
         this(null);
     }
 
     /**
-     * 注入 AuthClient，用于获取当前登录用户 ID。
+     * 注入 AuthComponent，用于获取当前登录用户 ID。
      *
-     * @param authClient 认证客户端（可为 null）
+     * @param authComponent 认证客户端（可为 null）
      */
-    public ContextFillFilter(@Nullable AuthClient authClient) {
-        this.authClient = authClient;
+    public ContextFillFilter(@Nullable AuthComponent authComponent) {
+        this.authComponent = authComponent;
     }
 
     @Override
@@ -63,10 +63,10 @@ public class ContextFillFilter extends OncePerRequestFilter {
     }
 
     private String resolveUserId() {
-        if (authClient == null) {
+        if (authComponent == null) {
             return SYSTEM_USER;
         }
-        String userId = authClient.getCurrentUserId();
+        String userId = authComponent.getCurrentUserId();
         return userId != null ? userId : ANONYMOUS_USER;
     }
 }

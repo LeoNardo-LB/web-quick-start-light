@@ -1,7 +1,6 @@
 package org.smm.archetype.entity.base;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.smm.archetype.exception.CommonErrorCode;
@@ -17,7 +16,6 @@ import java.util.List;
  */
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
 public class BasePageResult<T> extends BaseResult<List<T>> {
     
     /**

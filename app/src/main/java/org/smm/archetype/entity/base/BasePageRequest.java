@@ -2,7 +2,6 @@ package org.smm.archetype.entity.base;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +12,6 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
 public class BasePageRequest extends BaseRequest {
     
     /**

@@ -8,9 +8,9 @@ import org.smm.archetype.support.IntegrationTestBase;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * L3 集成测试 — 验证 client-log starter 的 LogAutoConfiguration 自动装配。
+ * L3 集成测试 — 验证 component-log starter 的 LogAutoConfiguration 自动装配。
  * <p>
- * 覆盖能力: client-log-starter
+ * 覆盖能力: component-log-starter
  */
 @DisplayName("LogAutoConfiguration")
 class LogAutoConfigurationITest extends IntegrationTestBase {

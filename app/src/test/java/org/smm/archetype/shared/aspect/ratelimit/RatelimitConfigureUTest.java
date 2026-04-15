@@ -28,9 +28,9 @@ class RatelimitConfigureUTest {
     void should_bind_properties() {
         contextRunner
                 .withPropertyValues(
-                        "middleware.ratelimit.enabled=true",
-                        "middleware.ratelimit.default-capacity=100",
-                        "middleware.ratelimit.default-refill-tokens=50"
+                        "component.ratelimit.enabled=true",
+                        "component.ratelimit.default-capacity=100",
+                        "component.ratelimit.default-refill-tokens=50"
                 )
                 .run(context -> {
                     RateLimitProperties props = context.getBean(RateLimitProperties.class);

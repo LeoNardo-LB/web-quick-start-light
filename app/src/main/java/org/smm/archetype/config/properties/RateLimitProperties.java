@@ -7,10 +7,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * 限流客户端配置属性。
  * <p>
- * 前缀：middleware.ratelimit
+ * 前缀：component.ratelimit
  *
  * <pre>
- * middleware:
+ * component:
  *   ratelimit:
  *     enabled: true
  *     default-capacity: 10
@@ -20,7 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "middleware.ratelimit")
+@ConfigurationProperties(prefix = "component.ratelimit")
 public class RateLimitProperties {
 
     /**

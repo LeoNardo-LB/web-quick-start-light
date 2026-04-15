@@ -224,37 +224,4 @@ class BasePageRequestUTest extends UnitTestBase {
             assertThat(violations).isEmpty();
         }
     }
-
-    @Nested
-    @DisplayName("equals/hashCode")
-    class EqualsHashCode {
-
-        @Test
-        @DisplayName("callSuper=true 但父类无 @EqualsAndHashCode，两个不同实例即使字段相同也不相等（基于身份）")
-        void should_not_be_equal_due_to_parent_identity_equals() {
-            // given: BaseRequest 无 @EqualsAndHashCode，super.equals() 退化为 Object.equals()
-            BasePageRequest r1 = new BasePageRequest();
-            r1.setPageNo(2);
-            r1.setPageSize(10);
-            r1.setRequestId("req-1");
-            r1.setTraceId("trace-1");
-
-            BasePageRequest r2 = new BasePageRequest();
-            r2.setPageNo(2);
-            r2.setPageSize(10);
-            r2.setRequestId("req-1");
-            r2.setTraceId("trace-1");
-
-            // then: 父类无 equals 实现，callSuper 退化为身份比较
-            assertThat(r1).isNotEqualTo(r2);
-        }
-
-        @Test
-        @DisplayName("同一引用应与自身相等")
-        void should_be_equal_to_itself() {
-            BasePageRequest r = new BasePageRequest();
-            assertThat(r).isEqualTo(r);
-            assertThat(r.hashCode()).isEqualTo(r.hashCode());
-        }
-    }
 }

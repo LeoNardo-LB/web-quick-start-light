@@ -1,6 +1,5 @@
 package org.smm.archetype.entity.base;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.smm.archetype.exception.CommonErrorCode;
@@ -17,7 +16,6 @@ import java.time.Instant;
  */
 @Getter
 @Setter
-@EqualsAndHashCode
 public class BaseResult<T> {
 
     /**

@@ -1,7 +1,7 @@
 ## 1. 准备工作
 
-- [ ] 1.1 确认 test-driven-development、dispatching-parallel-agents 技能已加载（未加载则加载，已加载则跳过）
-- [ ] 1.2 确认当前分支为干净状态（`git status` 无未提交更改），从 main 创建 feature 分支 `feature/rename-clients-to-components`
+- [x] 1.1 确认 test-driven-development、dispatching-parallel-agents 技能已加载（未加载则加载，已加载则跳过）
+- [x] 1.2 确认当前分支为干净状态（`git status` 无未提交更改），从 main 创建 feature 分支 `feature/rename-clients-to-components`
 
 ## 2. Chunk 1：目录重命名
 

@@ -17,7 +17,7 @@
 
     <modules>
         <module>common</module>
-        <module>clients</module>
+        <module>components</module>
         <module>app</module>
     </modules>
 
@@ -56,33 +56,33 @@
             </dependency>
             <dependency>
                 <groupId>org.smm.archetype</groupId>
-                <artifactId>client-cache</artifactId>
+                <artifactId>component-cache</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.smm.archetype</groupId>
-                <artifactId>client-oss</artifactId>
+                <artifactId>component-oss</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.smm.archetype</groupId>
-                <artifactId>client-email</artifactId>
+                <artifactId>component-email</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.smm.archetype</groupId>
-                <artifactId>client-sms</artifactId>
+                <artifactId>component-sms</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.smm.archetype</groupId>
-                <artifactId>client-search</artifactId>
+                <artifactId>component-search</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- client-log、client-ratelimit、client-idempotent 已迁移到 app/shared/ 包下，不再作为独立模块 -->
+            <!-- component-log、component-ratelimit、component-idempotent 已迁移到 app/shared/ 包下，不再作为独立模块 -->
             <dependency>
                 <groupId>org.smm.archetype</groupId>
-                <artifactId>client-auth</artifactId>
+                <artifactId>component-auth</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- 第三方依赖版本管理 -->

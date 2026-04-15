@@ -1,0 +1,2 @@
+org.smm.archetype.component.auth.AuthAutoConfiguration
+org.smm.archetype.component.auth.AuthInterceptorConfigurer

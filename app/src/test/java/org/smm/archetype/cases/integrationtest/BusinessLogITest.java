@@ -7,9 +7,9 @@ import org.smm.archetype.support.IntegrationTestBase;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * L3 集成测试 — 验证 @BusinessLog 注解通过 client-log starter 的 LogAspect 产生实际日志输出。
+ * L3 集成测试 — 验证 @BusinessLog 注解通过 component-log starter 的 LogAspect 产生实际日志输出。
  * <p>
- * 覆盖能力: client-log-starter (BusinessLog AOP side-effect)
+ * 覆盖能力: component-log-starter (BusinessLog AOP side-effect)
  */
 @DisplayName("@BusinessLog 日志切面")
 class BusinessLogITest extends IntegrationTestBase {

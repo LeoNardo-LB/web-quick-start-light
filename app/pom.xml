@@ -27,37 +27,37 @@
         </dependency>
         <dependency>
             <groupId>org.smm.archetype</groupId>
-            <artifactId>client-cache</artifactId>
+            <artifactId>component-cache</artifactId>
         </dependency>
-        <!-- Caffeine：client-cache 中标记为 optional 不传递，app 显式声明以启用 CacheAutoConfiguration -->
+        <!-- Caffeine：component-cache 中标记为 optional 不传递，app 显式声明以启用 CacheAutoConfiguration -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.smm.archetype</groupId>
-            <artifactId>client-oss</artifactId>
+            <artifactId>component-oss</artifactId>
         </dependency>
         <dependency>
             <groupId>org.smm.archetype</groupId>
-            <artifactId>client-email</artifactId>
+            <artifactId>component-email</artifactId>
         </dependency>
         <dependency>
             <groupId>org.smm.archetype</groupId>
-            <artifactId>client-sms</artifactId>
+            <artifactId>component-sms</artifactId>
         </dependency>
         <dependency>
             <groupId>org.smm.archetype</groupId>
-            <artifactId>client-search</artifactId>
+            <artifactId>component-search</artifactId>
         </dependency>
-        <!-- client-log、client-ratelimit、client-idempotent 已迁移到 app/shared/ 包下 -->
-        <!-- Bucket4j：限流令牌桶（原 client-ratelimit 依赖提升） -->
+        <!-- component-log、component-ratelimit、component-idempotent 已迁移到 app/shared/ 包下 -->
+        <!-- Bucket4j：限流令牌桶（原 component-ratelimit 依赖提升） -->
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j_jdk17-core</artifactId>
             <version>${bucket4j.version}</version>
         </dependency>
-        <!-- Fastjson2：日志序列化（原 client-log 依赖提升） -->
+        <!-- Fastjson2：日志序列化（原 component-log 依赖提升） -->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
@@ -65,7 +65,7 @@
         </dependency>
         <dependency>
             <groupId>org.smm.archetype</groupId>
-            <artifactId>client-auth</artifactId>
+            <artifactId>component-auth</artifactId>
         </dependency>
 
         <!-- Sa-Token（非 optional，app 模块显式引入以启用认证） -->

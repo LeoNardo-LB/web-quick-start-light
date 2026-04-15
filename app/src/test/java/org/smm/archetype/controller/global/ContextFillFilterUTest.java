@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.smm.archetype.client.auth.AuthClient;
+import org.smm.archetype.component.auth.AuthComponent;
 import org.smm.archetype.support.UnitTestBase;
 
 import java.lang.reflect.Method;
@@ -28,7 +28,7 @@ class ContextFillFilterUTest extends UnitTestBase {
     private FilterChain filterChain;
 
     @Mock
-    private AuthClient authClient;
+    private AuthComponent authComponent;
 
     // =========================================================================
     // resolveUserId
@@ -54,8 +54,8 @@ class ContextFillFilterUTest extends UnitTestBase {
         @Test
         @DisplayName("AuthClient 返回有效 userId 时应使用该值")
         void should_return_user_id_from_auth_client() throws Exception {
-            ContextFillFilter filter = new ContextFillFilter(authClient);
-            when(authClient.getCurrentUserId()).thenReturn("user-42");
+            ContextFillFilter filter = new ContextFillFilter(authComponent);
+            when(authComponent.getCurrentUserId()).thenReturn("user-42");
 
             Method method = ContextFillFilter.class.getDeclaredMethod("resolveUserId");
             method.setAccessible(true);
@@ -69,8 +69,8 @@ class ContextFillFilterUTest extends UnitTestBase {
         @Test
         @DisplayName("AuthClient 返回 null 时应返回 ANONYMOUS")
         void should_return_anonymous_when_auth_client_returns_null() throws Exception {
-            ContextFillFilter filter = new ContextFillFilter(authClient);
-            when(authClient.getCurrentUserId()).thenReturn(null);
+            ContextFillFilter filter = new ContextFillFilter(authComponent);
+            when(authComponent.getCurrentUserId()).thenReturn(null);
 
             Method method = ContextFillFilter.class.getDeclaredMethod("resolveUserId");
             method.setAccessible(true);
@@ -165,7 +165,7 @@ class ContextFillFilterUTest extends UnitTestBase {
 
             verify(response).setHeader(eq("X-Trace-Id"), anyString());
             verify(filterChain).doFilter(request, response);
-            verifyNoInteractions(authClient);
+            verifyNoInteractions(authComponent);
         }
     }
 
@@ -192,7 +192,7 @@ class ContextFillFilterUTest extends UnitTestBase {
         @Test
         @DisplayName("有参构造器应接受 AuthClient（可为 null）")
         void should_create_filter_with_auth_client() {
-            ContextFillFilter filter = new ContextFillFilter(authClient);
+            ContextFillFilter filter = new ContextFillFilter(authComponent);
             assertThat(filter).isNotNull();
             assertThat(filter).isInstanceOf(org.springframework.web.filter.OncePerRequestFilter.class);
         }

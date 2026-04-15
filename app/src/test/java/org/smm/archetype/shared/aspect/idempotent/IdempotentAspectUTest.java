@@ -5,7 +5,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.smm.archetype.client.cache.CacheClient;
+import org.smm.archetype.component.cache.CacheComponent;
 import org.smm.archetype.exception.BizException;
 
 import java.util.concurrent.TimeUnit;
@@ -25,12 +25,12 @@ import static org.mockito.Mockito.when;
 class IdempotentAspectUTest {
 
     private IdempotentAspect aspect;
-    private CacheClient      cacheClient;
+    private CacheComponent     cacheComponent;
 
     @BeforeEach
     void setUp() {
-        cacheClient = mock(CacheClient.class);
-        aspect = new IdempotentAspect(cacheClient);
+        cacheComponent = mock(CacheComponent.class);
+        aspect = new IdempotentAspect(cacheComponent);
     }
 
     // --- 辅助方法 ---
@@ -69,13 +69,13 @@ class IdempotentAspectUTest {
         );
         Idempotent idempotent = mockIdempotent(3000, TimeUnit.MILLISECONDS, "#key", "请勿重复操作");
 
-        when(cacheClient.hasKey("TestService.process(order123)")).thenReturn(false);
+        when(cacheComponent.hasKey("TestService.process(order123)")).thenReturn(false);
         when(joinPoint.proceed()).thenReturn("success");
 
         Object result = aspect.around(joinPoint, idempotent);
 
         assertThat(result).isEqualTo("success");
-        verify(cacheClient).put(eq("TestService.process(order123)"), eq("1"), any());
+        verify(cacheComponent).put(eq("TestService.process(order123)"), eq("1"), any());
     }
 
     @Test
@@ -90,11 +90,11 @@ class IdempotentAspectUTest {
         when(joinPoint.proceed()).thenReturn("success");
 
         // 首次调用：hasKey 返回 false
-        when(cacheClient.hasKey("TestService.process(order123)")).thenReturn(false);
+        when(cacheComponent.hasKey("TestService.process(order123)")).thenReturn(false);
         aspect.around(joinPoint, idempotent);
 
         // 重复调用：hasKey 返回 true → 抛 BizException
-        when(cacheClient.hasKey("TestService.process(order123)")).thenReturn(true);
+        when(cacheComponent.hasKey("TestService.process(order123)")).thenReturn(true);
         assertThatThrownBy(() -> aspect.around(joinPoint, idempotent))
                 .isInstanceOf(BizException.class)
                 .hasMessage("请勿重复操作");
@@ -112,16 +112,16 @@ class IdempotentAspectUTest {
         when(joinPoint.proceed()).thenReturn("success");
 
         // 首次调用
-        when(cacheClient.hasKey("TestService.process(order123)")).thenReturn(false);
+        when(cacheComponent.hasKey("TestService.process(order123)")).thenReturn(false);
         aspect.around(joinPoint, idempotent);
 
         // 过期后 hasKey 返回 false → 允许再次调用
-        when(cacheClient.hasKey("TestService.process(order123)")).thenReturn(false);
+        when(cacheComponent.hasKey("TestService.process(order123)")).thenReturn(false);
         Object result = aspect.around(joinPoint, idempotent);
         assertThat(result).isEqualTo("success");
 
         // put 应被调用两次（首次 + 过期后再调用）
-        verify(cacheClient, times(2)).put(eq("TestService.process(order123)"), eq("1"), any());
+        verify(cacheComponent, times(2)).put(eq("TestService.process(order123)"), eq("1"), any());
     }
 
     @Test
@@ -135,13 +135,13 @@ class IdempotentAspectUTest {
         );
         Idempotent idempotent = mockIdempotent(3000, TimeUnit.MILLISECONDS, "#request.orderId", "订单已提交");
 
-        when(cacheClient.hasKey("TestService.createOrder(ORD-001)")).thenReturn(false);
+        when(cacheComponent.hasKey("TestService.createOrder(ORD-001)")).thenReturn(false);
         when(joinPoint.proceed()).thenReturn("created");
 
         Object result = aspect.around(joinPoint, idempotent);
 
         assertThat(result).isEqualTo("created");
-        verify(cacheClient).put(eq("TestService.createOrder(ORD-001)"), eq("1"), any());
+        verify(cacheComponent).put(eq("TestService.createOrder(ORD-001)"), eq("1"), any());
     }
 
     @Test
@@ -153,14 +153,14 @@ class IdempotentAspectUTest {
         );
         Idempotent idempotent = mockIdempotent(3000, TimeUnit.MILLISECONDS, "", "请勿重复操作");
 
-        when(cacheClient.hasKey(anyString())).thenReturn(false);
+        when(cacheComponent.hasKey(anyString())).thenReturn(false);
         when(joinPoint.proceed()).thenReturn("done");
 
         Object result = aspect.around(joinPoint, idempotent);
 
         assertThat(result).isEqualTo("done");
         // 验证 put 被调用（参数匹配 className.methodName(hashCode) 格式）
-        verify(cacheClient).put(anyString(), eq("1"), any());
+        verify(cacheComponent).put(anyString(), eq("1"), any());
     }
 
     @Test
@@ -180,22 +180,22 @@ class IdempotentAspectUTest {
         when(joinPoint2.proceed()).thenReturn("resultB");
 
         // orderA 首次调用
-        when(cacheClient.hasKey("TestService.process(orderA)")).thenReturn(false);
+        when(cacheComponent.hasKey("TestService.process(orderA)")).thenReturn(false);
         Object result1 = aspect.around(joinPoint1, idempotent);
         assertThat(result1).isEqualTo("resultA");
 
         // orderB 首次调用（不同 Key，应正常执行）
-        when(cacheClient.hasKey("TestService.process(orderB)")).thenReturn(false);
+        when(cacheComponent.hasKey("TestService.process(orderB)")).thenReturn(false);
         Object result2 = aspect.around(joinPoint2, idempotent);
         assertThat(result2).isEqualTo("resultB");
 
         // orderA 重复调用应抛异常
-        when(cacheClient.hasKey("TestService.process(orderA)")).thenReturn(true);
+        when(cacheComponent.hasKey("TestService.process(orderA)")).thenReturn(true);
         assertThatThrownBy(() -> aspect.around(joinPoint1, idempotent))
                 .isInstanceOf(BizException.class);
 
         // orderB 重复调用应抛异常
-        when(cacheClient.hasKey("TestService.process(orderB)")).thenReturn(true);
+        when(cacheComponent.hasKey("TestService.process(orderB)")).thenReturn(true);
         assertThatThrownBy(() -> aspect.around(joinPoint2, idempotent))
                 .isInstanceOf(BizException.class);
     }
@@ -209,7 +209,7 @@ class IdempotentAspectUTest {
         );
         Idempotent idempotent = mockIdempotent(3000, TimeUnit.MILLISECONDS, "#key", "请勿重复操作");
 
-        when(cacheClient.hasKey("TestService.process(order123)")).thenReturn(false);
+        when(cacheComponent.hasKey("TestService.process(order123)")).thenReturn(false);
         when(joinPoint.proceed()).thenThrow(new RuntimeException("mock failure"));
 
         assertThatThrownBy(() -> aspect.around(joinPoint, idempotent))
@@ -217,8 +217,8 @@ class IdempotentAspectUTest {
                 .hasMessage("mock failure");
 
         // 验证 put 被调用，delete 也被调用（回滚标记）
-        verify(cacheClient).put(eq("TestService.process(order123)"), eq("1"), any());
-        verify(cacheClient).delete("TestService.process(order123)");
+        verify(cacheComponent).put(eq("TestService.process(order123)"), eq("1"), any());
+        verify(cacheComponent).delete("TestService.process(order123)");
     }
 
     @Test
@@ -231,13 +231,13 @@ class IdempotentAspectUTest {
         Idempotent idempotent = mockIdempotent(3000, TimeUnit.MILLISECONDS, "#key", "请勿重复操作");
 
         // hasKey 返回 true → 直接抛异常，不执行 proceed，不调用 put
-        when(cacheClient.hasKey("TestService.process(order123)")).thenReturn(true);
+        when(cacheComponent.hasKey("TestService.process(order123)")).thenReturn(true);
 
         assertThatThrownBy(() -> aspect.around(joinPoint, idempotent))
                 .isInstanceOf(BizException.class);
 
         verify(joinPoint, never()).proceed();
-        verify(cacheClient, never()).put(anyString(), any(), any());
+        verify(cacheComponent, never()).put(anyString(), any(), any());
     }
 
     // --- 测试用 Request 对象 ---
