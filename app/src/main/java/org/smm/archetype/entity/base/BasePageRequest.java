@@ -1,4 +1,4 @@
-package org.smm.archetype.entity.api;
+package org.smm.archetype.entity.base;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.EqualsAndHashCode;
-import org.smm.archetype.repository.BaseDO;
+import org.smm.archetype.entity.base.BaseDO;
 
 /**
  * 此文件由代码生成器生成，禁止手动修改。

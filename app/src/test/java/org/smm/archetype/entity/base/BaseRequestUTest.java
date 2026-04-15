@@ -1,4 +1,4 @@
-package org.smm.archetype.entity.api;
+package org.smm.archetype.entity.base;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

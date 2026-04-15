@@ -12,6 +12,8 @@ import org.smm.archetype.generated.entity.OperationLogDO;
 import org.smm.archetype.generated.mapper.OperationLogMapper;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+
 /**
  * 操作日志仓储实现
  */
@@ -30,8 +32,10 @@ public class OperationLogRepositoryImpl implements OperationLogRepository {
         LambdaQueryWrapper<OperationLogDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(StrUtil.isNotBlank(query.module()), OperationLogDO::getModule, query.module())
                 .eq(StrUtil.isNotBlank(query.operationType()), OperationLogDO::getOperationType, query.operationType())
-                .ge(StrUtil.isNotBlank(query.startTime()), OperationLogDO::getCreateTime, query.startTime())
-                .le(StrUtil.isNotBlank(query.endTime()), OperationLogDO::getCreateTime, query.endTime())
+                .ge(StrUtil.isNotBlank(query.startTime()), OperationLogDO::getCreateTime,
+                        parseInstant(query.startTime()))
+                .le(StrUtil.isNotBlank(query.endTime()), OperationLogDO::getCreateTime,
+                        parseInstant(query.endTime()))
                 .orderByDesc(OperationLogDO::getId);
 
         IPage<OperationLogDO> doPage = operationLogMapper.selectPage(page, wrapper);
@@ -42,5 +46,15 @@ public class OperationLogRepositoryImpl implements OperationLogRepository {
                 .map(converter::toEntity)
                 .toList());
         return entityPage;
+    }
+
+    /**
+     * 将 ISO-8601 格式时间字符串解析为 Instant。
+     */
+    private Instant parseInstant(String dateTime) {
+        if (dateTime == null || dateTime.isBlank()) {
+            return null;
+        }
+        return Instant.parse(dateTime);
     }
 }

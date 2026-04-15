@@ -3,7 +3,7 @@ package org.smm.archetype.facade.system;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.smm.archetype.entity.api.BasePageResult;
+import org.smm.archetype.entity.base.BasePageResult;
 import org.smm.archetype.entity.system.SystemConfigPageQuery;
 import org.smm.archetype.support.IntegrationTestBase;
 import org.springframework.beans.factory.annotation.Autowired;

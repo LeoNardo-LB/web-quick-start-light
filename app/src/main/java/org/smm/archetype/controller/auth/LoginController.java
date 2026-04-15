@@ -2,7 +2,7 @@ package org.smm.archetype.controller.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.smm.archetype.entity.api.BaseResult;
+import org.smm.archetype.entity.base.BaseResult;
 import org.smm.archetype.service.auth.LoginFacade;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

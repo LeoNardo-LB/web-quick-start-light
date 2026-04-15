@@ -1,4 +1,4 @@
-package org.smm.archetype.repository;
+package org.smm.archetype.entity.base;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -32,5 +32,15 @@ public abstract class BaseDO {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private String updateUser;
+
+    /**
+     * 逻辑删除标记：0 = 未删除，非 0 = 删除时间戳。
+     */
+    private Long deleteTime;
+
+    /**
+     * 删除人ID。
+     */
+    private String deleteUser;
 
 }

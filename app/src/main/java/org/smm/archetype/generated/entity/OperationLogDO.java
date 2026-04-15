@@ -1,23 +1,26 @@
 package org.smm.archetype.generated.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.smm.archetype.entity.base.BaseDO;
 
 /**
- * 操作日志数据对象。
- * <p>
- * 注意：此实体不继承 BaseDO（字段结构不同，无 updateUser/createUser）。
+ * 此文件由代码生成器生成，禁止手动修改。
+ * 如需重新生成，运行 MybatisPlusGenerator.main()
  */
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @TableName("operation_log")
-public class OperationLogDO {
-
-    @TableId(type = IdType.AUTO)
-    private Long id;
+public class OperationLogDO extends BaseDO {
     private String traceId;
     private String userId;
     private String module;
@@ -30,5 +33,4 @@ public class OperationLogDO {
     private String ip;
     private String status;
     private String errorMessage;
-    private String createTime;
 }

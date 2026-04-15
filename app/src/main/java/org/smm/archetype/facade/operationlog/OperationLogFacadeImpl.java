@@ -2,7 +2,7 @@ package org.smm.archetype.facade.operationlog;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
-import org.smm.archetype.entity.api.BasePageResult;
+import org.smm.archetype.entity.base.BasePageResult;
 import org.smm.archetype.entity.operationlog.OperationLog;
 import org.smm.archetype.entity.operationlog.OperationLogPageQuery;
 import org.smm.archetype.exception.CommonErrorCode;

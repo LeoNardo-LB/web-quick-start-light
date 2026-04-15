@@ -8,11 +8,14 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.JdbcType;
+import org.smm.archetype.shared.util.dal.InstantTypeHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import javax.sql.DataSource;
+import java.time.Instant;
 
 /**
  * MyBatis-Plus 手动配置.
@@ -40,6 +43,10 @@ public class MybatisPlusConfigure {
         // MyBatis 配置
         MybatisConfiguration configuration = new MybatisConfiguration();
         configuration.setMapUnderscoreToCamelCase(true);
+
+        // 注册 Instant 类型处理器（兼容 SQLite TEXT 存储）
+        configuration.getTypeHandlerRegistry().register(InstantTypeHandler.class);
+
         bean.setConfiguration(configuration);
 
         // 分页插件（v3.5.9+ 需要引入 mybatis-plus-jsqlparser 依赖）

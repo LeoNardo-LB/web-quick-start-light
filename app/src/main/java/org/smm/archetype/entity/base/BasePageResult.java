@@ -1,4 +1,4 @@
-package org.smm.archetype.entity.api;
+package org.smm.archetype.entity.base;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.EqualsAndHashCode;

@@ -12,6 +12,7 @@ import org.smm.archetype.generated.mapper.OperationLogMapper;
 import org.smm.archetype.support.IntegrationTestBase;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +47,7 @@ class OperationLogRepositoryITest extends IntegrationTestBase {
             logDO.setExecutionTime(100L * i);
             logDO.setIp("127.0.0.1");
             logDO.setStatus("SUCCESS");
-            logDO.setCreateTime("2025-01-" + String.format("%02d", i) + "T10:00:00Z");
+            logDO.setCreateTime(Instant.parse("2025-01-" + String.format("%02d", i) + "T10:00:00Z"));
             operationLogMapper.insert(logDO);
         }
     }

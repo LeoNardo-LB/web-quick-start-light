@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.smm.archetype.entity.api.BasePageResult;
+import org.smm.archetype.entity.base.BasePageResult;
 import org.smm.archetype.entity.operationlog.OperationLogPageQuery;
 import org.smm.archetype.facade.operationlog.OperationLogFacade;
 import org.smm.archetype.facade.operationlog.OperationLogVO;
