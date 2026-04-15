@@ -1,5 +1,7 @@
 package org.smm.archetype.facade.operationlog;
 
+import java.time.Instant;
+
 /**
  * 操作日志 VO — 用于前端展示
  *
@@ -32,5 +34,5 @@ public record OperationLogVO(
         String ip,
         String status,
         String errorMessage,
-        String createTime
+        Instant createTime
 ) {}

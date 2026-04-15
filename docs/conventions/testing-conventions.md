@@ -199,7 +199,7 @@ JaCoCo 配置说明：
 | `mvn test -Dtest="*UTest"` | 仅运行单元测试 |
 | `mvn test -Dtest="*ITest"` | 仅运行集成测试 |
 | `mvn clean verify` | 运行测试 + 生成覆盖率报告 |
-| `mvn test -pl client-cache` | 仅运行指定模块测试 |
+| `mvn test -pl component-cache` | 仅运行指定模块测试 |
 
 日常开发流程建议：
 1. 编写业务代码时同步编写 `*UTest`
@@ -210,7 +210,7 @@ JaCoCo 配置说明：
 
 **💡 MAY**
 
-客户端模块使用 `@ConditionalOnClass` + `@ConditionalOnProperty` 实现条件装配，测试时需验证以下场景：
+组件模块使用 `@ConditionalOnClass` + `@ConditionalOnProperty` 实现条件装配，测试时需验证以下场景：
 
 | 场景 | 验证内容 |
 |------|----------|
@@ -218,7 +218,7 @@ JaCoCo 配置说明：
 | 条件不满足 | NoOp 默认实现生效 |
 | 属性缺失 | 使用默认值 |
 
-示例（client-email 条件装配）：
+示例（component-email 条件装配）：
 ```java
 // 条件满足 — 实际实现注册
 @SpringBootTest(classes = EmailAutoConfiguration.class)
@@ -325,7 +325,7 @@ void createConfig_shouldRejectDuplicateKey_whenKeyAlreadyExists() {
 - [ ] ITest 使用真实 Spring 上下文，不使用 `@Mock`
 - [ ] Instruction 覆盖率 ≥ 95%，Branch 覆盖率 ≥ 90%
 - [ ] 覆盖率报告可通过 `mvn clean verify` 生成
-- [ ] 条件装配的客户端模块验证了装配条件
+- [ ] 条件装配的组件模块验证了装配条件
 
 ## 相关文档
 

@@ -37,14 +37,6 @@ scripts/md-sections docs/conventions/java-conventions.md "规则"
 ❌ 禁止：Read docs/conventions/java-conventions.md（全文加载）
 ```
 
-### 为什么
-
-| 做法 | 上下文消耗 | 信息精度 |
-|------|-----------|---------|
-| ❌ 全文加载 | 几千 token | 大量无关内容 |
-| ❌ 猜行号 | 不稳定 | 经常偏移、遗漏或多余 |
-| ✅ md-sections 分层 | 几十 token（目录）→ 几百 token（章节） | 精准获取所需内容 |
-
 ### 工具位置
 
 ```
@@ -87,18 +79,18 @@ scripts/md-sections <file> --line <行号>                  # 按行号定位章
 ```
 web-quick-start-light/                     (根 POM, packaging=pom)
 ├── common/                                (异常体系)
-├── clients/                               (parent POM, packaging=pom)
-│   ├── client-cache/                      (Caffeine 本地缓存)
-│   ├── client-oss/                        (本地对象存储)
-│   ├── client-email/                      (Jakarta Mail 邮件)
-│   ├── client-sms/                        (短信)
-│   ├── client-search/                     (内存搜索)
-│   ├── client-log/                        (日志客户端)
-│   ├── client-ratelimit/                  (限流客户端)
-│   ├── client-idempotent/                 (幂等客户端)
-│   └── client-auth/                       (认证客户端)
-└── app/                                   (主应用, 依赖 common + 所有 client-*)
+├── components/                               (parent POM, packaging=pom)
+│   ├── component-cache/                      (Caffeine 本地缓存)
+│   ├── component-oss/                        (本地对象存储)
+│   ├── component-email/                      (Jakarta Mail 邮件)
+│   ├── component-sms/                        (短信)
+│   ├── component-search/                     (内存搜索)
+│   └── component-auth/                       (认证组件)
+└── app/                                   (主应用, 依赖 common + 组件 component-*)
 ```
+
+> **注意**：限流（ratelimit）、幂等（idempotent）、操作日志（operationlog）和日志基础设施（logging）属于应用层横切关注点，直接集成在 app 模块的
+`shared/` 包下，不作为独立 component 模块。详见 [模块结构 - app 内部包组织](docs/architecture/module-structure.md#app-内部包组织)。
 
 ## 快速开始
 
@@ -155,7 +147,8 @@ mvn clean verify
 - `SysException` — 系统内部异常（500 类）
 
 ### 5. 日志规范
-- 使用 `@BusinessLog` 注解（`org.smm.archetype.client.log.BusinessLog`）记录业务方法日志（SLF4J + Micrometer 指标）
+
+- 使用 `@BusinessLog` 注解记录业务方法日志（SLF4J + Micrometer 指标）
 - `@BusinessLog` 扩展属性：`module`（业务模块）、`operation`（操作类型）、`samplingRate`（采样率，默认 1.0）
 - 操作日志持久化：`OperationLogWriter` 接口 + `OperationLogRecord`，`OperationType` 枚举（CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT）
 - 使用 `@Slf4j` + 参数化日志，**禁止 `System.out.println`**
@@ -171,14 +164,14 @@ mvn clean verify
 - 异步场景使用 `ContextRunnable` / `ContextCallable` 包装
 
 ### 8. 配置管理
-- 多环境：`application-dev.yaml` / `application-prod.yaml` / `application-optional.yaml`
+- 多环境：`application-dev.yaml` / `application-prod.yaml` / `application-component.yaml`
 - 配置类使用 `@ConfigurationProperties`，禁止 `@Value`
 
-### 9. 技术客户端规范（clients 模块）
-- 每个客户端模块独立 artifactId，依赖 `common`
-- **Template Method 模式**：`AbstractXxxClient` 的公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点
+### 9. 技术组件规范（components 模块）
+- 每个组件模块独立 artifactId，依赖 `common`
+- **Template Method 模式**：`AbstractXxxComponent` 的公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点
 - **条件装配**：`@AutoConfiguration` + `@ConditionalOnClass` + `@ConditionalOnProperty`
-- **Properties 前缀统一**：`middleware.*`（middleware.cache / middleware.object-storage / middleware.email / middleware.sms / middleware.search / middleware.ratelimit / middleware.idempotent / middleware.auth），日志前缀为 `logging`（对接 Spring Boot 日志配置惯例）
+- **Properties 前缀统一**：`component.*`（component.cache / component.oss / component.email / component.sms / component.search / component.ratelimit / component.auth），日志前缀为 `logging`（对接 Spring Boot 日志配置惯例）。幂等模块不再有独立 Properties（参数在 @Idempotent 注解上定义）
 
 ### 10. 时间类型规范
 - 所有时间存储与传输统一使用 `java.time.Instant`
@@ -204,7 +197,7 @@ mvn clean verify
 
 ### 15. 幂等规范
 - 使用 `@Idempotent` 注解标记需要幂等保护的接口
-- 基于 Caffeine 本地缓存实现幂等 Key 存储
+- 基于 CacheComponent 实现幂等 Key 存储（通过 TTL 过期机制）
 - 支持自定义幂等 Key 解析
 
 ### 16. 国际化规范（i18n）
@@ -228,23 +221,25 @@ mvn clean verify
 
 ### 架构文档（docs/architecture/）
 
-| 强度 | 文档 | 路径 | 一句话描述 |
-|------|------|------|-----------|
-| ⛔ MUST | 系统全景 | [system-overview.md](docs/architecture/system-overview.md) | C4 图 + 技术栈 + JVM 配置 |
-| ⛔ MUST | 模块结构 | [module-structure.md](docs/architecture/module-structure.md) | Maven 多模块 + 四层架构 + ArchUnit |
-| ⚠️ SHOULD | 请求流转 | [request-lifecycle.md](docs/architecture/request-lifecycle.md) | HTTP 请求完整处理链路 |
-| ⚠️ SHOULD | 设计模式 | [design-patterns.md](docs/architecture/design-patterns.md) | Template Method + 条件装配 |
-| 💡 MAY | 线程上下文 | [thread-context.md](docs/architecture/thread-context.md) | ScopedValue 传递链 |
-| ⚠️ SHOULD | 骨架使用 | [archetype-usage.md](docs/architecture/archetype-usage.md) | Maven 骨架安装/使用/故障排查 |
+| 强度        | 文档    | 路径                                                             | 一句话描述                       |
+|-----------|-------|----------------------------------------------------------------|-----------------------------|
+| ⛔ MUST    | 系统全景  | [system-overview.md](docs/architecture/system-overview.md)     | C4 图 + 技术栈 + JVM 配置         |
+| ⛔ MUST    | 模块结构  | [module-structure.md](docs/architecture/module-structure.md)   | Maven 多模块 + 四层架构 + ArchUnit |
+| ⚠️ SHOULD | 请求流转  | [request-lifecycle.md](docs/architecture/request-lifecycle.md) | HTTP 请求完整处理链路               |
+| ⚠️ SHOULD | 设计模式  | [design-patterns.md](docs/architecture/design-patterns.md)     | Template Method + 条件装配      |
+| ⚠️ SHOULD | 线程上下文 | [thread-context.md](docs/architecture/thread-context.md)       | ScopedValue 传递链             |
+| ⚠️ SHOULD | 骨架使用  | [archetype-usage.md](docs/architecture/archetype-usage.md)     | Maven 骨架安装/使用/故障排查          |
 
 ### 编码规范（docs/conventions/）
 
-| 强度 | 文档 | 路径 | 一句话描述 |
-|------|------|------|-----------|
-| ⛔ MUST | Java 编码规范 | [java-conventions.md](docs/conventions/java-conventions.md) | Lombok/时间/Record/依赖 |
-| ⛔ MUST | 测试规范 | [testing-conventions.md](docs/conventions/testing-conventions.md) | UTest/ITest/覆盖率标准 |
-| ⛔ MUST | 错误处理规范 | [error-handling.md](docs/conventions/error-handling.md) | 异常体系/错误码/i18n |
-| ⚠️ SHOULD | 配置规范 | [configuration.md](docs/conventions/configuration.md) | Properties/前缀/多环境 |
+**编码规范必须强制遵守！！！**
+
+| 强度     | 文档        | 路径                                                                | 一句话描述               |
+|--------|-----------|-------------------------------------------------------------------|---------------------|
+| ⛔ MUST | Java 编码规范 | [java-conventions.md](docs/conventions/java-conventions.md)       | Lombok/时间/Record/依赖 |
+| ⛔ MUST | 测试规范      | [testing-conventions.md](docs/conventions/testing-conventions.md) | UTest/ITest/覆盖率标准   |
+| ⛔ MUST | 错误处理规范    | [error-handling.md](docs/conventions/error-handling.md)           | 异常体系/错误码/i18n       |
+| ⛔ MUST | 配置规范      | [configuration.md](docs/conventions/configuration.md)             | Properties/前缀/多环境   |
 
 ### 模块文档（docs/modules/）
 
@@ -253,15 +248,14 @@ mvn clean verify
 | ⛔ MUST | 认证模块 | [auth.md](docs/modules/auth.md) | Sa-Token 登录/注销/拦截 |
 | ⛔ MUST | 系统配置模块 | [system-config.md](docs/modules/system-config.md) | CRUD + 分页 + 值对象 |
 | ⚠️ SHOULD | 操作日志模块 | [operation-log.md](docs/modules/operation-log.md) | @BusinessLog + 分页查询 |
-| ⚠️ SHOULD | 缓存客户端 | [client-cache.md](docs/modules/client-cache.md) | Caffeine + 10 方法 |
-| ⚠️ SHOULD | 对象存储客户端 | [client-oss.md](docs/modules/client-oss.md) | 本地存储 + NIO |
-| 💡 MAY | 邮件客户端 | [client-email.md](docs/modules/client-email.md) | Jakarta Mail + NoOp |
-| 💡 MAY | 短信客户端 | [client-sms.md](docs/modules/client-sms.md) | 3 方法 + NoOp |
-| 💡 MAY | 搜索客户端 | [client-search.md](docs/modules/client-search.md) | 内存搜索 + 15 方法 |
-| ⚠️ SHOULD | 日志客户端 | [client-log.md](docs/modules/client-log.md) | @BusinessLog + 8 Appender |
-| ⚠️ SHOULD | 限流客户端 | [client-ratelimit.md](docs/modules/client-ratelimit.md) | Bucket4j + SpEL |
-| ⚠️ SHOULD | 幂等客户端 | [client-idempotent.md](docs/modules/client-idempotent.md) | @Idempotent + Caffeine |
-| ⚠️ SHOULD | 认证客户端 | [client-auth.md](docs/modules/client-auth.md) | AuthClient 接口 + Sa-Token |
+| ⚠️ SHOULD | 缓存组件 | [component-cache.md](docs/modules/component-cache.md) | Caffeine + 10 方法 |
+| ⚠️ SHOULD | 对象存储组件 | [component-oss.md](docs/modules/component-oss.md) | 本地存储 + NIO |
+| 💡 MAY | 邮件组件 | [component-email.md](docs/modules/component-email.md) | Jakarta Mail + NoOp |
+| 💡 MAY | 短信组件 | [component-sms.md](docs/modules/component-sms.md) | 3 方法 + NoOp |
+| 💡 MAY | 搜索组件 | [component-search.md](docs/modules/component-search.md) | 内存搜索 + 15 方法 |
+| ⚠️ SHOULD | 认证组件 | [component-auth.md](docs/modules/component-auth.md) | AuthComponent 接口 + Sa-Token |
+
+> **注意**：限流、幂等、操作日志横切关注点已移至 app 模块 `shared/` 包下，对应的旧文档（component-ratelimit.md、component-idempotent.md、component-log.md）已归档至 `docs/archived/`。
 
 ### 文档系统说明
 
@@ -271,24 +265,4 @@ mvn clean verify
 
 ## OpenSpec Intent 索引
 
-> 以下为 Intent 轨（冻结）文档，记录各功能的设计意图，位于 `openspec/specs/`。
-
-| Capability | 路径 | 一句话描述 |
-|-----------|------|-----------|
-| agents-md-and-docs | [openspec/specs/agents-md-and-docs/spec.md](openspec/specs/agents-md-and-docs/spec.md) | AGENTS.md 与文档体系 |
-| api-versioning | [openspec/specs/api-versioning/spec.md](openspec/specs/api-versioning/spec.md) | API 版本控制 |
-| archetype-readme | [openspec/specs/archetype-readme/spec.md](openspec/specs/archetype-readme/spec.md) | 骨架 README |
-| auth | [openspec/specs/auth/spec.md](openspec/specs/auth/spec.md) | 认证功能 |
-| client-modules-replacement | [openspec/specs/client-modules-replacement/spec.md](openspec/specs/client-modules-replacement/spec.md) | 客户端模块替换 |
-| dal-code-generator | [openspec/specs/dal-code-generator/spec.md](openspec/specs/dal-code-generator/spec.md) | 代码生成器 |
-| dependency-upgrade | [openspec/specs/dependency-upgrade/spec.md](openspec/specs/dependency-upgrade/spec.md) | 依赖升级 |
-| facade-layer | [openspec/specs/facade-layer/spec.md](openspec/specs/facade-layer/spec.md) | Facade 层 |
-| i18n | [openspec/specs/i18n/spec.md](openspec/specs/i18n/spec.md) | 国际化 |
-| idempotent-protection | [openspec/specs/idempotent-protection/spec.md](openspec/specs/idempotent-protection/spec.md) | 幂等保护 |
-| instant-unification | [openspec/specs/instant-unification/spec.md](openspec/specs/instant-unification/spec.md) | Instant 时间统一 |
-| logging-enhancement | [openspec/specs/logging-enhancement/spec.md](openspec/specs/logging-enhancement/spec.md) | 日志增强 |
-| logging-system-replacement | [openspec/specs/logging-system-replacement/spec.md](openspec/specs/logging-system-replacement/spec.md) | 日志系统替换 |
-| operation-log | [openspec/specs/operation-log/spec.md](openspec/specs/operation-log/spec.md) | 操作日志 |
-| pagination | [openspec/specs/pagination/spec.md](openspec/specs/pagination/spec.md) | 分页功能 |
-| rate-limiting | [openspec/specs/rate-limiting/spec.md](openspec/specs/rate-limiting/spec.md) | 限流功能 |
-| system-config | [openspec/specs/system-config/spec.md](openspec/specs/system-config/spec.md) | 系统配置 |
+见：openspec/specs 与 openspec/changes 目录

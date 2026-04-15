@@ -22,7 +22,7 @@ HTTP 请求从进入到响应的完整处理链路。请求依次经过 Servlet 
 sequenceDiagram
     participant Client as 客户端
     participant Filter as ContextFillFilter
-    participant Auth as AuthClient
+    participant Auth as AuthComponent
     participant Ctx as ScopedThreadContext
     participant Ctrl as Controller
     participant Fac as Facade
@@ -101,7 +101,7 @@ sequenceDiagram
 
 | 环节 | 类/组件 | 核心职责 |
 |------|--------|---------|
-| **全局过滤** | `ContextFillFilter` | 解析 userId（AuthClient）、生成 traceId（X-Trace-Id Header 或 UUID）、绑定 ScopedValue 上下文 |
+| **全局过滤** | `ContextFillFilter` | 解析 userId（AuthComponent）、生成 traceId（X-Trace-Id Header 或 UUID）、绑定 ScopedValue 上下文 |
 | **线程上下文** | `ScopedThreadContext` | 基于 Java 25 ScopedValue 存储 userId 和 traceId，请求线程内自动可访问 |
 | **控制层** | `*Controller` | 接收 HTTP 请求、Bean Validation 参数校验、调用 Facade、返回 `BaseResult<T>` |
 | **门面层** | `*FacadeImpl` | Entity→VO 转换（MapStruct）、业务编排、聚合多个 Service 调用 |
@@ -137,7 +137,7 @@ graph TD
 | 6 | AOP Aspect | `LogAspect` | 方法环绕 | 标注 `@BusinessLog` 的方法 | 记录业务操作日志，支持 SLF4J + Micrometer 指标 |
 | 7 | ControllerAdvice | `WebExceptionAdvise` | 异常时 | 始终 | 捕获 `BizException` / `ClientException` / `SysException`，i18n 翻译 |
 
-> **注意**：序号 3-6 为条件装配组件，仅在对应依赖存在且配置启用时生效。详见各客户端模块文档。
+> **注意**：序号 3-6 为条件装配组件，仅在对应依赖存在且配置启用时生效。详见各组件模块文档。
 
 ## 关键组件列表
 
@@ -148,8 +148,8 @@ graph TD
 | 功能 | 实现方式 |
 |------|---------|
 | 解析 traceId | 读取 `X-Trace-Id` Header，不存在则生成 UUID |
-| 解析 userId | 调用 `AuthClient.getCurrentUserId()`，null 时返回 `"ANONYMOUS"` |
-| 无 AuthClient | userId 默认为 `"SYSTEM"` |
+| 解析 userId | 调用 `AuthComponent.getCurrentUserId()`，null 时返回 `"ANONYMOUS"` |
+| 无 AuthComponent | userId 默认为 `"SYSTEM"` |
 | 绑定上下文 | `ScopedThreadContext.runWithContext(runnable, userId, traceId)` |
 | 响应回写 | 设置 `X-Trace-Id` Response Header |
 
@@ -174,9 +174,9 @@ graph TD
 | 自定义消息优先 | `BizException` 指定自定义消息时直接返回，否则走 `messageKey()` 国际化 |
 | 异常分级 | `BizException`（warn）、`ClientException`（error）、`SysException`（error）分级记录日志 |
 
-### AuthClient
+### AuthComponent
 
-认证客户端接口，提供基础认证操作：
+认证组件接口，提供基础认证操作：
 
 | 方法 | 说明 |
 |------|------|

@@ -52,8 +52,8 @@ sa-token:
   token-style: uuid
   is-log: false
 
-# 认证中间件
-middleware:
+# 认证组件
+component:
   auth:
     enabled: true
     exclude-paths:

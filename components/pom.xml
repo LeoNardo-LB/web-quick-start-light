@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.smm.archetype</groupId>
+        <artifactId>web-quick-start-light</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>components</artifactId>
+    <packaging>pom</packaging>
+    <name>components</name>
+    <description>Middleware component modules (parent)</description>
+
+    <modules>
+        <module>component-cache</module>
+        <module>component-oss</module>
+        <module>component-email</module>
+        <module>component-sms</module>
+        <module>component-search</module>
+        <module>component-auth</module>
+    </modules>
+
+</project>

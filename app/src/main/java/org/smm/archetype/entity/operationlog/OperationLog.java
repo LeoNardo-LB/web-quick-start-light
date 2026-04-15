@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 /**
  * 操作日志领域实体
  */
@@ -29,5 +31,5 @@ public class OperationLog {
     private String ip;
     private String status;
     private String errorMessage;
-    private String createTime;
+    private Instant createTime;
 }

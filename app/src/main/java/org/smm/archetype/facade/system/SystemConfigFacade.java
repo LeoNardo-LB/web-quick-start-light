@@ -1,6 +1,6 @@
 package org.smm.archetype.facade.system;
 
-import org.smm.archetype.entity.api.BasePageResult;
+import org.smm.archetype.entity.base.BasePageResult;
 import org.smm.archetype.entity.system.SystemConfigPageQuery;
 
 import java.util.List;

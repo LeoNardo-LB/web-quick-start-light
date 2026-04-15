@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.baomidou.mybatisplus.generator.fill.Column;
-import org.smm.archetype.repository.BaseDO;
+import org.smm.archetype.entity.base.BaseDO;
 
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -51,7 +51,7 @@ public class MybatisPlusGenerator {
                         .enableLombok()
                         .enableTableFieldAnnotation()
                         // SQLite 没有 delete_time 逻辑删除字段，移除 logicDelete 配置
-                        .addSuperEntityColumns("id", "create_time", "update_time", "create_user", "update_user")
+                        .addSuperEntityColumns("id", "create_time", "update_time", "create_user", "update_user", "delete_time", "delete_user")
                         .formatFileName("%sDO")
                         .idType(IdType.ASSIGN_ID)
                         .addTableFills(

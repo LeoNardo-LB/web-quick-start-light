@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS system_config (
     update_time     TEXT    DEFAULT (datetime('now')),
     create_user     TEXT    DEFAULT '',
     update_user     TEXT    DEFAULT '',
+    delete_time     INTEGER NOT NULL DEFAULT 0,
+    delete_user     TEXT    DEFAULT NULL,
     UNIQUE(config_key)
 );
 
@@ -28,6 +30,8 @@ CREATE TABLE IF NOT EXISTS user (
     update_time     TEXT    DEFAULT (datetime('now')),
     create_user     TEXT    DEFAULT '',
     update_user     TEXT    DEFAULT '',
+    delete_time     INTEGER NOT NULL DEFAULT 0,
+    delete_user     TEXT    DEFAULT NULL,
     UNIQUE(username)
 );
 
@@ -46,5 +50,10 @@ CREATE TABLE IF NOT EXISTS operation_log (
     ip              TEXT    NOT NULL DEFAULT '',
     status          TEXT    NOT NULL DEFAULT 'SUCCESS',
     error_message   TEXT    DEFAULT '',
-    create_time     TEXT    DEFAULT (datetime('now'))
+    create_time     TEXT    DEFAULT (datetime('now')),
+    update_time     TEXT    DEFAULT (datetime('now')),
+    create_user     TEXT    DEFAULT '',
+    update_user     TEXT    DEFAULT '',
+    delete_time     INTEGER NOT NULL DEFAULT 0,
+    delete_user     TEXT    DEFAULT NULL
 );

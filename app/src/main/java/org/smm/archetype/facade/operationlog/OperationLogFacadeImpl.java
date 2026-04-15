@@ -2,12 +2,12 @@ package org.smm.archetype.facade.operationlog;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
-import org.smm.archetype.entity.api.BasePageResult;
+import org.smm.archetype.entity.base.BasePageResult;
 import org.smm.archetype.entity.operationlog.OperationLog;
 import org.smm.archetype.entity.operationlog.OperationLogPageQuery;
 import org.smm.archetype.exception.CommonErrorCode;
 import org.smm.archetype.service.operationlog.OperationLogService;
-import org.smm.archetype.util.context.ScopedThreadContext;
+import org.smm.archetype.shared.util.context.ScopedThreadContext;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;

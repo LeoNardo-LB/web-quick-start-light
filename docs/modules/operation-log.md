@@ -91,7 +91,7 @@ classDiagram
         +doAround(joinPoint) Object
         -writeOperationLog(...) void
         -initIfNecessary() void
-        -toSafeJson(obj) String
+        -toSafeJson(obj)$ String
     }
 
     class OperationLogWriter {
@@ -174,13 +174,26 @@ classDiagram
         +String endTime
     }
 
-    class LogAutoConfiguration {
+    class LoggingConfigure {
+        -Environment environment
+        -OperationLogWriter operationLogWriter
         +logAspect(MeterRegistry) LogAspect
+        +slowQueryInterceptor(LoggingProperties) SlowQueryInterceptor
+        +samplingTurboFilter(LoggingProperties) SamplingTurboFilter
+        +onApplicationEvent(ApplicationReadyEvent) void
     }
 
     class LoggingProperties {
         -SlowQuery slowQuery
         -Sampling sampling
+        class SlowQuery {
+            +long thresholdMs
+            +boolean enabled
+        }
+        class Sampling {
+            +boolean enabled
+            +double rate
+        }
     }
 
     BusinessLog --> OperationType
@@ -194,21 +207,23 @@ classDiagram
     OperationLogRepository <|.. OperationLogRepositoryImpl
     OperationLogFacadeImpl ..> OperationLogVO
     OperationLogController ..> OperationLogPageQuery
-    LogAutoConfiguration ..> LogAspect
-    LogAutoConfiguration ..> LoggingProperties
+    LoggingConfigure ..> LogAspect
+    LoggingConfigure ..> LoggingProperties
+    LoggingConfigure ..> SlowQueryInterceptor
+    LoggingConfigure ..> SamplingTurboFilter
 ```
 
 ### 关键类说明
 
 | 类 | 位置 | 职责 |
 |---|---|---|
-| `@BusinessLog` | `clients/client-log/` | 方法级注解，标注需要记录日志的业务方法 |
-| `LogAspect` | `clients/client-log/` | AOP 切面，`@Around` 环绕通知，记录执行日志 + Micrometer 指标 + 持久化 |
-| `OperationType` | `clients/client-log/` | 操作类型枚举：CREATE / UPDATE / DELETE / QUERY / EXPORT / IMPORT |
-| `OperationLogWriter` | `clients/client-log/` | 操作日志写入器接口，由 app 模块实现具体持久化逻辑 |
-| `OperationLogRecord` | `clients/client-log/` | 操作日志数据载体 record，在 LogAspect 与 Writer 之间传递 |
-| `LogAutoConfiguration` | `clients/client-log/` | 自动配置类，注册 LogAspect Bean，条件：classpath 中存在 Micrometer + AspectJ |
-| `LoggingProperties` | `clients/client-log/` | 日志配置属性（`logging.*`），含 slow-query 和 sampling 子配置 |
+| `@BusinessLog` | `app/.../shared/aspect/operationlog/` | 方法级注解，标注需要记录日志的业务方法 |
+| `LogAspect` | `app/.../shared/aspect/operationlog/` | AOP 切面，`@Around` 环绕通知，记录执行日志 + Micrometer 指标 + 持久化 |
+| `OperationType` | `app/.../shared/aspect/operationlog/` | 操作类型枚举：CREATE / UPDATE / DELETE / QUERY / EXPORT / IMPORT |
+| `OperationLogWriter` | `app/.../shared/aspect/operationlog/` | 操作日志写入器接口，由 app 模块实现具体持久化逻辑 |
+| `OperationLogRecord` | `app/.../shared/aspect/operationlog/` | 操作日志数据载体 record，在 LogAspect 与 Writer 之间传递 |
+| `LoggingConfigure` | `app/.../config/` | 配置类，注册 LogAspect / SlowQueryInterceptor / SamplingTurboFilter Bean；实现 `ApplicationListener<ApplicationReadyEvent>` 启动时验证日志目录 |
+| `LoggingProperties` | `app/.../config/properties/` | 日志配置属性（`logging.*`），含 slow-query 和 sampling 子配置 |
 | `OperationLogController` | `app/.../controller/operationlog/` | REST 入口，提供分页查询端点 |
 | `OperationLogFacade` / `OperationLogFacadeImpl` | `app/.../facade/operationlog/` | 门面层，Entity→VO 转换 |
 | `OperationLogService` | `app/.../service/operationlog/` | 服务层，只读事务查询 |
@@ -302,7 +317,7 @@ classDiagram
 
 ## 配置参考
 
-### 日志客户端配置（`logging.*`）
+### 日志组件配置（`logging.*`）
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
@@ -311,13 +326,13 @@ classDiagram
 | `logging.sampling.enabled` | boolean | `false` | 是否启用日志采样（SamplingTurboFilter） |
 | `logging.sampling.rate` | double | `0.1` | 采样率（0.0~1.0），ERROR 级别始终记录不受采样影响 |
 
-> **注意**：日志配置前缀为 `logging`（对接 Spring Boot 日志配置惯例），而非 `middleware.logging`。
+> **注意**：日志配置前缀为 `logging`（对接 Spring Boot 日志配置惯例），而非 `component.logging`。
 
 ### 条件装配
 
-- `LogAutoConfiguration` 条件：classpath 中同时存在 `MeterRegistry` 和 `Aspect` 类
-- `SlowQueryInterceptor` 条件：classpath 中存在 MyBatis 且 `logging.slow-query.enabled=true`
-- `SamplingTurboFilter` 条件：`logging.sampling.enabled=true`
+- `LoggingConfigure`：编译期依赖保证（缺少 Micrometer/AspectJ 时编译失败），无显式 `@ConditionalOnClass`
+- `SlowQueryInterceptor` 条件：`logging.slow-query.enabled=true`（`@ConditionalOnProperty`）
+- `SamplingTurboFilter` 条件：`logging.sampling.enabled=true`（`@ConditionalOnProperty`）
 
 ## 使用指南
 
@@ -326,8 +341,8 @@ classDiagram
 在需要记录日志的 Service 或 Facade 方法上添加 `@BusinessLog` 注解：
 
 ```java
-import org.smm.archetype.client.log.BusinessLog;
-import org.smm.archetype.client.log.OperationType;
+import org.smm.archetype.shared.aspect.operationlog.BusinessLog;
+import org.smm.archetype.shared.aspect.operationlog.OperationType;
 
 @Service
 public class SystemConfigService {
@@ -426,7 +441,9 @@ public class UserFacadeImpl implements UserFacade {
 ## 相关文档
 
 ### 上游依赖
-- [docs/modules/client-log.md](client-log.md) — @BusinessLog 注解定义、LogAspect 切面、LoggingProperties 配置
+- `app/.../shared/aspect/operationlog/` — @BusinessLog 注解定义、LogAspect 切面
+- `app/.../config/properties/LoggingProperties` — 日志配置属性
+- `app/.../config/LoggingConfigure` — 日志配置类（注册 LogAspect Bean）
 - [docs/architecture/request-lifecycle.md](../architecture/request-lifecycle.md) — HTTP 请求完整处理链路
 
 ### 下游消费者
@@ -439,4 +456,5 @@ public class UserFacadeImpl implements UserFacade {
 ## 变更历史
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-04-15 | 迁移：AOP 组件从 `component-log` 迁移到 `app/.../shared/aspect/operationlog/`；日志基础设施迁移到 `app/.../shared/util/logging/`；`LogAutoConfiguration` → `LoggingConfigure`（合并 `LoggingConfiguration`，新增启动时日志目录验证）；类图同步更新 |
 | 2025-04-14 | 初始创建 |

@@ -149,15 +149,18 @@ public record BaseRequest() {}  // 错误！
 
 #### 包名分层
 
-| 层 | 包路径 |
-|----|--------|
-| Controller | `...controller` |
-| Facade | `...facade` |
-| Service | `...service` |
-| Repository | `...repository` |
-| Entity | `...entity` |
-| Config | `...config` |
-| Util | `...util` |
+> 详细说明见 [模块结构 - app 内部包组织](../architecture/module-structure.md#app-内部包组织)。
+
+| 层          | 包路径             | 说明                                          |
+|------------|-----------------|---------------------------------------------|
+| Controller | `...controller` | REST API 入口，按业务分子包                          |
+| Facade     | `...facade`     | Entity→VO 转换与编排，按业务分子包                      |
+| Service    | `...service`    | 核心业务逻辑，按业务分子包                               |
+| Repository | `...repository` | 数据访问，按业务分子包                                 |
+| Entity     | `...entity`     | 领域实体与值对象，按业务分子包                             |
+| Shared     | `...shared`     | 跨层共享基础设施（aspect/logging/util），按职责分子包        |
+| Config     | `...config`     | Spring @Configuration，扁平结构 + properties/ 子包 |
+| Generated  | `...generated`  | 代码生成器产物，禁止手动修改                              |
 
 #### 类名约定
 
@@ -233,7 +236,7 @@ public class SystemConfigController {}
 - 使用 `@Slf4j` 声明日志对象
 - 使用参数化日志（`{}` 占位符），禁止字符串拼接
 - 禁止 `System.out.println` / `System.err.println`
-- 业务方法日志使用 `@BusinessLog` 注解（`org.smm.archetype.client.log.BusinessLog`）
+- 业务方法日志使用 `@BusinessLog` 注解（`org.smm.archetype.shared.aspect.operationlog.BusinessLog`）
 
 ✅ 正确：
 ```java

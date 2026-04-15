@@ -2,7 +2,7 @@ package org.smm.archetype.service.auth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.smm.archetype.client.auth.AuthClient;
+import org.smm.archetype.component.auth.AuthComponent;
 import org.smm.archetype.entity.user.User;
 import org.smm.archetype.exception.BizException;
 import org.smm.archetype.exception.CommonErrorCode;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class LoginFacadeImpl implements LoginFacade {
 
     private final UserRepository userRepository;
-    private final AuthClient authClient;
+    private final AuthComponent authComponent;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
@@ -32,12 +32,12 @@ public class LoginFacadeImpl implements LoginFacade {
         }
 
         log.info("用户登录成功: username={}", username);
-        return authClient.login(user.getId());
+        return authComponent.login(user.getId());
     }
 
     @Override
     public void logout() {
         log.info("用户注销");
-        authClient.logout();
+        authComponent.logout();
     }
 }

@@ -1,6 +1,6 @@
 package org.smm.archetype.facade.operationlog;
 
-import org.smm.archetype.entity.api.BasePageResult;
+import org.smm.archetype.entity.base.BasePageResult;
 import org.smm.archetype.entity.operationlog.OperationLogPageQuery;
 
 /**

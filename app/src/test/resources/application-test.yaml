@@ -38,8 +38,8 @@ sa-token:
   token-style: uuid
   is-log: false
 
-# 认证中间件（测试环境）
-middleware:
+# 认证组件（测试环境）
+component:
   auth:
     enabled: true
     exclude-paths:

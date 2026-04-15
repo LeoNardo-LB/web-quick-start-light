@@ -3,7 +3,7 @@ package org.smm.archetype.config;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
-import org.smm.archetype.client.auth.AuthClient;
+import org.smm.archetype.component.auth.AuthComponent;
 import org.smm.archetype.controller.global.ContextFillFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -24,12 +24,12 @@ import java.util.Locale;
 public class WebConfigure {
 
     @Autowired(required = false)
-    private AuthClient authClient;
+    private AuthComponent authComponent;
 
     @Bean
     public FilterRegistrationBean<ContextFillFilter> contextFillFilter() {
         FilterRegistrationBean<ContextFillFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new ContextFillFilter(authClient));
+        registration.setFilter(new ContextFillFilter(authComponent));
         registration.addUrlPatterns("/*");
         registration.setOrder(1);
         registration.setName("contextFillFilter");

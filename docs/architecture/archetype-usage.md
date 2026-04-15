@@ -141,7 +141,7 @@ mvn archetype:generate -DarchetypeCatalog=local -DinteractiveMode=false -Darchet
 | `Archetype IT 'basic' failed` | 集成测试阶段找不到资源 | 在 `archetype-metadata.xml` 中修正 fileset/module 的目录路径后重新 `mvn install` |
 | `Cannot resolve org.smm.archetype:common:...` | 骨架安装未完成或本地仓库缓存过期 | 先在骨架项目根目录执行 `mvn clean install -DskipTests`，确保所有模块安装到本地仓库 |
 | `Java version 25 required` | 项目要求 Java 25，当前 JDK 版本不满足 | 安装 JDK 25 并设置 `JAVA_HOME`，运行 `java -version` 确认版本 |
-| `Spring Boot 应用启动失败: No qualifying bean of type AuthClient` | 认证客户端未正确装配 | 检查 `middleware.auth.enabled` 配置（默认 `true`）；如使用 Sa-Token，确认 `sa-token` 依赖在 classpath 中；如不需要认证，确认 NoOp 自动配置生效 |
+| `Spring Boot 应用启动失败: No qualifying bean of type AuthComponent` | 认证组件未正确装配 | 检查 `component.auth.enabled` 配置（默认 `true`）；如使用 Sa-Token，确认 `sa-token` 依赖在 classpath 中；如不需要认证，确认 NoOp 自动配置生效 |
 | `生成的项目编译失败: package xxx does not exist` | 骨架生成时包名替换异常 | 检查 archetype-metadata.xml 中的 `package` 属性是否正确；手动检查生成项目的 import 语句是否与实际包名一致 |
 
 ## 相关文档

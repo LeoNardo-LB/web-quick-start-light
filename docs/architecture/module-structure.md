@@ -15,24 +15,22 @@
 
 ## 概述
 
-Maven 多模块结构和四层架构说明。项目采用 Maven POM 聚合模式，分为根 POM、common（公共模块）、clients（客户端聚合）、app（主应用）四个层级。app 模块内部遵循 Controller → Facade → Service → Repository 的严格四层架构，层间依赖单向流动，由 ArchUnit 在测试阶段守护约束。
+Maven 多模块结构和四层架构说明。项目采用 Maven POM 聚合模式，分为根 POM、common（公共模块）、components（组件聚合）、app（主应用）四个层级。app 模块内部遵循 Controller → Facade → Service → Repository 的严格四层架构，层间依赖单向流动，由 ArchUnit 在测试阶段守护约束。
 
 ## 目录树结构
 
 ```
 web-quick-start-light/                     (根 POM, packaging=pom)
 ├── common/                                (异常体系: ErrorCode, CommonErrorCode, BaseException...)
-├── clients/                               (parent POM, packaging=pom)
-│   ├── client-cache/                      (Caffeine 本地缓存, 10 方法, Template Method)
-│   ├── client-oss/                        (本地对象存储, NIO + 日期分层, 7 方法, Template Method)
-│   ├── client-email/                      (Jakarta Mail 邮件, 3 方法, NoOp 默认实现, 条件装配)
-│   ├── client-sms/                        (短信, 3 方法, NoOp 默认实现, 条件装配)
-│   ├── client-search/                     (内存搜索, ConcurrentHashMap, 15 方法, 条件装配)
-│   ├── client-log/                        (日志客户端, @BusinessLog 注解, LogAspect 切面, 条件装配)
-│   ├── client-ratelimit/                  (限流客户端, @RateLimit 注解, Bucket4j, 条件装配)
-│   ├── client-idempotent/                 (幂等客户端, @Idempotent 注解, Caffeine, 条件装配)
-│   └── client-auth/                       (认证客户端, Sa-Token/NoOp, Template Method, 条件装配)
-└── app/                                   (主应用, packaging=jar, 依赖 common + 所有 client-*)
+├── components/                               (parent POM, packaging=pom — 中间件接入层)
+│   ├── component-cache/                      (Caffeine 本地缓存, 10 方法, Template Method)
+│   ├── component-oss/                        (本地对象存储, NIO + 日期分层, 7 方法, Template Method)
+│   ├── component-email/                      (Jakarta Mail 邮件, 3 方法, NoOp 默认实现, 条件装配)
+│   ├── component-sms/                        (短信, 3 方法, NoOp 默认实现, 条件装配)
+│   ├── component-search/                     (内存搜索, ConcurrentHashMap, 15 方法, 条件装配)
+│   └── component-auth/                       (认证组件, Sa-Token/NoOp, Template Method, 条件装配)
+└── app/                                   (主应用, packaging=jar, 依赖 common + 中间件 component-*)
+    └── shared/                            (跨层共享基础设施: 限流/幂等/操作日志/日志工具)
 ```
 
 ## Maven 依赖关系图
@@ -41,31 +39,25 @@ web-quick-start-light/                     (根 POM, packaging=pom)
 graph TD
     ROOT["web-quick-start-light<br/>根 POM (pom)"]
     COMMON["common<br/>异常体系"]
-    CLIENTS["clients<br/>聚合 POM (pom)"]
+    COMPONENTS["components<br/>聚合 POM (pom) — 中间件接入层"]
     APP["app<br/>Spring Boot 主应用 (jar)"]
 
     ROOT --> COMMON
-    ROOT --> CLIENTS
+    ROOT --> COMPONENTS
     ROOT --> APP
 
-    CLIENTS --> CACHE["client-cache"]
-    CLIENTS --> OSS["client-oss"]
-    CLIENTS --> EMAIL["client-email"]
-    CLIENTS --> SMS["client-sms"]
-    CLIENTS --> SEARCH["client-search"]
-    CLIENTS --> LOG["client-log"]
-    CLIENTS --> RATE["client-ratelimit"]
-    CLIENTS --> IDEM["client-idempotent"]
-    CLIENTS --> AUTH["client-auth"]
+    COMPONENTS --> CACHE["component-cache"]
+    COMPONENTS --> OSS["component-oss"]
+    COMPONENTS --> EMAIL["component-email"]
+    COMPONENTS --> SMS["component-sms"]
+    COMPONENTS --> SEARCH["component-search"]
+    COMPONENTS --> AUTH["component-auth"]
 
     CACHE --> COMMON
     OSS --> COMMON
     EMAIL --> COMMON
     SMS --> COMMON
     SEARCH --> COMMON
-    LOG --> COMMON
-    RATE --> COMMON
-    IDEM --> COMMON
     AUTH --> COMMON
 
     APP --> COMMON
@@ -74,13 +66,11 @@ graph TD
     APP --> EMAIL
     APP --> SMS
     APP --> SEARCH
-    APP --> LOG
-    APP --> RATE
-    APP --> IDEM
     APP --> AUTH
 ```
 
-> 箭头表示 `depends on`（A → B 表示 A 的 pom.xml 中声明了对 B 的依赖）。所有 client-* 模块仅依赖 common，不互相依赖。
+> 箭头表示 `depends on`（A → B 表示 A 的 pom.xml 中声明了对 B 的依赖）。所有 component-* 模块仅依赖 common，不互相依赖。components 模块只包含中间件接入（Template
+> Method 模式），应用层横切关注点（限流/幂等/操作日志/日志基础设施）集成在 app 模块的 `shared/` 包下。
 
 ## 四层架构
 
@@ -134,6 +124,90 @@ flowchart TD
 | Service | `service` | 核心业务逻辑、事务管理 | Command → Entity |
 | Repository | `repository` | 数据访问、MyBatis-Plus Mapper、Entity↔DO 转换 | Entity → DO |
 
+### app 内部包组织
+
+app 模块内部采用 **技术分层 → 业务分层** 的两级分包模式。第一级按技术职责划分，第二级按业务领域划分。
+
+```
+org.smm.archetype/
+│
+│  ═══ 四层业务流转（第一级：技术层，第二级：业务子包）═══
+│
+├── controller/
+│   ├── global/                  ← Web 层横切（异常处理、过滤器）
+│   ├── auth/                    ← 认证业务
+│   ├── system/                  ← 系统配置业务
+│   └── operationlog/            ← 操作日志业务（查询接口）
+├── facade/
+│   ├── system/
+│   └── operationlog/
+├── service/
+│   ├── auth/
+│   ├── system/
+│   └── operationlog/
+├── repository/
+│   ├── user/
+│   ├── system/
+│   └── operationlog/
+├── entity/
+│   ├── api/                     ← 通用基类（BaseResult、BasePageResult 等）
+│   ├── user/
+│   ├── system/
+│   └── operationlog/
+│
+│  ═══ 跨层共享基础设施 ═══
+│
+├── shared/                      ← 被多层共享的基础设施
+│   ├── aspect/                  ← AOP 切面（按业务子包）
+│   │   ├── ratelimit/           ← 限流（@RateLimit + RateLimitAspect + 辅助类）
+│   │   ├── idempotent/          ← 幂等（@Idempotent + IdempotentAspect + 辅助类）
+│   │   └── operationlog/        ← 操作日志（@BusinessLog + LogAspect + OperationLogWriter 等）
+│   └── util/                    ← 通用工具类
+│       ├── context/             ← ScopedThreadContext / ContextRunnable / ContextCallable
+│       ├── dal/                 ← MyMetaObjectHandler 等 DAL 横切
+│       └── logging/             ← 日志基础设施（慢查询拦截、采样、脱敏、Marker）
+│
+│  ═══ 配置与生成器 ═══
+│
+├── config/                      ← Spring @Configuration + @ConfigurationProperties
+│   └── properties/              ← Properties 类
+├── generated/                   ← 代码生成器产物（禁止手动修改）
+│   ├── mapper/
+│   └── entity/
+│
+└── WebStartLightApplication.java
+```
+
+#### 分包原则
+
+| 区域     | 第一级                                       | 第二级                           | 说明                             |
+|--------|-------------------------------------------|-------------------------------|--------------------------------|
+| 业务流转   | 技术层（controller/facade/service/repository） | 业务子包（system/operationlog/...） | 四层架构严格单向依赖                     |
+| 共享基础设施 | `shared`                                  | 职责子包（aspect/util）            | 被多层共享，不参与四层流转                  |
+| 配置     | `config`                                  | 无（扁平）                         | @Configuration 类 + properties/ |
+| 生成器    | `generated`                               | 按类型（mapper/entity）            | 禁止手动修改                         |
+
+#### shared 层定位
+
+`shared` 放置被多个技术层共享使用的横切关注点和基础设施，不参与四层业务流转。
+
+| 子包                    | 职责          | 典型内容                          |
+|-----------------------|-------------|-------------------------------|
+| `shared/aspect/`      | AOP 切面及配套组件 | 注解定义、切面类、Key 解析器、工厂类、枚举       |
+| `shared/util/`        | 通用工具        | 线程上下文传递、DAL 横切处理、序列化、IP 工具、日志工具等 |
+| `shared/util/logging/` | 日志基础设施（util 子包） | 慢查询拦截器、日志采样过滤器、脱敏工具、Marker 常量 |
+
+> **注意**：`shared/aspect/` 下每个业务子包（如 `ratelimit/`）是自包含的，包含注解、切面、辅助类等该横切功能所需的全部组件。不需要跨子包引用。
+
+#### config 层定位
+
+| 规范                                  | 说明                                      |
+|-------------------------------------|-----------------------------------------|
+| 使用 `@Configuration`                 | 不使用 `@AutoConfiguration`（那是 starter 用的） |
+| 使用 `@EnableConfigurationProperties` | 管理配置属性类                                 |
+| 使用 `@Bean` 方法                       | 直接创建并注册 Bean                            |
+| Properties 放 `config/properties/`   | 统一管理 `@ConfigurationProperties` 类       |
+
 ## 层间依赖规则
 
 ### 允许的依赖
@@ -182,15 +256,15 @@ flowchart TD
 
 | 方案 | 优点 | 缺点 |
 |------|------|------|
-| 单模块 | 结构简单，IDE 导入快 | 所有代码耦合在一起，无法独立复用客户端模块；修改一个客户端可能导致全量重新编译 |
-| 多模块（当前选择） | 模块间物理隔离，客户端可独立引用；Maven 依赖传递清晰 | IDE 导入略慢；需要维护 parent POM 依赖版本 |
+| 单模块 | 结构简单，IDE 导入快 | 所有代码耦合在一起，无法独立复用组件模块；修改一个组件可能导致全量重新编译 |
+| 多模块（当前选择） | 模块间物理隔离，组件可独立引用；Maven 依赖传递清晰 | IDE 导入略慢；需要维护 parent POM 依赖版本 |
 
 **选择多模块的理由**：
 
-1. **客户端可独立复用**：其他项目可以只引入 `client-cache` 而不引入整个骨架，Maven 依赖传递自动处理
-2. **编译隔离**：修改 `client-sms` 不会触发 `app` 模块重新编译，提升开发效率
+1. **组件可独立复用**：其他项目可以只引入 `component-cache` 而不引入整个骨架，Maven 依赖传递自动处理
+2. **编译隔离**：修改 `component-sms` 不会触发 `app` 模块重新编译，提升开发效率
 3. **依赖范围控制**：`common` 模块不依赖 Spring，确保异常体系等基础能力可以在任何环境下使用
-4. **团队协作友好**：不同开发者可以独立修改不同客户端模块，减少合并冲突
+4. **团队协作友好**：不同开发者可以独立修改不同组件模块，减少合并冲突
 
 ### 为什么 common 模块不依赖 Spring Framework
 
@@ -214,6 +288,8 @@ flowchart TD
 
 ## 变更历史
 
-| 日期 | 变更内容 |
-|------|---------|
-| 2026-04-14 | 初始创建 |
+| 日期         | 变更内容                                                                                                              |
+|------------|-------------------------------------------------------------------------------------------------------------------|
+| 2026-04-14 | 初始创建                                                                                                              |
+| 2026-04-14 | 新增「app 内部包组织」章节；components 模块精简为纯中间件接入层（移除 component-log/component-ratelimit/component-idempotent）；横切关注点纳入 app 模块 `shared/` 包 |
+| 2026-04-15 | `shared/logging/` 合并到 `shared/util/logging/`，统一 shared 下 aspect/util 两个维度 |

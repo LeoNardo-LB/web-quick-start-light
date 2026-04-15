@@ -3,7 +3,7 @@ package org.smm.archetype.facade.system;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-import org.smm.archetype.entity.api.BasePageResult;
+import org.smm.archetype.entity.base.BasePageResult;
 import org.smm.archetype.entity.system.SystemConfig;
 import org.smm.archetype.entity.system.SystemConfigPageQuery;
 import org.smm.archetype.exception.BizException;

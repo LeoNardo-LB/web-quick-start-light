@@ -13,7 +13,7 @@
 
 ## 概述
 
-项目中使用的两种核心设计模式：**Template Method**（模板方法）和**条件装配**（Conditional Configuration）。Template Method 用于所有技术客户端的抽象基类，统一参数校验、日志和异常处理逻辑；条件装配基于 Spring Boot 的 `@AutoConfiguration` 体系，按需加载客户端 Bean，部分模块提供 NoOp 默认实现确保无外部依赖时也能正常启动。
+项目中使用的两种核心设计模式：**Template Method**（模板方法）和**条件装配**（Conditional Configuration）。Template Method 用于所有技术组件的抽象基类，统一参数校验、日志和异常处理逻辑；条件装配基于 Spring Boot 的 `@AutoConfiguration` 体系，按需加载组件 Bean，部分模块提供 NoOp 默认实现确保无外部依赖时也能正常启动。
 
 ## Template Method 模式
 
@@ -21,7 +21,7 @@
 
 ```mermaid
 classDiagram
-    class CacheClient {
+    class CacheComponent {
         <<interface>>
         +get(key) T
         +put(key, value) void
@@ -29,7 +29,7 @@ classDiagram
         +hasKey(key) Boolean
     }
 
-    class AbstractCacheClient {
+    class AbstractCacheComponent {
         <<abstract>>
         +get(key) T ★final
         +put(key, value) void ★final
@@ -43,7 +43,7 @@ classDiagram
         #getDefaultDuration() Duration
     }
 
-    class CaffeineCacheClient {
+    class CaffeineCacheComponent {
         -Caffeine Cache 实例
         #doGet(key) T
         #doPut(key, value, duration) void
@@ -52,10 +52,10 @@ classDiagram
         #getDefaultDuration() Duration
     }
 
-    CacheClient <|.. AbstractCacheClient
-    AbstractCacheClient <|-- CaffeineCacheClient
+    CacheComponent <|.. AbstractCacheComponent
+    AbstractCacheComponent <|-- CaffeineCacheComponent
 
-    note for AbstractCacheClient "公开方法为 final\n参数校验 + 日志 + 异常处理\n子类实现 do* 扩展点"
+    note for AbstractCacheComponent "公开方法为 final\n参数校验 + 日志 + 异常处理\n子类实现 do* 扩展点"
 ```
 
 ### 设计思路
@@ -68,7 +68,7 @@ classDiagram
 
 ```
 ┌─────────────────────────────────────────┐
-│  AbstractXxxClient（final 公开方法）      │
+│  AbstractXxxComponent（final 公开方法）      │
 │                                         │
 │  1. 参数校验                              │
 │  2. 日志记录                              │
@@ -77,7 +77,7 @@ classDiagram
 └────────────────┬────────────────────────┘
                  │ extends
 ┌────────────────▼────────────────────────┐
-│  ConcreteXxxClient                      │
+│  ConcreteXxxComponent                      │
 │                                         │
 │  #doGet(...)     → 具体读取逻辑           │
 │  #doPut(...)     → 具体写入逻辑           │
@@ -85,24 +85,25 @@ classDiagram
 └─────────────────────────────────────────┘
 ```
 
-### 使用此模式的客户端列表
+### 使用此模式的组件列表
 
-| 客户端 | 接口 | 抽象基类 | 实现类 | 方法数 |
+| 组件 | 接口 | 抽象基类 | 实现类 | 方法数 |
 |--------|------|---------|--------|--------|
-| client-cache | `CacheClient` | `AbstractCacheClient` | `CaffeineCacheClient` | 10 |
-| client-oss | `OssClient` | `AbstractOssClient` | `LocalOssClient` | 7 |
-| client-email | `EmailClient` | `AbstractEmailClient` | `NoOpEmailClient` | 3 |
-| client-sms | `SmsClient` | `AbstractSmsClient` | `NoOpSmsClient` | 3 |
-| client-search | `SearchClient` | `AbstractSearchClient` | `SimpleSearchClient` | 15 |
-| client-auth | `AuthClient` | `AbstractAuthClient` | `SaTokenAuthClient` / `NoOpAuthClient` | 5 |
+| component-cache | `CacheComponent` | `AbstractCacheComponent` | `CaffeineCacheComponent` | 10 |
+| component-oss | `OssComponent` | `AbstractOssComponent` | `LocalOssComponent` | 7 |
+| component-email | `EmailComponent` | `AbstractEmailComponent` | `NoOpEmailComponent` | 3 |
+| component-sms | `SmsComponent` | `AbstractSmsComponent` | `NoOpSmsComponent` | 3 |
+| component-search | `SearchComponent` | `AbstractSearchComponent` | `SimpleSearchComponent` | 15 |
+| component-auth | `AuthComponent` | `AbstractAuthComponent` | `SaTokenAuthComponent` / `NoOpAuthComponent` | 5 |
 
-> 注：`client-ratelimit` 和 `client-idempotent` 采用 AOP 切面模式（`@RateLimit` + `RateLimitAspect`），不使用 Template Method。
+> 注：限流（`shared/aspect/ratelimit`）、幂等（`shared/aspect/idempotent`）和操作日志（`shared/aspect/operationlog`）采用 AOP 切面模式，集成在 app
+> 模块的 `shared/` 包下，不使用 Template Method。详见 [模块结构 - app 内部包组织](module-structure.md#app-内部包组织)。
 
 ## 条件装配模式
 
 ### 机制说明
 
-所有客户端模块使用 Spring Boot 的**自动配置**体系实现按需加载：
+所有组件模块使用 Spring Boot 的**自动配置**体系实现按需加载：
 
 ```
 @AutoConfiguration                    ← 声明为自动配置类
@@ -114,41 +115,37 @@ classDiagram
 
 ### 装配策略总览
 
-| 客户端 | ConditionalOnClass | ConditionalOnProperty | 默认启用 | NoOp 实现 | 模式 |
+| 组件 | ConditionalOnClass | ConditionalOnProperty | 默认启用 | NoOp 实现 | 模式 |
 |--------|-------------------|----------------------|---------|----------|------|
-| client-cache | `Caffeine.class` | `middleware.cache.enabled` | ✅ | ❌ | Template Method |
-| client-oss | - | `middleware.object-storage.enabled` | ✅ | ❌ | Template Method |
-| client-email | - | `middleware.email.enabled` | ❌ | ✅ `NoOpEmailClient` | Template Method |
-| client-sms | - | `middleware.sms.enabled` | ❌ | ✅ `NoOpSmsClient` | Template Method |
-| client-search | - | `middleware.search.enabled` | ✅ | ✅ `SimpleSearchClient`（内存） | Template Method |
-| client-log | `MeterRegistry.class` + `Aspect.class` | 无（Class 存在即加载） | ✅ | ❌ | AOP 切面 |
-| client-ratelimit | `Bucket.class` + `Aspect.class` | `middleware.ratelimit.enabled` | ✅ | ❌ | AOP 切面 |
-| client-idempotent | `Caffeine.class` + `Aspect.class` | `middleware.idempotent.enabled` | ❌ | ❌ | AOP 切面 |
-| client-auth | Bean 级别条件 | `middleware.auth.enabled` | ✅ | ✅ `NoOpAuthClient` | Template Method |
+| component-cache | `Caffeine.class` | `component.cache.enabled` | ✅ | ❌ | Template Method |
+| component-oss | - | `component.oss.enabled` | ✅ | ❌ | Template Method |
+| component-email | - | `component.email.enabled` | ❌ | ✅ `NoOpEmailComponent` | Template Method |
+| component-sms | - | `component.sms.enabled` | ❌ | ✅ `NoOpSmsComponent` | Template Method |
+| component-search | - | `component.search.enabled` | ✅ | ✅ `SimpleSearchComponent`（内存） | Template Method |
+| component-auth | Bean 级别条件 | `component.auth.enabled` | ✅ | ✅ `NoOpAuthComponent` | Template Method |
+
+> **注意**：`component-log`、`component-ratelimit`、`component-idempotent` 已迁移至 `app/.../shared/aspect/` 下，不再作为独立组件模块，故不在此表中列出。
 
 ### 装配策略分类
 
 ```mermaid
 graph TD
     subgraph "默认启用（开箱即用）"
-        CACHE["client-cache<br/>Caffeine + matchIfMissing=true"]
-        OSS["client-oss<br/>matchIfMissing=true"]
-        SEARCH["client-search<br/>SimpleSearchClient 内存实现"]
-        LOG["client-log<br/>Micrometer + AspectJ"]
-        RATE["client-ratelimit<br/>Bucket4j + matchIfMissing=true"]
-        AUTH["client-auth<br/>Sa-Token / NoOp 双分支"]
+        CACHE["component-cache<br/>Caffeine + matchIfMissing=true"]
+        OSS["component-oss<br/>matchIfMissing=true"]
+        SEARCH["component-search<br/>SimpleSearchComponent 内存实现"]
+        AUTH["component-auth<br/>Sa-Token / NoOp 双分支"]
     end
 
     subgraph "默认禁用（需显式启用）"
-        EMAIL["client-email<br/>middleware.email.enabled=true"]
-        SMS["client-sms<br/>middleware.sms.enabled=true"]
-        IDEM["client-idempotent<br/>middleware.idempotent.enabled=true"]
+        EMAIL["component-email<br/>component.email.enabled=true"]
+        SMS["component-sms<br/>component.sms.enabled=true"]
     end
 
     subgraph "NoOp 兜底（无外部依赖也能启动）"
-        EMAIL_NOOP["NoOpEmailClient"]
-        SMS_NOOP["NoOpSmsClient"]
-        AUTH_NOOP["NoOpAuthClient"]
+        EMAIL_NOOP["NoOpEmailComponent"]
+        SMS_NOOP["NoOpSmsComponent"]
+        AUTH_NOOP["NoOpAuthComponent"]
     end
 
     EMAIL --> EMAIL_NOOP
@@ -156,15 +153,17 @@ graph TD
     AUTH --> AUTH_NOOP
 ```
 
+> **注意**：`component-log`、`component-ratelimit`、`component-idempotent` 已迁移至 `app/.../shared/aspect/` 下，不再作为独立组件模块参与条件装配。
+
 ## 代码示例
 
 ### Template Method 典型用法
 
-以 `AbstractCacheClient.get()` 为例，展示 Template Method 的骨架结构：
+以 `AbstractCacheComponent.get()` 为例，展示 Template Method 的骨架结构：
 
 ```java
 @Slf4j
-public abstract class AbstractCacheClient implements CacheClient {
+public abstract class AbstractCacheComponent implements CacheComponent {
 
     /**
      * 公开方法 — final 修饰，子类不可覆写。
@@ -207,27 +206,27 @@ public abstract class AbstractCacheClient implements CacheClient {
 ```java
 @AutoConfiguration
 @EnableConfigurationProperties(AuthProperties.class)
-@ConditionalOnProperty(prefix = "middleware.auth", name = "enabled",
+@ConditionalOnProperty(prefix = "component.auth", name = "enabled",
         havingValue = "true", matchIfMissing = true)
 public class AuthAutoConfiguration {
 
     /**
-     * Sa-Token 在 classpath 时 → 注册 SaTokenAuthClient
+     * Sa-Token 在 classpath 时 → 注册 SaTokenAuthComponent
      */
     @Bean
     @ConditionalOnClass(name = "cn.dev33.satoken.stp.StpUtil")
-    @ConditionalOnMissingBean(AuthClient.class)
-    public AuthClient saTokenAuthClient() {
-        return new SaTokenAuthClient();
+    @ConditionalOnMissingBean(AuthComponent.class)
+    public AuthComponent saTokenAuthComponent() {
+        return new SaTokenAuthComponent();
     }
 
     /**
-     * 兜底 → 注册 NoOpAuthClient（无需任何外部依赖）
+     * 兜底 → 注册 NoOpAuthComponent（无需任何外部依赖）
      */
     @Bean
-    @ConditionalOnMissingBean(AuthClient.class)
-    public AuthClient noOpAuthClient() {
-        return new NoOpAuthClient();
+    @ConditionalOnMissingBean(AuthComponent.class)
+    public AuthComponent noOpAuthComponent() {
+        return new NoOpAuthComponent();
     }
 }
 ```
@@ -236,7 +235,7 @@ public class AuthAutoConfiguration {
 
 ### Template Method vs Strategy
 
-**驱动力**：技术客户端需要统一的校验/日志骨架，同时允许子类定制具体行为。
+**驱动力**：技术组件需要统一的校验/日志骨架，同时允许子类定制具体行为。
 
 **备选方案**：
 
@@ -247,14 +246,14 @@ public class AuthAutoConfiguration {
 
 **选择 Template Method 的理由**：
 
-1. **行为固定**：客户端实现在编译期已确定（如 `CaffeineCacheClient` 不会在运行时变成 `RedisCacheClient`），不需要运行时切换策略
+1. **行为固定**：组件实现在编译期已确定（如 `CaffeineCacheComponent` 不会在运行时变成 `RedisCacheComponent`），不需要运行时切换策略
 2. **横切关注点保障**：`final` 公开方法防止子类跳过参数校验和日志记录，保证了横切关注点的完整性
 3. **扩展点明确**：`do*` 抽象方法（如 `doGet`、`doPut`、`doDelete`）清晰界定了子类的职责边界，降低了子类犯错的概率
 4. **代码集中**：所有子类共用的参数校验、异常转换逻辑集中在抽象基类，避免重复
 
 ### 条件装配 vs 工厂模式
 
-**驱动力**：技术客户端需要根据 classpath 和配置条件自动装配，不存在对应依赖时不影响启动。
+**驱动力**：技术组件需要根据 classpath 和配置条件自动装配，不存在对应依赖时不影响启动。
 
 **备选方案**：
 
@@ -268,7 +267,7 @@ public class AuthAutoConfiguration {
 1. **框架原生**：Spring Boot 条件装配是框架原生能力，与 `@AutoConfiguration`、`spring.factories` / `AutoConfiguration.imports` 无缝集成
 2. **零侵入**：不需要额外的工厂类或手动 `if-else` 分支，自动配置类本身就是"工厂"
 3. **类路径感知**：`@ConditionalOnClass` 能在编译期就感知依赖是否存在，避免 `ClassNotFoundException`
-4. **NoOp 兜底**：`@ConditionalOnMissingBean` 保证始终有一个兜底 Bean，应用永远不会因缺少某客户端而启动失败
+4. **NoOp 兜底**：`@ConditionalOnMissingBean` 保证始终有一个兜底 Bean，应用永远不会因缺少某组件而启动失败
 
 ## 相关文档
 

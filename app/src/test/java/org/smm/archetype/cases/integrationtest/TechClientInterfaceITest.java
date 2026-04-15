@@ -2,9 +2,9 @@ package org.smm.archetype.cases.integrationtest;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.smm.archetype.client.cache.CacheClient;
-import org.smm.archetype.client.oss.OssClient;
-import org.smm.archetype.client.search.SearchClient;
+import org.smm.archetype.component.cache.CacheComponent;
+import org.smm.archetype.component.oss.OssComponent;
+import org.smm.archetype.component.search.SearchComponent;
 import org.smm.archetype.support.IntegrationTestBase;
 
 import java.time.Duration;
@@ -23,9 +23,9 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 class TechClientInterfaceITest extends IntegrationTestBase {
 
     @Test
-    @DisplayName("CacheClient Bean 已注册（CaffeineCacheClient）")
+    @DisplayName("CacheComponent Bean 已注册（CaffeineCacheComponent）")
     void should_cacheClientBeanBeAvailable() {
-        CacheClient client = applicationContext.getBean(CacheClient.class);
+        CacheComponent client = applicationContext.getBean(CacheComponent.class);
         assertThat(client).isNotNull();
         assertThat(client.getClass().getSimpleName()).contains("Caffeine");
 
@@ -33,17 +33,17 @@ class TechClientInterfaceITest extends IntegrationTestBase {
     }
 
     @Test
-    @DisplayName("SearchClient Bean 已注册（SimpleSearchClient）")
+    @DisplayName("SearchComponent Bean 已注册（SimpleSearchComponent）")
     void should_searchClientBeanBeAvailable() {
-        SearchClient client = applicationContext.getBean(SearchClient.class);
+        SearchComponent client = applicationContext.getBean(SearchComponent.class);
         assertThat(client).isNotNull();
         assertThat(client.getClass().getSimpleName()).contains("Simple");
     }
 
     @Test
-    @DisplayName("OssClient Bean 已注册（LocalOssClient）")
+    @DisplayName("OssComponent Bean 已注册（LocalOssComponent）")
     void should_ossClientBeanBeAvailable() {
-        OssClient client = applicationContext.getBean(OssClient.class);
+        OssComponent client = applicationContext.getBean(OssComponent.class);
         assertThat(client).isNotNull();
         assertThat(client.getClass().getSimpleName()).contains("Local");
     }

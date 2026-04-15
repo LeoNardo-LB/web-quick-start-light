@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import java.time.Instant;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -39,7 +41,7 @@ class OperationLogControllerITest extends IntegrationTestBase {
             logDO.setExecutionTime(100L * i);
             logDO.setIp("127.0.0.1");
             logDO.setStatus("SUCCESS");
-            logDO.setCreateTime("2025-01-" + String.format("%02d", i) + "T10:00:00Z");
+            logDO.setCreateTime(Instant.parse("2025-01-" + String.format("%02d", i) + "T10:00:00Z"));
             operationLogMapper.insert(logDO);
         }
     }
