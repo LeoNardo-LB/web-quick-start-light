@@ -1,4 +1,4 @@
-# 短信客户端（client-sms） — Contract 轨
+# 短信组件（component-sms） — Contract 轨
 
 > 代码变更时必须同步更新本文档
 
@@ -15,17 +15,17 @@
 
 ## 概述
 
-短信客户端（`client-sms`）提供统一的短信发送抽象接口，内置 `NoOpSmsClient` 无操作实现。采用 Template Method 模式，支持模板短信、指定服务商短信和批量短信三种发送方式。
+短信组件（`component-sms`）提供统一的短信发送抽象接口，内置 `NoOpSmsComponent` 无操作实现。采用 Template Method 模式，支持模板短信、指定服务商短信和批量短信三种发送方式。
 
 **核心特性：**
 
-- 统一的 `SmsClient` 接口，支持 3 种发送模式
+- 统一的 `SmsComponent` 接口，支持 3 种发送模式
 - **Template Method 模式**：抽象基类统一处理参数校验、异常转换与日志记录
 - **NoOp 默认实现**：不调用真实短信 SDK，仅记录日志并返回成功结果，适用于开发和测试环境
 - 支持 `ServiceProvider` 枚举指定服务商（ALIYUN / TENCENT / LOCAL / CUSTOM）
 - **条件装配**：默认不启用（`enabled=false`），需显式配置开启
 
-**模块坐标：** `org.smm.archetype:client-sms`
+**模块坐标：** `org.smm.archetype:component-sms`
 
 ## 业务场景
 
@@ -43,21 +43,21 @@
 
 ```mermaid
 classDiagram
-    class SmsClient {
+    class SmsComponent {
         <<interface>>
         +sendSms(request: SmsRequest): SmsResult
         +sendSms(provider: ServiceProvider, request: SmsRequest): SmsResult
         +sendBatchSms(request: SmsRequest): SmsResult
     }
 
-    class AbstractSmsClient {
+    class AbstractSmsComponent {
         <<abstract>>
         #doSendSms(request: SmsRequest): SmsResult*
         #doSendSmsWithProvider(provider: ServiceProvider, request: SmsRequest): SmsResult*
         #doSendBatchSms(request: SmsRequest): SmsResult*
     }
 
-    class NoOpSmsClient {
+    class NoOpSmsComponent {
         +doSendSms(): SmsResult
         +doSendSmsWithProvider(): SmsResult
         +doSendBatchSms(): SmsResult
@@ -94,22 +94,22 @@ classDiagram
         +signName: String
     }
 
-    SmsClient <|.. AbstractSmsClient : implements
-    AbstractSmsClient <|-- NoOpSmsClient : extends
-    SmsClient ..> SmsRequest : 参数
-    SmsClient ..> SmsResult : 返回值
-    SmsClient ..> ServiceProvider : 参数
+    SmsComponent <|.. AbstractSmsComponent : implements
+    AbstractSmsComponent <|-- NoOpSmsComponent : extends
+    SmsComponent ..> SmsRequest : 参数
+    SmsComponent ..> SmsResult : 返回值
+    SmsComponent ..> ServiceProvider : 参数
     SmsAutoConfiguration ..> SmsProperties : @EnableConfigurationProperties
-    SmsAutoConfiguration ..> NoOpSmsClient : @Bean
+    SmsAutoConfiguration ..> NoOpSmsComponent : @Bean
 ```
 
 ### 关键类说明
 
 | 类名 | 职责 | 关键方法 |
 |------|------|----------|
-| `SmsClient` | 短信发送接口，定义 3 个方法 | `sendSms`, `sendSms(provider)`, `sendBatchSms` |
-| `AbstractSmsClient` | 抽象基类，Template Method 模式骨架 | `final` 公开方法 + `do*` 扩展点 |
-| `NoOpSmsClient` | 无操作实现，仅记录日志 | 适用于开发和测试环境 |
+| `SmsComponent` | 短信发送接口，定义 3 个方法 | `sendSms`, `sendSms(provider)`, `sendBatchSms` |
+| `AbstractSmsComponent` | 抽象基类，Template Method 模式骨架 | `final` 公开方法 + `do*` 扩展点 |
+| `NoOpSmsComponent` | 无操作实现，仅记录日志 | 适用于开发和测试环境 |
 | `SmsRequest` | 短信请求 record | `phoneNumber`, `templateId`, `templateParams` |
 | `SmsResult` | 短信发送结果 record | 静态工厂 `success()` / `fail()` |
 | `ServiceProvider` | 服务商枚举 | `ALIYUN`, `TENCENT`, `LOCAL`, `CUSTOM` |
@@ -117,24 +117,24 @@ classDiagram
 
 ### Template Method 模式
 
-本客户端采用 Template Method 模式实现统一的校验/日志骨架。公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点。详见 [设计模式](../architecture/design-patterns.md)。
+本组件采用 Template Method 模式实现统一的校验/日志骨架。公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点。详见 [设计模式](../architecture/design-patterns.md)。
 
 ### 条件装配
 
 ```yaml
 # 自动装配条件
 @ConditionalOnProperty(                                 # 配置开关
-  prefix = "middleware.sms",
+  prefix = "component.sms",
   name = "enabled",
   havingValue = "true"                                  # 默认 false，不自动注册
 )
 ```
 
-> **重要**：短信客户端默认 **不启用**，需在配置文件中显式设置 `middleware.sms.enabled=true`。
+> **重要**：短信组件默认 **不启用**，需在配置文件中显式设置 `component.sms.enabled=true`。
 
 ## API 参考
 
-### SmsClient 接口方法（3 个）
+### SmsComponent 接口方法（3 个）
 
 | 方法 | 参数 | 返回值 | 说明 |
 |------|------|--------|------|
@@ -173,11 +173,11 @@ classDiagram
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `middleware.sms.enabled` | `boolean` | `false` | 是否启用短信客户端（需显式开启） |
-| `middleware.sms.provider` | `String` | `null` | 短信服务商标识 |
-| `middleware.sms.access-key-id` | `String` | `null` | AccessKey ID |
-| `middleware.sms.access-key-secret` | `String` | `null` | AccessKey Secret |
-| `middleware.sms.sign-name` | `String` | `null` | 短信签名 |
+| `component.sms.enabled` | `boolean` | `false` | 是否启用短信组件（需显式开启） |
+| `component.sms.provider` | `String` | `null` | 短信服务商标识 |
+| `component.sms.access-key-id` | `String` | `null` | AccessKey ID |
+| `component.sms.access-key-secret` | `String` | `null` | AccessKey Secret |
+| `component.sms.sign-name` | `String` | `null` | 短信签名 |
 
 ## 使用指南
 
@@ -188,7 +188,7 @@ classDiagram
 @Service
 public class AuthService {
 
-    private final SmsClient smsClient;
+    private final SmsComponent smsClient;
 
     public void sendLoginCode(String phone, String code) {
         SmsRequest request = new SmsRequest(
@@ -247,8 +247,8 @@ middleware:
 
 | 文档 | 说明 |
 |------|------|
-| [Template Method 模式](../architecture/design-patterns.md) | `AbstractSmsClient` 基类的设计模式说明 |
-| [配置前缀规范](../conventions/configuration.md) | `middleware.sms.*` 配置前缀约定 |
+| [Template Method 模式](../architecture/design-patterns.md) | `AbstractSmsComponent` 基类的设计模式说明 |
+| [配置前缀规范](../conventions/configuration.md) | `component.sms.*` 配置前缀约定 |
 
 ### 下游消费者
 
@@ -261,8 +261,8 @@ middleware:
 
 | 文档 | 说明 |
 |------|------|
-| [系统全景](../architecture/system-overview.md) | C4 架构中 client-sms 的定位 |
-| [模块结构](../architecture/module-structure.md) | Maven 多模块结构中 client-sms 的依赖关系 |
+| [系统全景](../architecture/system-overview.md) | C4 架构中 component-sms 的定位 |
+| [模块结构](../architecture/module-structure.md) | Maven 多模块结构中 component-sms 的依赖关系 |
 
 ## 变更历史
 | 日期 | 变更内容 |

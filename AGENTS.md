@@ -79,18 +79,18 @@ scripts/md-sections <file> --line <行号>                  # 按行号定位章
 ```
 web-quick-start-light/                     (根 POM, packaging=pom)
 ├── common/                                (异常体系)
-├── clients/                               (parent POM, packaging=pom)
-│   ├── client-cache/                      (Caffeine 本地缓存)
-│   ├── client-oss/                        (本地对象存储)
-│   ├── client-email/                      (Jakarta Mail 邮件)
-│   ├── client-sms/                        (短信)
-│   ├── client-search/                     (内存搜索)
-│   └── client-auth/                       (认证客户端)
-└── app/                                   (主应用, 依赖 common + 中间件 client-*)
+├── components/                               (parent POM, packaging=pom)
+│   ├── component-cache/                      (Caffeine 本地缓存)
+│   ├── component-oss/                        (本地对象存储)
+│   ├── component-email/                      (Jakarta Mail 邮件)
+│   ├── component-sms/                        (短信)
+│   ├── component-search/                     (内存搜索)
+│   └── component-auth/                       (认证组件)
+└── app/                                   (主应用, 依赖 common + 组件 component-*)
 ```
 
 > **注意**：限流（ratelimit）、幂等（idempotent）、操作日志（operationlog）和日志基础设施（logging）属于应用层横切关注点，直接集成在 app 模块的
-`shared/` 包下，不作为独立 client 模块。详见 [模块结构 - app 内部包组织](docs/architecture/module-structure.md#app-内部包组织)。
+`shared/` 包下，不作为独立 component 模块。详见 [模块结构 - app 内部包组织](docs/architecture/module-structure.md#app-内部包组织)。
 
 ## 快速开始
 
@@ -164,14 +164,14 @@ mvn clean verify
 - 异步场景使用 `ContextRunnable` / `ContextCallable` 包装
 
 ### 8. 配置管理
-- 多环境：`application-dev.yaml` / `application-prod.yaml` / `application-optional.yaml`
+- 多环境：`application-dev.yaml` / `application-prod.yaml` / `application-component.yaml`
 - 配置类使用 `@ConfigurationProperties`，禁止 `@Value`
 
-### 9. 技术客户端规范（clients 模块）
-- 每个客户端模块独立 artifactId，依赖 `common`
-- **Template Method 模式**：`AbstractXxxClient` 的公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点
+### 9. 技术组件规范（components 模块）
+- 每个组件模块独立 artifactId，依赖 `common`
+- **Template Method 模式**：`AbstractXxxComponent` 的公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点
 - **条件装配**：`@AutoConfiguration` + `@ConditionalOnClass` + `@ConditionalOnProperty`
-- **Properties 前缀统一**：`middleware.*`（middleware.cache / middleware.object-storage / middleware.email / middleware.sms / middleware.search / middleware.ratelimit / middleware.auth），日志前缀为 `logging`（对接 Spring Boot 日志配置惯例）。幂等模块不再有独立 Properties（参数在 @Idempotent 注解上定义）
+- **Properties 前缀统一**：`component.*`（component.cache / component.oss / component.email / component.sms / component.search / component.ratelimit / component.auth），日志前缀为 `logging`（对接 Spring Boot 日志配置惯例）。幂等模块不再有独立 Properties（参数在 @Idempotent 注解上定义）
 
 ### 10. 时间类型规范
 - 所有时间存储与传输统一使用 `java.time.Instant`
@@ -197,7 +197,7 @@ mvn clean verify
 
 ### 15. 幂等规范
 - 使用 `@Idempotent` 注解标记需要幂等保护的接口
-- 基于 CacheClient 实现幂等 Key 存储（通过 TTL 过期机制）
+- 基于 CacheComponent 实现幂等 Key 存储（通过 TTL 过期机制）
 - 支持自定义幂等 Key 解析
 
 ### 16. 国际化规范（i18n）
@@ -248,14 +248,14 @@ mvn clean verify
 | ⛔ MUST | 认证模块 | [auth.md](docs/modules/auth.md) | Sa-Token 登录/注销/拦截 |
 | ⛔ MUST | 系统配置模块 | [system-config.md](docs/modules/system-config.md) | CRUD + 分页 + 值对象 |
 | ⚠️ SHOULD | 操作日志模块 | [operation-log.md](docs/modules/operation-log.md) | @BusinessLog + 分页查询 |
-| ⚠️ SHOULD | 缓存客户端 | [client-cache.md](docs/modules/client-cache.md) | Caffeine + 10 方法 |
-| ⚠️ SHOULD | 对象存储客户端 | [client-oss.md](docs/modules/client-oss.md) | 本地存储 + NIO |
-| 💡 MAY | 邮件客户端 | [client-email.md](docs/modules/client-email.md) | Jakarta Mail + NoOp |
-| 💡 MAY | 短信客户端 | [client-sms.md](docs/modules/client-sms.md) | 3 方法 + NoOp |
-| 💡 MAY | 搜索客户端 | [client-search.md](docs/modules/client-search.md) | 内存搜索 + 15 方法 |
-| ⚠️ SHOULD | 认证客户端 | [client-auth.md](docs/modules/client-auth.md) | AuthClient 接口 + Sa-Token |
+| ⚠️ SHOULD | 缓存组件 | [component-cache.md](docs/modules/component-cache.md) | Caffeine + 10 方法 |
+| ⚠️ SHOULD | 对象存储组件 | [component-oss.md](docs/modules/component-oss.md) | 本地存储 + NIO |
+| 💡 MAY | 邮件组件 | [component-email.md](docs/modules/component-email.md) | Jakarta Mail + NoOp |
+| 💡 MAY | 短信组件 | [component-sms.md](docs/modules/component-sms.md) | 3 方法 + NoOp |
+| 💡 MAY | 搜索组件 | [component-search.md](docs/modules/component-search.md) | 内存搜索 + 15 方法 |
+| ⚠️ SHOULD | 认证组件 | [component-auth.md](docs/modules/component-auth.md) | AuthComponent 接口 + Sa-Token |
 
-> **注意**：限流、幂等、操作日志横切关注点已移至 app 模块 `shared/` 包下，对应的旧文档（client-ratelimit.md、client-idempotent.md、client-log.md）已归档至 `docs/archived/`。
+> **注意**：限流、幂等、操作日志横切关注点已移至 app 模块 `shared/` 包下，对应的旧文档（component-ratelimit.md、component-idempotent.md、component-log.md）已归档至 `docs/archived/`。
 
 ### 文档系统说明
 

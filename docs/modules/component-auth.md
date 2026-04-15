@@ -1,4 +1,4 @@
-# 认证客户端（client-auth） — Contract 轨
+# 认证组件（component-auth） — Contract 轨
 
 > 代码变更时必须同步更新本文档
 
@@ -15,15 +15,15 @@
 
 ## 概述
 
-认证客户端（`client-auth`）提供统一的认证接口，基于 Template Method 模式实现可扩展的认证体系。默认使用 Sa-Token 框架实现会话管理，当 Sa-Token 不在 classpath 时自动降级为 NoOp 实现。
+认证组件（`component-auth`）提供统一的认证接口，基于 Template Method 模式实现可扩展的认证体系。默认使用 Sa-Token 框架实现会话管理，当 Sa-Token 不在 classpath 时自动降级为 NoOp 实现。
 
 核心特性：
 
-- **统一接口**：`AuthClient` 接口定义 login/logout/getCurrentUserId/isLogin/checkLogin 五个标准操作
-- **Template Method 模式**：`AbstractAuthClient` 公开方法为 `final`，子类实现 `do*` 扩展点
-- **条件装配**：Sa-Token 存在时注册 `SaTokenAuthClient`，否则注册 `NoOpAuthClient`
+- **统一接口**：`AuthComponent` 接口定义 login/logout/getCurrentUserId/isLogin/checkLogin 五个标准操作
+- **Template Method 模式**：`AbstractAuthComponent` 公开方法为 `final`，子类实现 `do*` 扩展点
+- **条件装配**：Sa-Token 存在时注册 `SaTokenAuthComponent`，否则注册 `NoOpAuthComponent`
 - **路由拦截**：`AuthInterceptorConfigurer` 基于 Sa-Token SaInterceptor 自动配置 Web 拦截器
-- **路径排除**：通过 `middleware.auth.exclude-paths` 配置不需要认证的路径
+- **路径排除**：通过 `component.auth.exclude-paths` 配置不需要认证的路径
 
 ## 业务场景
 
@@ -37,19 +37,19 @@
 
 ### 3. 上下文填充
 
-app 模块的 `ContextFillFilter` 注入 `AuthClient`，在请求入口处调用 `getCurrentUserId()` 获取当前用户 ID 并填充到 `ScopedThreadContext`，供下游 Service 层使用。
+app 模块的 `ContextFillFilter` 注入 `AuthComponent`，在请求入口处调用 `getCurrentUserId()` 获取当前用户 ID 并填充到 `ScopedThreadContext`，供下游 Service 层使用。
 
 ### 4. 开发/测试降级
 
-当 Sa-Token 不在 classpath 时（如纯单元测试场景），自动注册 `NoOpAuthClient`，`isLogin` 始终返回 `true`，避免认证逻辑阻塞开发和测试。
+当 Sa-Token 不在 classpath 时（如纯单元测试场景），自动注册 `NoOpAuthComponent`，`isLogin` 始终返回 `true`，避免认证逻辑阻塞开发和测试。
 
 ## 技术设计
 
-### AuthClient 接口继承体系
+### AuthComponent 接口继承体系
 
 ```mermaid
 classDiagram
-    class AuthClient {
+    class AuthComponent {
         <<interface>>
         +login(userId: Object) String
         +logout() void
@@ -58,7 +58,7 @@ classDiagram
         +checkLogin() void
     }
 
-    class AbstractAuthClient {
+    class AbstractAuthComponent {
         <<abstract>>
         +login(userId: Object)$ String
         +logout()$ void
@@ -71,14 +71,14 @@ classDiagram
         #doIsLogin()* boolean
     }
 
-    class SaTokenAuthClient {
+    class SaTokenAuthComponent {
         #doLogin(userId: Object) String
         #doLogout() void
         #doGetCurrentUserId() String
         #doIsLogin() boolean
     }
 
-    class NoOpAuthClient {
+    class NoOpAuthComponent {
         #doLogin(userId: Object) String
         #doLogout() void
         #doGetCurrentUserId() String
@@ -95,22 +95,22 @@ classDiagram
         -excludePaths: List~String~
     }
 
-    AuthClient <|.. AbstractAuthClient
-    AbstractAuthClient <|-- SaTokenAuthClient
-    AbstractAuthClient <|-- NoOpAuthClient
+    AuthComponent <|.. AbstractAuthComponent
+    AbstractAuthComponent <|-- SaTokenAuthComponent
+    AbstractAuthComponent <|-- NoOpAuthComponent
     AuthInterceptorConfigurer --> AuthProperties
-    AuthInterceptorConfigurer ..> AuthClient : 使用 SaInterceptor
+    AuthInterceptorConfigurer ..> AuthComponent : 使用 SaInterceptor
 ```
 
 ### 条件装配流程
 
 ```mermaid
 graph TD
-    A["AuthAutoConfiguration"] --> B{"middleware.auth.enabled=true?"}
+    A["AuthAutoConfiguration"] --> B{"component.auth.enabled=true?"}
     B -->|否| C[不注册任何 Bean]
     B -->|是| D{"Sa-Token 在 classpath?"}
-    D -->|是| E["注册 SaTokenAuthClient"]
-    D -->|否| F["注册 NoOpAuthClient"]
+    D -->|是| E["注册 SaTokenAuthComponent"]
+    D -->|否| F["注册 NoOpAuthComponent"]
 
     E --> G["AuthInterceptorConfigurer"]
     G --> H["SaInterceptor 拦截 /**"]
@@ -125,13 +125,13 @@ sequenceDiagram
     participant Browser as 浏览器
     participant Filter as ContextFillFilter
     participant Interceptor as SaInterceptor
-    participant AuthClient as AuthClient
+    participant AuthComponent as AuthComponent
     participant Context as ScopedThreadContext
     participant Controller as Controller
 
     Browser->>Filter: HTTP 请求（携带 Token）
-    Filter->>AuthClient: getCurrentUserId()
-    AuthClient-->>Filter: userId（或 null）
+    Filter->>AuthComponent: getCurrentUserId()
+    AuthComponent-->>Filter: userId（或 null）
     Filter->>Context: setUserId(userId)
     Filter->>Interceptor: 放行
 
@@ -150,21 +150,21 @@ sequenceDiagram
 
 ## API 参考
 
-### AuthClient 接口
+### AuthComponent 接口
 
-> 包路径：`org.smm.archetype.client.auth.AuthClient`
+> 包路径：`org.smm.archetype.component.auth.AuthComponent`
 
 | 方法 | 签名 | 返回值 | 说明 |
 |------|------|--------|------|
-| `login` | `String login(Object userId)` | `String`（token 值） | 登录，userId 为 null 时 AbstractAuthClient 抛出 BizException |
+| `login` | `String login(Object userId)` | `String`（token 值） | 登录，userId 为 null 时 AbstractAuthComponent 抛出 BizException |
 | `logout` | `void logout()` | `void` | 注销当前会话 |
 | `getCurrentUserId` | `String getCurrentUserId()` | `String`（用户 ID），未登录返回 `null` | 获取当前登录用户 ID |
 | `isLogin` | `boolean isLogin()` | `boolean` | 判断当前是否已登录 |
 | `checkLogin` | `void checkLogin()` | `void` | 校验登录状态，未登录抛出 `BizException(AUTH_UNAUTHORIZED)` |
 
-### AbstractAuthClient 抽象基类
+### AbstractAuthComponent 抽象基类
 
-> 包路径：`org.smm.archetype.client.auth.AbstractAuthClient`
+> 包路径：`org.smm.archetype.component.auth.AbstractAuthComponent`
 
 公开方法均为 `final`，完成参数校验与异常处理。子类实现以下 `do*` 扩展点：
 
@@ -175,9 +175,9 @@ sequenceDiagram
 | `doGetCurrentUserId` | `protected abstract String doGetCurrentUserId()` | 获取当前用户 ID |
 | `doIsLogin` | `protected abstract boolean doIsLogin()` | 判断是否已登录 |
 
-### SaTokenAuthClient 实现
+### SaTokenAuthComponent 实现
 
-> 包路径：`org.smm.archetype.client.auth.SaTokenAuthClient`
+> 包路径：`org.smm.archetype.component.auth.SaTokenAuthComponent`
 
 基于 Sa-Token `StpUtil` 实现：
 - `doLogin` → `StpUtil.login(userId)` + `StpUtil.getTokenValue()`
@@ -185,9 +185,9 @@ sequenceDiagram
 - `doGetCurrentUserId` → `StpUtil.getLoginIdDefaultNull()`（返回 String，未登录返回 null）
 - `doIsLogin` → `StpUtil.isLogin()`
 
-### NoOpAuthClient 实现
+### NoOpAuthComponent 实现
 
-> 包路径：`org.smm.archetype.client.auth.NoOpAuthClient`
+> 包路径：`org.smm.archetype.component.auth.NoOpAuthComponent`
 
 空操作实现，适用于 Sa-Token 不在 classpath 或认证功能被禁用的场景：
 - `doLogin` → 返回 `null`
@@ -197,7 +197,7 @@ sequenceDiagram
 
 ### AuthInterceptorConfigurer
 
-> 包路径：`org.smm.archetype.client.auth.AuthInterceptorConfigurer`
+> 包路径：`org.smm.archetype.component.auth.AuthInterceptorConfigurer`
 
 实现 `WebMvcConfigurer`，注册 Sa-Token 拦截器：
 - 拦截路径：`/**`
@@ -206,12 +206,12 @@ sequenceDiagram
 
 ## 配置参考
 
-> 配置前缀：`middleware.auth`
+> 配置前缀：`component.auth`
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `middleware.auth.enabled` | `boolean` | `true` | 是否启用认证功能 |
-| `middleware.auth.exclude-paths` | `List<String>` | `[]` | 不需要认证的路径列表（Ant 风格匹配） |
+| `component.auth.enabled` | `boolean` | `true` | 是否启用认证功能 |
+| `component.auth.exclude-paths` | `List<String>` | `[]` | 不需要认证的路径列表（Ant 风格匹配） |
 
 ### 配置示例
 
@@ -229,16 +229,16 @@ middleware:
 
 ## 使用指南
 
-### 1. 在 Facade/Service 中使用 AuthClient
+### 1. 在 Facade/Service 中使用 AuthComponent
 
 ```java
-import org.smm.archetype.client.auth.AuthClient;
+import org.smm.archetype.component.auth.AuthComponent;
 
 @Service
 @RequiredArgsConstructor
 public class LoginFacadeImpl implements LoginFacade {
 
-    private final AuthClient authClient;
+    private final AuthComponent authClient;
 
     @Override
     public LoginResult login(LoginRequest request) {
@@ -263,14 +263,14 @@ public class LoginFacadeImpl implements LoginFacade {
 }
 ```
 
-### 2. 在 ContextFillFilter 中使用 AuthClient
+### 2. 在 ContextFillFilter 中使用 AuthComponent
 
 ```java
 @Component
 @RequiredArgsConstructor
 public class ContextFillFilter extends OncePerRequestFilter {
 
-    private final AuthClient authClient;
+    private final AuthComponent authClient;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -312,18 +312,18 @@ middleware:
 关闭后：
 - `AuthAutoConfiguration` 不注册任何 Bean
 - `AuthInterceptorConfigurer` 不注册拦截器
-- 如果代码中直接注入 `AuthClient`，需自行提供 Bean 或使用 `@ConditionalOnBean` 保护
+- 如果代码中直接注入 `AuthComponent`，需自行提供 Bean 或使用 `@ConditionalOnBean` 保护
 
 ### 5. 自动配置条件
 
-认证客户端自动装配逻辑：
+认证组件自动装配逻辑：
 
 | 条件 | 注册的 Bean | 说明 |
 |------|-------------|------|
-| `middleware.auth.enabled=true` + Sa-Token 在 classpath | `SaTokenAuthClient` | 正式认证 |
-| `middleware.auth.enabled=true` + Sa-Token 不在 classpath | `NoOpAuthClient` | 兜底空操作 |
-| `middleware.auth.enabled=true` + Sa-Token 在 classpath | `AuthInterceptorConfigurer` | 路由拦截器 |
-| `middleware.auth.enabled=false` | 无 | 认证功能完全关闭 |
+| `component.auth.enabled=true` + Sa-Token 在 classpath | `SaTokenAuthComponent` | 正式认证 |
+| `component.auth.enabled=true` + Sa-Token 不在 classpath | `NoOpAuthComponent` | 兜底空操作 |
+| `component.auth.enabled=true` + Sa-Token 在 classpath | `AuthInterceptorConfigurer` | 路由拦截器 |
+| `component.auth.enabled=false` | 无 | 认证功能完全关闭 |
 
 > **注意**：`AuthInterceptorConfigurer` 使用 `@ConditionalOnClass(name = "cn.dev33.satoken.stp.StpUtil")` + `@ConditionalOnProperty` 双重条件，仅在 Sa-Token 存在且认证启用时注册拦截器。
 
@@ -333,19 +333,19 @@ middleware:
 
 | 文档 | 链接 | 关系 |
 |------|------|------|
-| 设计模式 | [architecture/design-patterns.md](../architecture/design-patterns.md) | Template Method 模式的完整说明（`AbstractAuthClient` → `SaTokenAuthClient`/`NoOpAuthClient` 的设计模式） |
+| 设计模式 | [architecture/design-patterns.md](../architecture/design-patterns.md) | Template Method 模式的完整说明（`AbstractAuthComponent` → `SaTokenAuthComponent`/`NoOpAuthComponent` 的设计模式） |
 
 ### 下游消费者
 
 | 文档 | 链接 | 关系 |
 |------|------|------|
-| 认证模块 | [modules/auth.md](auth.md) | 使用 `AuthClient` 接口实现登录/注销/会话管理等认证业务逻辑 |
+| 认证模块 | [modules/auth.md](auth.md) | 使用 `AuthComponent` 接口实现登录/注销/会话管理等认证业务逻辑 |
 
 ### 设计依据
 
 | 文档 | 链接 | 关系 |
 |------|------|------|
-| 认证功能 Intent | [openspec/specs/auth/spec.md](../../openspec/specs/auth/spec.md) | `AuthClient` 接口 + Sa-Token 集成 + NoOp 降级 + 路由拦截的设计意图 |
+| 认证功能 Intent | [openspec/specs/auth/spec.md](../../openspec/specs/auth/spec.md) | `AuthComponent` 接口 + Sa-Token 集成 + NoOp 降级 + 路由拦截的设计意图 |
 
 ## 变更历史
 | 日期 | 变更内容 |

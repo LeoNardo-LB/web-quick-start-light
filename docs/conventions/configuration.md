@@ -31,7 +31,7 @@
 ```java
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "middleware.cache")
+@ConfigurationProperties(prefix = "component.cache")
 public class CacheProperties {
     private Integer initialCapacity = 1000;
     private Long maximumSize = 10000L;
@@ -43,7 +43,7 @@ public class CacheProperties {
 ```java
 @Component
 public class CacheService {
-    @Value("${middleware.cache.maximum-size:10000}")  // 禁止！
+    @Value("${component.cache.maximum-size:10000}")  // 禁止！
     private Long maximumSize;
 }
 ```
@@ -54,22 +54,22 @@ public class CacheService {
 
 **⛔ MUST**
 
-所有客户端模块的配置前缀必须遵循 `middleware.*` 统一命名规范。日志模块使用 Spring Boot 惯例前缀 `logging`。
+所有组件模块的配置前缀必须遵循 `component.*` 统一命名规范。日志模块使用 Spring Boot 惯例前缀 `logging`。
 
-**客户端模块配置映射表**（从源码验证）：
+**组件模块配置映射表**（从源码验证）：
 
-| 客户端 | 配置前缀 | Properties 类 | 源码位置 |
+| 组件 | 配置前缀 | Properties 类 | 源码位置 |
 |--------|----------|---------------|----------|
-| 缓存 | `middleware.cache` | `CacheProperties` | `client-cache/...cache/CacheProperties.java` |
-| 对象存储 | `middleware.object-storage` | `OssProperties` | `client-oss/...oss/OssProperties.java` |
-| 邮件 | `middleware.email` | `EmailProperties` | `client-email/...email/EmailProperties.java` |
-| 短信 | `middleware.sms` | `SmsProperties` | `client-sms/...sms/SmsProperties.java` |
-| 搜索 | `middleware.search` | `SearchProperties` | `client-search/...search/SearchProperties.java` |
+| 缓存 | `component.cache` | `CacheProperties` | `component-cache/...cache/CacheProperties.java` |
+| 对象存储 | `component.oss` | `OssProperties` | `component-oss/...oss/OssProperties.java` |
+| 邮件 | `component.email` | `EmailProperties` | `component-email/...email/EmailProperties.java` |
+| 短信 | `component.sms` | `SmsProperties` | `component-sms/...sms/SmsProperties.java` |
+| 搜索 | `component.search` | `SearchProperties` | `component-search/...search/SearchProperties.java` |
 | 日志 | `logging` ⚠️ | `LoggingProperties` | `app/.../config/properties/LoggingProperties.java` |
-| 限流 | `middleware.ratelimit` | `RateLimitProperties` | `app/.../config/properties/RateLimitProperties.java` |
-| 认证 | `middleware.auth` | `AuthProperties` | `client-auth/...auth/AuthProperties.java` |
+| 限流 | `component.ratelimit` | `RateLimitProperties` | `app/.../config/properties/RateLimitProperties.java` |
+| 认证 | `component.auth` | `AuthProperties` | `component-auth/...auth/AuthProperties.java` |
 
-> ⚠️ **日志模块特殊**：使用 `logging` 前缀而非 `middleware.logging`，因为日志配置对接 Spring Boot 日志配置惯例（`logging.level`、`logging.file` 等）。
+> ⚠️ **日志模块特殊**：使用 `logging` 前缀而非 `component.logging`，因为日志配置对接 Spring Boot 日志配置惯例（`logging.level`、`logging.file` 等）。
 
 **应用级配置映射表**（从源码验证）：
 
@@ -78,7 +78,7 @@ public class CacheService {
 | 应用信息 | `app` | `AppInfoProperties` | `app/.../config/properties/AppInfoProperties.java` |
 | 线程池 | `thread-pool` | `ThreadPoolProperties` | `app/.../config/properties/ThreadPoolProperties.java` |
 
-> **注意**：应用级配置使用独立前缀（`app`、`thread-pool`），不纳入 `middleware.*` 命名空间，因为它们属于应用自身的基础设施配置而非中间件客户端配置。
+> **注意**：应用级配置使用独立前缀（`app`、`thread-pool`），不纳入 `component.*` 命名空间，因为它们属于应用自身的基础设施配置而非组件配置。
 
 **配置示例**：
 
@@ -141,13 +141,13 @@ logging:
     rate: 0.1
 ```
 
-**新增客户端模块时**：
-1. 创建 `XxxProperties` 类，使用 `@ConfigurationProperties(prefix = "middleware.xxx")`
+**新增组件模块时**：
+1. 创建 `XxxProperties` 类，使用 `@ConfigurationProperties(prefix = "component.xxx")`
 2. 所有字段提供合理的默认值
 3. 使用 `@Getter` + `@Setter`（禁止 `@Data`）
 4. 配套编写 Properties 类的单元测试
 
-> **为什么**：统一的 `middleware.*` 前缀使得所有客户端配置在 YAML 文件中自然聚合在一起，便于运维人员快速定位和批量管理。如果不统一（如有人用 `cache.*`，有人用 `my.cache.*`），配置文件会变得散乱，且无法通过前缀快速识别哪些配置属于中间件层。日志模块使用 `logging` 前缀是唯一例外，因为需要与 Spring Boot 内置的日志配置体系（如 `logging.level`、`logging.file`）无缝对接。
+> **为什么**：统一的 `component.*` 前缀使得所有组件配置在 YAML 文件中自然聚合在一起，便于运维人员快速定位和批量管理。如果不统一（如有人用 `cache.*`，有人用 `my.cache.*`），配置文件会变得散乱，且无法通过前缀快速识别哪些配置属于组件层。日志模块使用 `logging` 前缀是唯一例外，因为需要与 Spring Boot 内置的日志配置体系（如 `logging.level`、`logging.file`）无缝对接。
 
 ### 规则 3: 多环境配置
 
@@ -160,7 +160,7 @@ logging:
 | `dev` | `application-dev.yaml` | 开发环境（默认） |
 | `prod` | `application-prod.yaml` | 生产环境 |
 | `test` | `application-test.yaml` | 测试环境（ITest 使用） |
-| — | `application-optional.yaml` | 可选配置（可选功能开关） |
+| — | `application-component.yaml` | 组件配置（可选功能开关） |
 
 **环境切换方式**：
 
@@ -177,7 +177,7 @@ scripts/start.sh prod
 
 **配置优先级**（高 → 低）：
 1. 命令行参数
-2. 环境变量（`MIDDLEWARE_CACHE_MAXIMUM_SIZE`）
+2. 环境变量（`COMPONENT_CACHE_MAXIMUM_SIZE`）
 3. Profile 配置文件（`application-{profile}.yaml`）
 4. 主配置文件（`application.yaml`）
 5. Properties 类默认值
@@ -251,13 +251,13 @@ JaCoCo 覆盖率工具的配置分布如下：
 ```java
 @Component
 public class EmailService {
-    @Value("${middleware.email.host:smtp.example.com}")
+    @Value("${component.email.host:smtp.example.com}")
     private String host;
 
-    @Value("${middleware.email.port:587}")
+    @Value("${component.email.port:587}")
     private Integer port;
 
-    @Value("${middleware.email.ssl-enable:true}")
+    @Value("${component.email.ssl-enable:true}")
     private Boolean sslEnable;
     // 配置散落在 3 个 @Value 中，无法集中管理，无法做类型校验
 }
@@ -267,7 +267,7 @@ public class EmailService {
 ```java
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "middleware.email")
+@ConfigurationProperties(prefix = "component.email")
 public class EmailProperties {
     private String host = "smtp.example.com";
     private Integer port = 587;
@@ -284,39 +284,39 @@ public class EmailProperties {
 
 > **后果**：`@Value` 散落在多个类中时，新增或修改配置需要在整个代码库中搜索，容易遗漏。且 `@Value` 默认是 `String` 类型，需要手动转换，转换失败只在运行时才暴露。`@ConfigurationProperties` 在应用启动时就完成绑定和校验，快速失败。
 
-### 场景 2: 配置前缀不符合 middleware.* 惯例
+### 场景 2: 配置前缀不符合 component.* 惯例
 
 ❌ 错误做法：
 ```java
-@ConfigurationProperties(prefix = "cache.config")         // 应为 middleware.cache
+@ConfigurationProperties(prefix = "cache.config")         // 应为 component.cache
 public class CacheProperties { }
 
-@ConfigurationProperties(prefix = "myApp.objectStorage")    // 应为 middleware.object-storage
+@ConfigurationProperties(prefix = "myApp.objectStorage")    // 应为 component.oss
 public class OssProperties { }
 
-@ConfigurationProperties(prefix = "ratelimit")              // 应为 middleware.ratelimit
+@ConfigurationProperties(prefix = "ratelimit")              // 应为 component.ratelimit
 public class RateLimitProperties { }
 ```
 
 ✅ 正确做法：
 ```java
-@ConfigurationProperties(prefix = "middleware.cache")
+@ConfigurationProperties(prefix = "component.cache")
 public class CacheProperties { }
 
-@ConfigurationProperties(prefix = "middleware.object-storage")
+@ConfigurationProperties(prefix = "component.oss")
 public class OssProperties { }
 
-@ConfigurationProperties(prefix = "middleware.ratelimit")
+@ConfigurationProperties(prefix = "component.ratelimit")
 public class RateLimitProperties { }
 ```
 
-> **后果**：不统一的配置前缀导致 YAML 文件中同一层的配置散落各处（`cache:`、`myApp:`、`ratelimit:`），运维人员无法通过前缀快速识别哪些配置属于中间件层。团队协作时新成员也无法从配置前缀推断出该配置的归属模块。
+> **后果**：不统一的配置前缀导致 YAML 文件中同一层的配置散落各处（`cache:`、`myApp:`、`ratelimit:`），运维人员无法通过前缀快速识别哪些配置属于组件层。团队协作时新成员也无法从配置前缀推断出该配置的归属模块。
 
 ## 检查清单
 
 - [ ] 没有使用 `@Value` 注解注入配置
 - [ ] 所有配置类使用 `@ConfigurationProperties`，字段有合理默认值
-- [ ] 配置前缀遵循 `middleware.*` 统一规范（日志模块除外，使用 `logging`）
+- [ ] 配置前缀遵循 `component.*` 统一规范（日志模块除外，使用 `logging`）
 - [ ] Properties 类使用 `@Getter` + `@Setter`，不使用 `@Data`
 - [ ] 多环境配置文件齐全（dev / prod / test）
 - [ ] 新增配置项在 Properties 类中有默认值

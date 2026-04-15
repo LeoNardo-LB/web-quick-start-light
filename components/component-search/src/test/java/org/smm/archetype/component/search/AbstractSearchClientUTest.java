@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 验证 client-search 模块遵循 Template Method 模式。
+ * 验证 component-search 模块遵循 Template Method 模式。
  * AbstractSearchComponent 应为抽象类，公开方法应为 final。
  */
 @DisplayName("AbstractSearchComponent Template Method 模式")

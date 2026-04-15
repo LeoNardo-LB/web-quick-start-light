@@ -15,14 +15,14 @@
 
 ## 概述
 
-基于 Sa-Token 的认证模块，提供登录/注销/会话管理功能，通过 `AuthClient` 抽象接口与路由拦截实现统一的认证管控。
+基于 Sa-Token 的认证模块，提供登录/注销/会话管理功能，通过 `AuthComponent` 抽象接口与路由拦截实现统一的认证管控。
 
 ## 业务场景
 
 1. **用户登录**：接收用户名和密码，通过 BCrypt 验证后调用 Sa-Token 创建会话，返回 Token
 2. **用户注销**：调用 Sa-Token 销毁当前会话
 3. **路由拦截**：通过 `AuthInterceptorConfigurer` 配置需要认证的路由，排除白名单路径
-4. **上下文填充**：`ContextFillFilter` 在请求入口注入 `AuthClient`，解析当前用户 ID 并写入 `ScopedThreadContext`
+4. **上下文填充**：`ContextFillFilter` 在请求入口注入 `AuthComponent`，解析当前用户 ID 并写入 `ScopedThreadContext`
 
 ## 技术设计
 
@@ -34,7 +34,7 @@ sequenceDiagram
     participant Controller as LoginController
     participant Facade as LoginFacadeImpl
     participant Repo as UserRepository
-    participant Auth as AuthClient (Sa-Token)
+    participant Auth as AuthComponent (Sa-Token)
 
     Client->>Controller: POST /api/auth/login
     Controller->>Facade: login(username, password)
@@ -77,13 +77,13 @@ classDiagram
 
     class LoginFacadeImpl {
         -UserRepository userRepository
-        -AuthClient authClient
+        -AuthComponent authClient
         -BCryptPasswordEncoder passwordEncoder
         +login(username, password) String
         +logout() void
     }
 
-    class AuthClient {
+    class AuthComponent {
         <<interface>>
         +login(userId) String
         +logout() void
@@ -92,7 +92,7 @@ classDiagram
         +checkLogin() void
     }
 
-    class AbstractAuthClient {
+    class AbstractAuthComponent {
         <<abstract>>
         +login(userId)$ String
         +logout()$ void
@@ -105,14 +105,14 @@ classDiagram
         #doIsLogin()* boolean
     }
 
-    class SaTokenAuthClient {
+    class SaTokenAuthComponent {
         #doLogin(userId) String
         #doLogout() void
         #doGetCurrentUserId() String
         #doIsLogin() boolean
     }
 
-    class NoOpAuthClient {
+    class NoOpAuthComponent {
         #doLogin(userId) String
         #doLogout() void
         #doGetCurrentUserId() String
@@ -130,7 +130,7 @@ classDiagram
     }
 
     class ContextFillFilter {
-        -AuthClient authClient
+        -AuthComponent authClient
         #doFilterInternal(request, response, chain) void
     }
 
@@ -138,12 +138,12 @@ classDiagram
     LoginController ..> LoginRequest
     LoginFacade <|.. LoginFacadeImpl
     LoginFacadeImpl --> UserRepository
-    LoginFacadeImpl --> AuthClient
-    AuthClient <|.. AbstractAuthClient
-    AbstractAuthClient <|-- SaTokenAuthClient
-    AbstractAuthClient <|-- NoOpAuthClient
+    LoginFacadeImpl --> AuthComponent
+    AuthComponent <|.. AbstractAuthComponent
+    AbstractAuthComponent <|-- SaTokenAuthComponent
+    AbstractAuthComponent <|-- NoOpAuthComponent
     AuthInterceptorConfigurer --> AuthProperties
-    ContextFillFilter --> AuthClient
+    ContextFillFilter --> AuthComponent
 ```
 
 ### 关键类说明
@@ -152,14 +152,14 @@ classDiagram
 |---|---|---|
 | `LoginController` | `app/.../controller/auth/` | REST 入口，定义 `/api/auth/login` 和 `/api/auth/logout` 端点 |
 | `LoginFacade` | `app/.../service/auth/` | 登录门面接口，解耦 Controller 与底层认证实现 |
-| `LoginFacadeImpl` | `app/.../service/auth/` | 登录门面实现，负责用户查找、BCrypt 密码验证、调用 AuthClient 创建会话 |
-| `AuthClient` | `clients/client-auth/` | 认证客户端接口，定义 login/logout/getCurrentUserId/isLogin/checkLogin 五个方法 |
-| `AbstractAuthClient` | `clients/client-auth/` | 认证客户端抽象基类，Template Method 模式，公开方法为 final，子类实现 do* 扩展点 |
-| `SaTokenAuthClient` | `clients/client-auth/` | 基于 Sa-Token 的认证实现，使用 `StpUtil` 管理会话 |
-| `NoOpAuthClient` | `clients/client-auth/` | 空操作认证实现，isLogin 始终返回 true，用于开发/测试环境 |
-| `AuthProperties` | `clients/client-auth/` | 认证配置属性（`middleware.auth.*`），含 enabled 和 excludePaths |
-| `AuthInterceptorConfigurer` | `clients/client-auth/` | Sa-Token 路由拦截器，自动配置 `SaInterceptor`，拦截 `/**` 并排除白名单 |
-| `AuthAutoConfiguration` | `clients/client-auth/` | 认证自动配置，条件装配 SaTokenAuthClient 或 NoOpAuthClient |
+| `LoginFacadeImpl` | `app/.../service/auth/` | 登录门面实现，负责用户查找、BCrypt 密码验证、调用 AuthComponent 创建会话 |
+| `AuthComponent` | `components/component-auth/` | 认证组件接口，定义 login/logout/getCurrentUserId/isLogin/checkLogin 五个方法 |
+| `AbstractAuthComponent` | `components/component-auth/` | 认证组件抽象基类，Template Method 模式，公开方法为 final，子类实现 do* 扩展点 |
+| `SaTokenAuthComponent` | `components/component-auth/` | 基于 Sa-Token 的认证实现，使用 `StpUtil` 管理会话 |
+| `NoOpAuthComponent` | `components/component-auth/` | 空操作认证实现，isLogin 始终返回 true，用于开发/测试环境 |
+| `AuthProperties` | `components/component-auth/` | 认证配置属性（`component.auth.*`），含 enabled 和 excludePaths |
+| `AuthInterceptorConfigurer` | `components/component-auth/` | Sa-Token 路由拦截器，自动配置 `SaInterceptor`，拦截 `/**` 并排除白名单 |
+| `AuthAutoConfiguration` | `components/component-auth/` | 认证自动配置，条件装配 SaTokenAuthComponent 或 NoOpAuthComponent |
 | `ContextFillFilter` | `app/.../controller/global/` | 全局过滤器，解析 traceId 和 userId 写入 ScopedThreadContext |
 
 ## API 参考
@@ -222,24 +222,24 @@ classDiagram
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
-| `middleware.auth.enabled` | boolean | `true` | 是否启用认证功能。设为 false 时不注册拦截器 |
-| `middleware.auth.exclude-paths` | List\<String\> | `[]` | 不需要认证的路径列表（如 `/api/auth/login`） |
+| `component.auth.enabled` | boolean | `true` | 是否启用认证功能。设为 false 时不注册拦截器 |
+| `component.auth.exclude-paths` | List\<String\> | `[]` | 不需要认证的路径列表（如 `/api/auth/login`） |
 
 **条件装配规则**：
-- `middleware.auth.enabled=true`（默认）且 classpath 中存在 Sa-Token 时 → 注册 `SaTokenAuthClient`
-- `middleware.auth.enabled=true` 但 classpath 中无 Sa-Token → 注册 `NoOpAuthClient`
-- `middleware.auth.enabled=false` → 不注册任何 AuthClient Bean
+- `component.auth.enabled=true`（默认）且 classpath 中存在 Sa-Token 时 → 注册 `SaTokenAuthComponent`
+- `component.auth.enabled=true` 但 classpath 中无 Sa-Token → 注册 `NoOpAuthComponent`
+- `component.auth.enabled=false` → 不注册任何 AuthComponent Bean
 
 ## 使用指南
 
 ### 集成步骤
 
-1. **引入依赖**：在 `app/pom.xml` 中确保已引入 `client-auth` 模块
+1. **引入依赖**：在 `app/pom.xml` 中确保已引入 `component-auth` 模块
 
 ```xml
 <dependency>
     <groupId>org.smm.archetype</groupId>
-    <artifactId>client-auth</artifactId>
+    <artifactId>component-auth</artifactId>
 </dependency>
 ```
 
@@ -257,14 +257,14 @@ middleware:
       - /v3/api-docs/**
 ```
 
-3. **使用 AuthClient**：在 Service 层注入 `AuthClient` 获取当前用户信息
+3. **使用 AuthComponent**：在 Service 层注入 `AuthComponent` 获取当前用户信息
 
 ```java
 @Service
 @RequiredArgsConstructor
 public class SomeService {
 
-    private final AuthClient authClient;
+    private final AuthComponent authClient;
 
     public void doSomething() {
         // 获取当前登录用户 ID
@@ -288,7 +288,7 @@ String traceId = ScopedThreadContext.getTraceId();
 
 ### 在 Controller 层使用认证守卫
 
-在需要认证保护的 Controller 方法中，通过 `AuthClient` 校验登录状态并获取用户信息：
+在需要认证保护的 Controller 方法中，通过 `AuthComponent` 校验登录状态并获取用户信息：
 
 ```java
 @RestController
@@ -296,7 +296,7 @@ String traceId = ScopedThreadContext.getTraceId();
 @RequiredArgsConstructor
 public class UserController {
 
-    private final AuthClient authClient;
+    private final AuthComponent authClient;
     private final UserFacade userFacade;
 
     @GetMapping("/profile")
@@ -317,13 +317,13 @@ public class UserController {
 ## 相关文档
 
 ### 上游依赖
-- [docs/modules/client-auth.md](client-auth.md) — AuthClient 接口定义与 Sa-Token/NoOp 两种实现
+- [docs/modules/component-auth.md](component-auth.md) — AuthComponent 接口定义与 Sa-Token/NoOp 两种实现
 - [docs/architecture/request-lifecycle.md](../architecture/request-lifecycle.md) — 认证拦截链路（AuthInterceptorConfigurer → ContextFillFilter）
 - [docs/conventions/error-handling.md](../conventions/error-handling.md) — 错误码 i18n 与 BizException 处理
 
 ### 下游消费者
 - **所有需要认证的 Controller**：通过 `AuthInterceptorConfigurer` 拦截器统一管控
-- **所有需要获取当前用户的 Service**：通过 `AuthClient.getCurrentUserId()` 获取
+- **所有需要获取当前用户的 Service**：通过 `AuthComponent.getCurrentUserId()` 获取
 - `ScopedThreadContext`：`ContextFillFilter` 写入 userId/traceId，全链路可用
 
 ### 设计依据

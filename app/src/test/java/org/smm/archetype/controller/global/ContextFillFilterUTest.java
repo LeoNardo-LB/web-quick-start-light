@@ -39,7 +39,7 @@ class ContextFillFilterUTest extends UnitTestBase {
     class ResolveUserId {
 
         @Test
-        @DisplayName("无 AuthClient 时应返回 SYSTEM")
+        @DisplayName("无 AuthComponent 时应返回 SYSTEM")
         void should_return_system_when_no_auth_client() throws Exception {
             ContextFillFilter filter = new ContextFillFilter();
 
@@ -52,7 +52,7 @@ class ContextFillFilterUTest extends UnitTestBase {
         }
 
         @Test
-        @DisplayName("AuthClient 返回有效 userId 时应使用该值")
+        @DisplayName("AuthComponent 返回有效 userId 时应使用该值")
         void should_return_user_id_from_auth_client() throws Exception {
             ContextFillFilter filter = new ContextFillFilter(authComponent);
             when(authComponent.getCurrentUserId()).thenReturn("user-42");
@@ -67,7 +67,7 @@ class ContextFillFilterUTest extends UnitTestBase {
         }
 
         @Test
-        @DisplayName("AuthClient 返回 null 时应返回 ANONYMOUS")
+        @DisplayName("AuthComponent 返回 null 时应返回 ANONYMOUS")
         void should_return_anonymous_when_auth_client_returns_null() throws Exception {
             ContextFillFilter filter = new ContextFillFilter(authComponent);
             when(authComponent.getCurrentUserId()).thenReturn(null);
@@ -156,7 +156,7 @@ class ContextFillFilterUTest extends UnitTestBase {
         }
 
         @Test
-        @DisplayName("无 AuthClient 时应使用 SYSTEM 作为 userId 并正常完成过滤")
+        @DisplayName("无 AuthComponent 时应使用 SYSTEM 作为 userId 并正常完成过滤")
         void should_use_system_user_when_no_auth_client() throws Exception {
             ContextFillFilter filter = new ContextFillFilter();
             when(request.getHeader("X-Trace-Id")).thenReturn(null);
@@ -190,7 +190,7 @@ class ContextFillFilterUTest extends UnitTestBase {
         }
 
         @Test
-        @DisplayName("有参构造器应接受 AuthClient（可为 null）")
+        @DisplayName("有参构造器应接受 AuthComponent（可为 null）")
         void should_create_filter_with_auth_client() {
             ContextFillFilter filter = new ContextFillFilter(authComponent);
             assertThat(filter).isNotNull();

@@ -18,18 +18,18 @@
 | [system-config.md](system-config.md) | 系统配置模块：CRUD + 分页 + 值对象 |
 | [operation-log.md](operation-log.md) | 操作日志模块：@BusinessLog 注解 + 分页查询 |
 
-### 技术客户端
+### 技术组件
 
 | 文档 | 一句话描述 |
 |------|-----------|
-| [client-cache.md](client-cache.md) | 缓存客户端：Caffeine + 10 方法 |
-| [client-oss.md](client-oss.md) | 对象存储客户端：本地存储 + NIO + 日期分层 |
-| [client-email.md](client-email.md) | 邮件客户端：Jakarta Mail + NoOp 默认 |
-| [client-sms.md](client-sms.md) | 短信客户端：3 方法 + NoOp 默认 |
-| [client-search.md](client-search.md) | 搜索客户端：内存搜索 + 15 方法 |
-| [client-auth.md](client-auth.md) | 认证客户端：AuthClient 接口 + Sa-Token |
+| [component-cache.md](component-cache.md) | 缓存组件：Caffeine + 10 方法 |
+| [component-oss.md](component-oss.md) | 对象存储组件：本地存储 + NIO + 日期分层 |
+| [component-email.md](component-email.md) | 邮件组件：Jakarta Mail + NoOp 默认 |
+| [component-sms.md](component-sms.md) | 短信组件：3 方法 + NoOp 默认 |
+| [component-search.md](component-search.md) | 搜索组件：内存搜索 + 15 方法 |
+| [component-auth.md](component-auth.md) | 认证组件：AuthComponent 接口 + Sa-Token |
 
-> **注意**：`client-log.md`、`client-ratelimit.md`、`client-idempotent.md` 已迁移至 `app/.../shared/aspect/` 下，旧文档已归档至 `docs/archived/`。操作日志见 [operation-log.md](operation-log.md)。
+> **注意**：`component-log.md`、`component-ratelimit.md`、`component-idempotent.md` 已迁移至 `app/.../shared/aspect/` 下，旧文档已归档至 `docs/archived/`。操作日志见 [operation-log.md](operation-log.md)。
 
 ## 模板结构
 
@@ -94,7 +94,7 @@ modules/ 下所有文件使用**统一的 8 章节模板**：
 - **技术设计**：
   - 至少 1 个 Mermaid 图（classDiagram 或 sequenceDiagram）
   - 关键类说明表格（类名、职责、关键方法）
-  - 技术客户端模块需展示 Template Method 模式（详见 [design-patterns.md](../architecture/design-patterns.md)）
+  - 技术组件模块需展示 Template Method 模式（详见 [design-patterns.md](../architecture/design-patterns.md)）
 - **API 参考**：列出全部公开方法/端点，格式：方法签名 | 参数 | 返回值 | 说明
 - **配置参考**：列出配置前缀和全部配置项，格式：配置项 | 类型 | 默认值 | 说明
 - **使用指南**：至少 2 个不同场景的完整代码示例（如基础用法 + 高级用法，或集成步骤 + 常见操作）

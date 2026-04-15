@@ -26,7 +26,7 @@
 RuntimeException
   └── BaseException          (abstract, 持有 ErrorCode)
         ├── BizException     (业务异常 — 可预期，前端展示)
-        ├── ClientException  (客户端参数异常 — 400 类)
+        ├── ClientException  (组件参数异常 — 400 类)
         └── SysException     (系统内部异常 — 500 类)
 ```
 
@@ -117,7 +117,7 @@ public interface ErrorCode {
 | 1000 | 成功 | 正确响应 |
 | 2000-2999 | 通用业务 | 业务/参数类异常 |
 | 5000-5999 | 系统异常 | 内部系统错误 |
-| 6000-6999 | Client 中间件 | 各客户端模块错误 |
+| 6000-6999 | Component 中间件 | 各组件模块错误 |
 | 9999 | 兜底 | 未知异常 |
 
 **新增错误码流程**：
@@ -280,7 +280,7 @@ public class SystemConfigController {
 - [ ] 异常使用三级体系（BizException / ClientException / SysException），不直接抛 RuntimeException
 - [ ] 所有错误码实现 `ErrorCode` 接口
 - [ ] 新增 `CommonErrorCode` 后同步更新 `messages.properties` 和 `messages_en.properties`
-- [ ] 错误码分段符合约定（1000 成功 / 2000 通用 / 5000 系统 / 6000 客户端 / 9999 兜底）
+- [ ] 错误码分段符合约定（1000 成功 / 2000 通用 / 5000 系统 / 6000 组件 / 9999 兜底）
 - [ ] 使用默认消息构造异常时，消息支持国际化
 - [ ] `messages.properties` 和 `messages_en.properties` 的 key 与 `CommonErrorCode` 完全一致
 - [ ] 参数校验消息在 `ValidationMessages.properties` 和 `ValidationMessages_en.properties` 中配置

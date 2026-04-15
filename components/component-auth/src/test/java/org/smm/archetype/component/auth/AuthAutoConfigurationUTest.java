@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * AuthAutoConfiguration 单元测试。
  * 使用 ApplicationContextRunner 测试条件装配。
  * <p>
- * 注意：client-auth 模块中 Sa-Token 是 optional 依赖，
+ * 注意：component-auth 模块中 Sa-Token 是 optional 依赖，
  * 在测试 classpath 上 Sa-Token 实际不存在，因此 @ConditionalOnClass(name = "cn.dev33.satoken.stp.StpUtil")
  * 不会匹配，始终走 NoOpAuthComponent 分支。
  */
@@ -31,7 +31,7 @@ class AuthAutoConfigurationUTest {
             contextRunner
                     .run(context -> {
                         assertThat(context).hasSingleBean(AuthComponent.class);
-                        // client-auth 测试 classpath 有 Sa-Token（optional 但测试时可用）
+                        // component-auth 测试 classpath 有 Sa-Token（optional 但测试时可用）
                         // 因此注册的是 SaTokenAuthComponent
                         assertThat(context.getBean(AuthComponent.class))
                                 .isInstanceOf(SaTokenAuthComponent.class);

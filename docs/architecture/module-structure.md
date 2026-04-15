@@ -15,21 +15,21 @@
 
 ## 概述
 
-Maven 多模块结构和四层架构说明。项目采用 Maven POM 聚合模式，分为根 POM、common（公共模块）、clients（客户端聚合）、app（主应用）四个层级。app 模块内部遵循 Controller → Facade → Service → Repository 的严格四层架构，层间依赖单向流动，由 ArchUnit 在测试阶段守护约束。
+Maven 多模块结构和四层架构说明。项目采用 Maven POM 聚合模式，分为根 POM、common（公共模块）、components（组件聚合）、app（主应用）四个层级。app 模块内部遵循 Controller → Facade → Service → Repository 的严格四层架构，层间依赖单向流动，由 ArchUnit 在测试阶段守护约束。
 
 ## 目录树结构
 
 ```
 web-quick-start-light/                     (根 POM, packaging=pom)
 ├── common/                                (异常体系: ErrorCode, CommonErrorCode, BaseException...)
-├── clients/                               (parent POM, packaging=pom — 中间件接入层)
-│   ├── client-cache/                      (Caffeine 本地缓存, 10 方法, Template Method)
-│   ├── client-oss/                        (本地对象存储, NIO + 日期分层, 7 方法, Template Method)
-│   ├── client-email/                      (Jakarta Mail 邮件, 3 方法, NoOp 默认实现, 条件装配)
-│   ├── client-sms/                        (短信, 3 方法, NoOp 默认实现, 条件装配)
-│   ├── client-search/                     (内存搜索, ConcurrentHashMap, 15 方法, 条件装配)
-│   └── client-auth/                       (认证客户端, Sa-Token/NoOp, Template Method, 条件装配)
-└── app/                                   (主应用, packaging=jar, 依赖 common + 中间件 client-*)
+├── components/                               (parent POM, packaging=pom — 中间件接入层)
+│   ├── component-cache/                      (Caffeine 本地缓存, 10 方法, Template Method)
+│   ├── component-oss/                        (本地对象存储, NIO + 日期分层, 7 方法, Template Method)
+│   ├── component-email/                      (Jakarta Mail 邮件, 3 方法, NoOp 默认实现, 条件装配)
+│   ├── component-sms/                        (短信, 3 方法, NoOp 默认实现, 条件装配)
+│   ├── component-search/                     (内存搜索, ConcurrentHashMap, 15 方法, 条件装配)
+│   └── component-auth/                       (认证组件, Sa-Token/NoOp, Template Method, 条件装配)
+└── app/                                   (主应用, packaging=jar, 依赖 common + 中间件 component-*)
     └── shared/                            (跨层共享基础设施: 限流/幂等/操作日志/日志工具)
 ```
 
@@ -39,19 +39,19 @@ web-quick-start-light/                     (根 POM, packaging=pom)
 graph TD
     ROOT["web-quick-start-light<br/>根 POM (pom)"]
     COMMON["common<br/>异常体系"]
-    CLIENTS["clients<br/>聚合 POM (pom) — 中间件接入层"]
+    COMPONENTS["components<br/>聚合 POM (pom) — 中间件接入层"]
     APP["app<br/>Spring Boot 主应用 (jar)"]
 
     ROOT --> COMMON
-    ROOT --> CLIENTS
+    ROOT --> COMPONENTS
     ROOT --> APP
 
-    CLIENTS --> CACHE["client-cache"]
-    CLIENTS --> OSS["client-oss"]
-    CLIENTS --> EMAIL["client-email"]
-    CLIENTS --> SMS["client-sms"]
-    CLIENTS --> SEARCH["client-search"]
-    CLIENTS --> AUTH["client-auth"]
+    COMPONENTS --> CACHE["component-cache"]
+    COMPONENTS --> OSS["component-oss"]
+    COMPONENTS --> EMAIL["component-email"]
+    COMPONENTS --> SMS["component-sms"]
+    COMPONENTS --> SEARCH["component-search"]
+    COMPONENTS --> AUTH["component-auth"]
 
     CACHE --> COMMON
     OSS --> COMMON
@@ -69,7 +69,7 @@ graph TD
     APP --> AUTH
 ```
 
-> 箭头表示 `depends on`（A → B 表示 A 的 pom.xml 中声明了对 B 的依赖）。所有 client-* 模块仅依赖 common，不互相依赖。clients 模块只包含中间件接入（Template
+> 箭头表示 `depends on`（A → B 表示 A 的 pom.xml 中声明了对 B 的依赖）。所有 component-* 模块仅依赖 common，不互相依赖。components 模块只包含中间件接入（Template
 > Method 模式），应用层横切关注点（限流/幂等/操作日志/日志基础设施）集成在 app 模块的 `shared/` 包下。
 
 ## 四层架构
@@ -256,15 +256,15 @@ org.smm.archetype/
 
 | 方案 | 优点 | 缺点 |
 |------|------|------|
-| 单模块 | 结构简单，IDE 导入快 | 所有代码耦合在一起，无法独立复用客户端模块；修改一个客户端可能导致全量重新编译 |
-| 多模块（当前选择） | 模块间物理隔离，客户端可独立引用；Maven 依赖传递清晰 | IDE 导入略慢；需要维护 parent POM 依赖版本 |
+| 单模块 | 结构简单，IDE 导入快 | 所有代码耦合在一起，无法独立复用组件模块；修改一个组件可能导致全量重新编译 |
+| 多模块（当前选择） | 模块间物理隔离，组件可独立引用；Maven 依赖传递清晰 | IDE 导入略慢；需要维护 parent POM 依赖版本 |
 
 **选择多模块的理由**：
 
-1. **客户端可独立复用**：其他项目可以只引入 `client-cache` 而不引入整个骨架，Maven 依赖传递自动处理
-2. **编译隔离**：修改 `client-sms` 不会触发 `app` 模块重新编译，提升开发效率
+1. **组件可独立复用**：其他项目可以只引入 `component-cache` 而不引入整个骨架，Maven 依赖传递自动处理
+2. **编译隔离**：修改 `component-sms` 不会触发 `app` 模块重新编译，提升开发效率
 3. **依赖范围控制**：`common` 模块不依赖 Spring，确保异常体系等基础能力可以在任何环境下使用
-4. **团队协作友好**：不同开发者可以独立修改不同客户端模块，减少合并冲突
+4. **团队协作友好**：不同开发者可以独立修改不同组件模块，减少合并冲突
 
 ### 为什么 common 模块不依赖 Spring Framework
 
@@ -291,5 +291,5 @@ org.smm.archetype/
 | 日期         | 变更内容                                                                                                              |
 |------------|-------------------------------------------------------------------------------------------------------------------|
 | 2026-04-14 | 初始创建                                                                                                              |
-| 2026-04-14 | 新增「app 内部包组织」章节；clients 模块精简为纯中间件接入层（移除 client-log/client-ratelimit/client-idempotent）；横切关注点纳入 app 模块 `shared/` 包 |
+| 2026-04-14 | 新增「app 内部包组织」章节；components 模块精简为纯中间件接入层（移除 component-log/component-ratelimit/component-idempotent）；横切关注点纳入 app 模块 `shared/` 包 |
 | 2026-04-15 | `shared/logging/` 合并到 `shared/util/logging/`，统一 shared 下 aspect/util 两个维度 |

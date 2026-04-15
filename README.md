@@ -24,17 +24,17 @@
 ```
 web-quick-start-light/                     (根 POM, packaging=pom)
 ├── common/                                (异常体系)
-├── clients/                               (parent POM, packaging=pom)
-│   ├── client-cache/                      (Caffeine 本地缓存)
-│   ├── client-oss/                        (本地对象存储)
-│   ├── client-email/                      (Jakarta Mail 邮件)
-│   ├── client-sms/                        (短信)
-│   ├── client-search/                     (内存搜索)
-│   ├── client-log/                        (日志客户端)
-│   ├── client-ratelimit/                  (限流客户端)
-│   ├── client-idempotent/                 (幂等客户端)
-│   └── client-auth/                       (认证客户端)
-└── app/                                   (主应用, 依赖 common + 所有 client-*)
+├── components/                               (parent POM, packaging=pom)
+│   ├── component-cache/                      (Caffeine 本地缓存)
+│   ├── component-oss/                        (本地对象存储)
+│   ├── component-email/                      (Jakarta Mail 邮件)
+│   ├── component-sms/                        (短信)
+│   ├── component-search/                     (内存搜索)
+│   ├── component-log/                        (日志组件)
+│   ├── component-ratelimit/                  (限流组件)
+│   ├── component-idempotent/                 (幂等组件)
+│   └── component-auth/                       (认证组件)
+└── app/                                   (主应用, 依赖 common + 所有 component-*)
 ```
 
 > 详细模块依赖和四层架构说明见 [docs/architecture/module-structure.md](docs/architecture/module-structure.md)。
@@ -80,7 +80,7 @@ mvn spring-boot:run -pl app -Dspring-boot.run.profiles=prod
 ## 核心特性
 
 - **四层架构**：Controller → Facade → Service → Repository，ArchUnit 守护依赖规则
-- **9 个技术客户端**：缓存/存储/邮件/短信/搜索/日志/限流/幂等/认证，Template Method + 条件装配
+- **9 个技术组件**：缓存/存储/邮件/短信/搜索/日志/限流/幂等/认证，Template Method + 条件装配
 - **ScopedValue 线程上下文**：基于 Java 25 ScopedValue 的 userId/traceId 全链路传递
 - **完善日志体系**：@BusinessLog 注解 + 8 个 Appender + 采样 + 慢 SQL 监控
 - **高覆盖率测试**：UTest + ITest 双分类，JaCoCo Instruction ≥ 95%

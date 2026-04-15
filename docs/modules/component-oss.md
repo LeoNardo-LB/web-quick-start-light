@@ -1,4 +1,4 @@
-# 对象存储客户端（client-oss） — Contract 轨
+# 对象存储组件（component-oss） — Contract 轨
 
 > 代码变更时必须同步更新本文档
 
@@ -15,18 +15,18 @@
 
 ## 概述
 
-对象存储客户端（`client-oss`）提供统一的文件存储抽象接口，内置基于本地文件系统的 `LocalOssClient` 实现。采用 NIO 零拷贝文件操作和日期分层目录结构（`yyyy/MM`），适用于轻量级文件存储场景。
+对象存储组件（`component-oss`）提供统一的文件存储抽象接口，内置基于本地文件系统的 `LocalOssComponent` 实现。采用 NIO 零拷贝文件操作和日期分层目录结构（`yyyy/MM`），适用于轻量级文件存储场景。
 
 **核心特性：**
 
-- 统一的 `OssClient` 接口，屏蔽底层存储差异
+- 统一的 `OssComponent` 接口，屏蔽底层存储差异
 - **Template Method 模式**：抽象基类统一处理参数校验、异常转换与日志记录
 - 本地实现使用 **NIO 文件操作** + **日期分层目录**（`yyyy/MM`）
 - 文件名防冲突：时间戳前缀（`{timestamp}-{fileName}`）
 - 路径安全校验：`normalize()` 防止路径穿越攻击
-- 自动装配：默认启用，`middleware.object-storage.enabled` 控制
+- 自动装配：默认启用，`component.oss.enabled` 控制
 
-**模块坐标：** `org.smm.archetype:client-oss`
+**模块坐标：** `org.smm.archetype:component-oss`
 
 ## 业务场景
 
@@ -43,7 +43,7 @@
 
 ```mermaid
 classDiagram
-    class OssClient {
+    class OssComponent {
         <<interface>>
         +upload(request: OssUploadRequest): OssUploadResult
         +download(fileKey: String): InputStream
@@ -54,7 +54,7 @@ classDiagram
         +getFileSize(fileKey: String): long
     }
 
-    class AbstractOssClient {
+    class AbstractOssComponent {
         <<abstract>>
         #doUpload(request: OssUploadRequest): OssUploadResult*
         #doDownload(fileKey: String): InputStream*
@@ -65,7 +65,7 @@ classDiagram
         #doGetFileSize(fileKey: String): long*
     }
 
-    class LocalOssClient {
+    class LocalOssComponent {
         -basePath: Path
         -DATE_FORMATTER: DateTimeFormatter
         +resolveAndValidate(fileKey: String): Path
@@ -104,22 +104,22 @@ classDiagram
         +localStoragePath: String
     }
 
-    OssClient <|.. AbstractOssClient : implements
-    AbstractOssClient <|-- LocalOssClient : extends
-    OssClient ..> OssUploadRequest : 参数
-    OssClient ..> OssUploadResult : 返回值
-    OssClient ..> FileMetadata : 返回值
+    OssComponent <|.. AbstractOssComponent : implements
+    AbstractOssComponent <|-- LocalOssComponent : extends
+    OssComponent ..> OssUploadRequest : 参数
+    OssComponent ..> OssUploadResult : 返回值
+    OssComponent ..> FileMetadata : 返回值
     OssAutoConfiguration ..> OssProperties : @EnableConfigurationProperties
-    OssAutoConfiguration ..> LocalOssClient : @Bean
+    OssAutoConfiguration ..> LocalOssComponent : @Bean
 ```
 
 ### 关键类说明
 
 | 类名 | 职责 | 关键方法 |
 |------|------|----------|
-| `OssClient` | 对象存储操作接口，定义 7 个方法 | `upload`, `download`, `delete`, `generateUrl`, `searchFiles`, `exists`, `getFileSize` |
-| `AbstractOssClient` | 抽象基类，Template Method 模式骨架 | `final` 公开方法 + `do*` 扩展点 |
-| `LocalOssClient` | 本地文件系统实现 | NIO 操作 + 日期分层 + 路径安全校验 |
+| `OssComponent` | 对象存储操作接口，定义 7 个方法 | `upload`, `download`, `delete`, `generateUrl`, `searchFiles`, `exists`, `getFileSize` |
+| `AbstractOssComponent` | 抽象基类，Template Method 模式骨架 | `final` 公开方法 + `do*` 扩展点 |
+| `LocalOssComponent` | 本地文件系统实现 | NIO 操作 + 日期分层 + 路径安全校验 |
 | `OssUploadRequest` | 上传请求 record | `fileName`, `inputStream`, `contentLength`, `contentType` |
 | `OssUploadResult` | 上传结果 record | 静态工厂 `success()` / `fail()` |
 | `FileMetadata` | 文件元数据 record | `fileKey`, `fileName`, `fileSize`, `contentType`, `url` |
@@ -127,7 +127,7 @@ classDiagram
 
 ### Template Method 模式
 
-本客户端采用 Template Method 模式实现统一的校验/日志骨架。公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点。详见 [设计模式](../architecture/design-patterns.md)。
+本组件采用 Template Method 模式实现统一的校验/日志骨架。公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点。详见 [设计模式](../architecture/design-patterns.md)。
 
 ### 日期分层存储结构
 
@@ -153,7 +153,7 @@ classDiagram
 ```yaml
 # 自动装配条件
 @ConditionalOnProperty(                                 # 配置开关
-  prefix = "middleware.object-storage",
+  prefix = "component.oss",
   name = "enabled",
   havingValue = "true",
   matchIfMissing = true                                 # 默认启用
@@ -162,7 +162,7 @@ classDiagram
 
 ## API 参考
 
-### OssClient 接口方法（7 个）
+### OssComponent 接口方法（7 个）
 
 | 方法 | 参数 | 返回值 | 说明 |
 |------|------|--------|------|
@@ -208,9 +208,9 @@ classDiagram
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `middleware.object-storage.enabled` | `boolean` | `true` | 是否启用对象存储客户端 |
-| `middleware.object-storage.type` | `String` | `local` | 存储类型（当前仅支持 `local`） |
-| `middleware.object-storage.local-storage-path` | `String` | `./uploads` | 本地存储根目录路径 |
+| `component.oss.enabled` | `boolean` | `true` | 是否启用对象存储组件 |
+| `component.oss.type` | `String` | `local` | 存储类型（当前仅支持 `local`） |
+| `component.oss.local-storage-path` | `String` | `./uploads` | 本地存储根目录路径 |
 
 ## 使用指南
 
@@ -221,7 +221,7 @@ classDiagram
 @Service
 public class FileService {
 
-    private final OssClient ossClient;
+    private final OssComponent ossClient;
 
     public OssUploadResult uploadAvatar(MultipartFile file) throws IOException {
         OssUploadRequest request = new OssUploadRequest(
@@ -290,8 +290,8 @@ middleware:
 
 | 文档 | 说明 |
 |------|------|
-| [Template Method 模式](../architecture/design-patterns.md) | `AbstractOssClient` 基类的设计模式说明 |
-| [配置前缀规范](../conventions/configuration.md) | `middleware.object-storage.*` 配置前缀约定 |
+| [Template Method 模式](../architecture/design-patterns.md) | `AbstractOssComponent` 基类的设计模式说明 |
+| [配置前缀规范](../conventions/configuration.md) | `component.oss.*` 配置前缀约定 |
 
 ### 下游消费者
 
@@ -304,8 +304,8 @@ middleware:
 
 | 文档 | 说明 |
 |------|------|
-| [系统全景](../architecture/system-overview.md) | C4 架构中 client-oss 的定位 |
-| [模块结构](../architecture/module-structure.md) | Maven 多模块结构中 client-oss 的依赖关系 |
+| [系统全景](../architecture/system-overview.md) | C4 架构中 component-oss 的定位 |
+| [模块结构](../architecture/module-structure.md) | Maven 多模块结构中 component-oss 的依赖关系 |
 
 ## 变更历史
 | 日期 | 变更内容 |

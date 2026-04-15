@@ -474,8 +474,8 @@ public class SystemConfigFacadeImpl implements SystemConfigFacade {
 - [docs/architecture/module-structure.md](../architecture/module-structure.md) — 四层架构与模块结构说明
 
 ### 下游消费者
-- **client-email**：邮件发送时读取 EMAIL 分组下的 SMTP 配置
-- **client-oss**：对象存储时读取 STORAGE 分组下的存储路径配置
+- **component-email**：邮件发送时读取 EMAIL 分组下的 SMTP 配置
+- **component-oss**：对象存储时读取 STORAGE 分组下的存储路径配置
 - **前端管理界面**：通过 REST API 展示和编辑系统配置
 
 ### 设计依据

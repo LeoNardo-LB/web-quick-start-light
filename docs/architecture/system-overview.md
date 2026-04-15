@@ -14,7 +14,7 @@
 
 ## 概述
 
-本项目的系统全景视图，包含 C4 架构图和技术栈概要。项目是一个轻量级 Web 脚手架，基于 Spring Boot 4.x + Java 25，采用多模块 Maven 结构和四层架构。设计目标是在 1G JVM 内存约束下，实现零外部运行时依赖（SQLite + Caffeine）、可水平扩展的技术客户端体系。
+本项目的系统全景视图，包含 C4 架构图和技术栈概要。项目是一个轻量级 Web 脚手架，基于 Spring Boot 4.x + Java 25，采用多模块 Maven 结构和四层架构。设计目标是在 1G JVM 内存约束下，实现零外部运行时依赖（SQLite + Caffeine）、可水平扩展的技术组件体系。
 
 ## C4 Container 图
 
@@ -28,13 +28,13 @@ graph TD
         COMMON["common<br/>异常体系<br/>ErrorCode / BizException"]
     end
 
-    subgraph "客户端模块（clients parent POM）"
-        CACHE["client-cache<br/>Caffeine 本地缓存"]
-        OSS["client-oss<br/>本地对象存储（NIO）"]
-        EMAIL["client-email<br/>Jakarta Mail 邮件"]
-        SMS["client-sms<br/>短信"]
-        SEARCH["client-search<br/>内存搜索"]
-        AUTH["client-auth<br/>认证（Sa-Token）"]
+    subgraph "组件模块（components parent POM）"
+        CACHE["component-cache<br/>Caffeine 本地缓存"]
+        OSS["component-oss<br/>本地对象存储（NIO）"]
+        EMAIL["component-email<br/>Jakarta Mail 邮件"]
+        SMS["component-sms<br/>短信"]
+        SEARCH["component-search<br/>内存搜索"]
+        AUTH["component-auth<br/>认证（Sa-Token）"]
     end
 
     subgraph "外部存储"
@@ -123,14 +123,14 @@ graph TD
 |------|---------|---------|
 | 数据库 | SQLite | 无 |
 | 缓存 | Caffeine（本地） | 无 |
-| 搜索 | SimpleSearchClient（ConcurrentHashMap） | 无 |
-| 对象存储 | LocalOssClient（NIO + 文件系统） | 无 |
+| 搜索 | SimpleSearchComponent（ConcurrentHashMap） | 无 |
+| 对象存储 | LocalOssComponent（NIO + 文件系统） | 无 |
 | 邮件/短信 | NoOp 默认实现（条件装配） | 可选 |
 
 ### 3. 可扩展 — Template Method + 条件装配
 
-- **Template Method 模式**：每个客户端通过 `AbstractXxxClient` 提供统一骨架，子类只需实现 `do*` 扩展点
-- **条件装配**：`@AutoConfiguration` + `@ConditionalOnClass` + `@ConditionalOnProperty`，按需加载客户端
+- **Template Method 模式**：每个组件通过 `AbstractXxxComponent` 提供统一骨架，子类只需实现 `do*` 扩展点
+- **条件装配**：`@AutoConfiguration` + `@ConditionalOnClass` + `@ConditionalOnProperty`，按需加载组件
 - **NoOp 默认实现**：email / sms / auth 提供 NoOp 实现，无对应依赖时也能正常启动
 
 ## 系统边界
@@ -143,11 +143,11 @@ graph TD
 |--------|---------|------|
 | Web 层 | Controller / Facade / Service / Repository 四层架构 | 详见[模块结构](module-structure.md) |
 | 持久层 | MyBatis-Plus + SQLite | 嵌入式数据库，无需外部服务 |
-| 本地缓存 | Caffeine | 详见[缓存客户端](../modules/client-cache.md) |
-| 本地对象存储 | NIO + 文件系统 | 详见[对象存储客户端](../modules/client-oss.md) |
-| 邮件发送 | Jakarta Mail + NoOp 默认实现 | 详见[邮件客户端](../modules/client-email.md) |
-| 短信发送 | 接口 + NoOp 默认实现 | 详见[短信客户端](../modules/client-sms.md) |
-| 内存搜索 | 基于 Java Collection | 详见[搜索客户端](../modules/client-search.md) |
+| 本地缓存 | Caffeine | 详见[缓存组件](../modules/component-cache.md) |
+| 本地对象存储 | NIO + 文件系统 | 详见[对象存储组件](../modules/component-oss.md) |
+| 邮件发送 | Jakarta Mail + NoOp 默认实现 | 详见[邮件组件](../modules/component-email.md) |
+| 短信发送 | 接口 + NoOp 默认实现 | 详见[短信组件](../modules/component-sms.md) |
+| 内存搜索 | 基于 Java Collection | 详见[搜索组件](../modules/component-search.md) |
 | 业务日志 | SLF4J + Micrometer | 详见[操作日志模块](../modules/operation-log.md) |
 | 限流 | Bucket4j | 已迁移至 `app/.../shared/aspect/ratelimit/` |
 | 幂等保护 | Caffeine | 已迁移至 `app/.../shared/aspect/idempotent/` |

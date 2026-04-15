@@ -1,4 +1,4 @@
-# 邮件客户端（client-email） — Contract 轨
+# 邮件组件（component-email） — Contract 轨
 
 > 代码变更时必须同步更新本文档
 
@@ -15,17 +15,17 @@
 
 ## 概述
 
-邮件客户端（`client-email`）提供统一的邮件发送抽象接口，内置 `NoOpEmailClient` 无操作实现。采用 Template Method 模式，支持简单邮件、指定服务商邮件和批量邮件三种发送方式。
+邮件组件（`component-email`）提供统一的邮件发送抽象接口，内置 `NoOpEmailComponent` 无操作实现。采用 Template Method 模式，支持简单邮件、指定服务商邮件和批量邮件三种发送方式。
 
 **核心特性：**
 
-- 统一的 `EmailClient` 接口，支持 3 种发送模式
+- 统一的 `EmailComponent` 接口，支持 3 种发送模式
 - **Template Method 模式**：抽象基类统一处理参数校验、异常转换与日志记录
 - **NoOp 默认实现**：不调用真实邮件 SDK，仅记录日志并返回成功结果，适用于开发和测试环境
 - 支持 `ServiceProvider` 枚举指定服务商（ALIYUN / TENCENT / LOCAL / CUSTOM）
 - **条件装配**：默认不启用（`enabled=false`），需显式配置开启
 
-**模块坐标：** `org.smm.archetype:client-email`
+**模块坐标：** `org.smm.archetype:component-email`
 
 ## 业务场景
 
@@ -43,21 +43,21 @@
 
 ```mermaid
 classDiagram
-    class EmailClient {
+    class EmailComponent {
         <<interface>>
         +sendEmail(to: String, subject: String, content: String): EmailResult
         +sendEmail(provider: ServiceProvider, request: EmailRequest): EmailResult
         +sendBatchEmail(request: EmailRequest): EmailResult
     }
 
-    class AbstractEmailClient {
+    class AbstractEmailComponent {
         <<abstract>>
         #doSendEmail(to: String, subject: String, content: String): EmailResult*
         #doSendEmailWithProvider(provider: ServiceProvider, request: EmailRequest): EmailResult*
         #doSendBatchEmail(request: EmailRequest): EmailResult*
     }
 
-    class NoOpEmailClient {
+    class NoOpEmailComponent {
         +doSendEmail(): EmailResult
         +doSendEmailWithProvider(): EmailResult
         +doSendBatchEmail(): EmailResult
@@ -97,22 +97,22 @@ classDiagram
         +from: String
     }
 
-    EmailClient <|.. AbstractEmailClient : implements
-    AbstractEmailClient <|-- NoOpEmailClient : extends
-    EmailClient ..> EmailRequest : 参数
-    EmailClient ..> EmailResult : 返回值
-    EmailClient ..> ServiceProvider : 参数
+    EmailComponent <|.. AbstractEmailComponent : implements
+    AbstractEmailComponent <|-- NoOpEmailComponent : extends
+    EmailComponent ..> EmailRequest : 参数
+    EmailComponent ..> EmailResult : 返回值
+    EmailComponent ..> ServiceProvider : 参数
     EmailAutoConfiguration ..> EmailProperties : @EnableConfigurationProperties
-    EmailAutoConfiguration ..> NoOpEmailClient : @Bean
+    EmailAutoConfiguration ..> NoOpEmailComponent : @Bean
 ```
 
 ### 关键类说明
 
 | 类名 | 职责 | 关键方法 |
 |------|------|----------|
-| `EmailClient` | 邮件发送接口，定义 3 个方法 | `sendEmail`, `sendEmail(provider)`, `sendBatchEmail` |
-| `AbstractEmailClient` | 抽象基类，Template Method 模式骨架 | `final` 公开方法 + `do*` 扩展点 |
-| `NoOpEmailClient` | 无操作实现，仅记录日志 | 适用于开发和测试环境 |
+| `EmailComponent` | 邮件发送接口，定义 3 个方法 | `sendEmail`, `sendEmail(provider)`, `sendBatchEmail` |
+| `AbstractEmailComponent` | 抽象基类，Template Method 模式骨架 | `final` 公开方法 + `do*` 扩展点 |
+| `NoOpEmailComponent` | 无操作实现，仅记录日志 | 适用于开发和测试环境 |
 | `EmailRequest` | 邮件请求 record | `to`, `templateId`, `templateParams`, `subject` |
 | `EmailResult` | 邮件发送结果 record | 静态工厂 `success()` / `fail()` |
 | `ServiceProvider` | 服务商枚举 | `ALIYUN`, `TENCENT`, `LOCAL`, `CUSTOM` |
@@ -120,24 +120,24 @@ classDiagram
 
 ### Template Method 模式
 
-本客户端采用 Template Method 模式实现统一的校验/日志骨架。公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点。详见 [设计模式](../architecture/design-patterns.md)。
+本组件采用 Template Method 模式实现统一的校验/日志骨架。公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点。详见 [设计模式](../architecture/design-patterns.md)。
 
 ### 条件装配
 
 ```yaml
 # 自动装配条件
 @ConditionalOnProperty(                                 # 配置开关
-  prefix = "middleware.email",
+  prefix = "component.email",
   name = "enabled",
   havingValue = "true"                                  # 默认 false，不自动注册
 )
 ```
 
-> **重要**：邮件客户端默认 **不启用**，需在配置文件中显式设置 `middleware.email.enabled=true`。
+> **重要**：邮件组件默认 **不启用**，需在配置文件中显式设置 `component.email.enabled=true`。
 
 ## API 参考
 
-### EmailClient 接口方法（3 个）
+### EmailComponent 接口方法（3 个）
 
 | 方法 | 参数 | 返回值 | 说明 |
 |------|------|--------|------|
@@ -177,13 +177,13 @@ classDiagram
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `middleware.email.enabled` | `boolean` | `false` | 是否启用邮件客户端（需显式开启） |
-| `middleware.email.host` | `String` | `null` | SMTP 主机地址 |
-| `middleware.email.port` | `int` | `587` | SMTP 端口 |
-| `middleware.email.username` | `String` | `null` | SMTP 用户名 |
-| `middleware.email.password` | `String` | `null` | SMTP 密码 |
-| `middleware.email.ssl-enable` | `boolean` | `true` | 是否启用 SSL |
-| `middleware.email.from` | `String` | `null` | 发件人地址 |
+| `component.email.enabled` | `boolean` | `false` | 是否启用邮件组件（需显式开启） |
+| `component.email.host` | `String` | `null` | SMTP 主机地址 |
+| `component.email.port` | `int` | `587` | SMTP 端口 |
+| `component.email.username` | `String` | `null` | SMTP 用户名 |
+| `component.email.password` | `String` | `null` | SMTP 密码 |
+| `component.email.ssl-enable` | `boolean` | `true` | 是否启用 SSL |
+| `component.email.from` | `String` | `null` | 发件人地址 |
 
 ## 使用指南
 
@@ -194,7 +194,7 @@ classDiagram
 @Service
 public class NotificationService {
 
-    private final EmailClient emailClient;
+    private final EmailComponent emailClient;
 
     public void sendVerifyCode(String email, String code) {
         EmailResult result = emailClient.sendEmail(
@@ -256,8 +256,8 @@ middleware:
 
 | 文档 | 说明 |
 |------|------|
-| [Template Method 模式](../architecture/design-patterns.md) | `AbstractEmailClient` 基类的设计模式说明 |
-| [配置前缀规范](../conventions/configuration.md) | `middleware.email.*` 配置前缀约定 |
+| [Template Method 模式](../architecture/design-patterns.md) | `AbstractEmailComponent` 基类的设计模式说明 |
+| [配置前缀规范](../conventions/configuration.md) | `component.email.*` 配置前缀约定 |
 
 ### 下游消费者
 
@@ -270,8 +270,8 @@ middleware:
 
 | 文档 | 说明 |
 |------|------|
-| [系统全景](../architecture/system-overview.md) | C4 架构中 client-email 的定位 |
-| [模块结构](../architecture/module-structure.md) | Maven 多模块结构中 client-email 的依赖关系 |
+| [系统全景](../architecture/system-overview.md) | C4 架构中 component-email 的定位 |
+| [模块结构](../architecture/module-structure.md) | Maven 多模块结构中 component-email 的依赖关系 |
 
 ## 变更历史
 | 日期 | 变更内容 |

@@ -317,7 +317,7 @@ classDiagram
 
 ## 配置参考
 
-### 日志客户端配置（`logging.*`）
+### 日志组件配置（`logging.*`）
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
@@ -326,7 +326,7 @@ classDiagram
 | `logging.sampling.enabled` | boolean | `false` | 是否启用日志采样（SamplingTurboFilter） |
 | `logging.sampling.rate` | double | `0.1` | 采样率（0.0~1.0），ERROR 级别始终记录不受采样影响 |
 
-> **注意**：日志配置前缀为 `logging`（对接 Spring Boot 日志配置惯例），而非 `middleware.logging`。
+> **注意**：日志配置前缀为 `logging`（对接 Spring Boot 日志配置惯例），而非 `component.logging`。
 
 ### 条件装配
 
@@ -456,5 +456,5 @@ public class UserFacadeImpl implements UserFacade {
 ## 变更历史
 | 日期 | 变更内容 |
 |------|---------|
-| 2026-04-15 | 迁移：AOP 组件从 `client-log` 迁移到 `app/.../shared/aspect/operationlog/`；日志基础设施迁移到 `app/.../shared/util/logging/`；`LogAutoConfiguration` → `LoggingConfigure`（合并 `LoggingConfiguration`，新增启动时日志目录验证）；类图同步更新 |
+| 2026-04-15 | 迁移：AOP 组件从 `component-log` 迁移到 `app/.../shared/aspect/operationlog/`；日志基础设施迁移到 `app/.../shared/util/logging/`；`LogAutoConfiguration` → `LoggingConfigure`（合并 `LoggingConfiguration`，新增启动时日志目录验证）；类图同步更新 |
 | 2025-04-14 | 初始创建 |

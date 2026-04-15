@@ -1,4 +1,4 @@
-# 搜索客户端（client-search） — Contract 轨
+# 搜索组件（component-search） — Contract 轨
 
 > 代码变更时必须同步更新本文档
 
@@ -15,18 +15,18 @@
 
 ## 概述
 
-搜索客户端（`client-search`）提供完整的全文搜索抽象接口，内置基于 `ConcurrentHashMap` 的 `SimpleSearchClient` 内存实现。支持索引管理、文档 CRUD、全文关键字匹配、分页查询和聚合统计等功能。
+搜索组件（`component-search`）提供完整的全文搜索抽象接口，内置基于 `ConcurrentHashMap` 的 `SimpleSearchComponent` 内存实现。支持索引管理、文档 CRUD、全文关键字匹配、分页查询和聚合统计等功能。
 
 **核心特性：**
 
-- 统一的 `SearchClient` 接口，提供 **15 个方法**，覆盖索引操作、文档操作和查询操作
+- 统一的 `SearchComponent` 接口，提供 **15 个方法**，覆盖索引操作、文档操作和查询操作
 - **Template Method 模式**：抽象基类统一处理参数校验、异常转换与日志记录
-- **SimpleSearchClient 内存实现**：基于 `ConcurrentHashMap`，零外部依赖，适用于开发和测试环境
+- **SimpleSearchComponent 内存实现**：基于 `ConcurrentHashMap`，零外部依赖，适用于开发和测试环境
 - 支持全文关键字匹配：所有字段值的 `String.contains(keyword)` 匹配
 - 支持分页查询和聚合统计
-- 自动装配：默认启用，`middleware.search.enabled` 控制
+- 自动装配：默认启用，`component.search.enabled` 控制
 
-**模块坐标：** `org.smm.archetype:client-search`
+**模块坐标：** `org.smm.archetype:component-search`
 
 ## 业务场景
 
@@ -43,7 +43,7 @@
 
 ```mermaid
 classDiagram
-    class SearchClient {
+    class SearchComponent {
         <<interface>>
         +index(indexName: String, id: String, document: Object): void
         +bulkIndex(indexName: String, documents: List~Map~): void
@@ -62,7 +62,7 @@ classDiagram
         +count(indexName: String): long
     }
 
-    class AbstractSearchClient {
+    class AbstractSearchComponent {
         <<abstract>>
         #doIndex(indexName, id, document): void*
         #doBulkIndex(indexName, documents): void*
@@ -80,7 +80,7 @@ classDiagram
         #doCount(indexName): long*
     }
 
-    class SimpleSearchClient {
+    class SimpleSearchComponent {
         -documents: ConcurrentHashMap~String, Map~
         -indices: Set~String~
     }
@@ -106,30 +106,30 @@ classDiagram
         +maxPageSize: int
     }
 
-    SearchClient <|.. AbstractSearchClient : implements
-    AbstractSearchClient <|-- SimpleSearchClient : extends
-    SearchClient ..> SearchQuery : 参数
-    SearchClient ..> SearchResult : 返回值
+    SearchComponent <|.. AbstractSearchComponent : implements
+    AbstractSearchComponent <|-- SimpleSearchComponent : extends
+    SearchComponent ..> SearchQuery : 参数
+    SearchComponent ..> SearchResult : 返回值
     SearchAutoConfiguration ..> SearchProperties : @EnableConfigurationProperties
-    SearchAutoConfiguration ..> SimpleSearchClient : @Bean
+    SearchAutoConfiguration ..> SimpleSearchComponent : @Bean
 ```
 
 ### 关键类说明
 
 | 类名 | 职责 | 关键方法 |
 |------|------|----------|
-| `SearchClient` | 搜索操作接口，定义 15 个方法 | 索引操作、文档操作、查询操作 |
-| `AbstractSearchClient` | 抽象基类，Template Method 模式骨架 | `final` 公开方法 + `do*` 扩展点 |
-| `SimpleSearchClient` | 内存实现，ConcurrentHashMap 存储 | 全文匹配、分页、聚合 |
+| `SearchComponent` | 搜索操作接口，定义 15 个方法 | 索引操作、文档操作、查询操作 |
+| `AbstractSearchComponent` | 抽象基类，Template Method 模式骨架 | `final` 公开方法 + `do*` 扩展点 |
+| `SimpleSearchComponent` | 内存实现，ConcurrentHashMap 存储 | 全文匹配、分页、聚合 |
 | `SearchQuery` | 搜索查询 record | `keyword`, `indexName`, `pageNo`, `pageSize` |
 | `SearchResult` | 搜索结果 record | `total`, `records`, `pageNo`, `pageSize` |
 | `SearchProperties` | 配置属性类 | `defaultPageSize`, `maxPageSize` |
 
 ### Template Method 模式
 
-本客户端采用 Template Method 模式实现统一的校验/日志骨架。公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点。详见 [设计模式](../architecture/design-patterns.md)。
+本组件采用 Template Method 模式实现统一的校验/日志骨架。公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点。详见 [设计模式](../architecture/design-patterns.md)。
 
-### SimpleSearchClient 存储结构
+### SimpleSearchComponent 存储结构
 
 ```
 documents (ConcurrentHashMap)
@@ -151,7 +151,7 @@ indices (ConcurrentHashMap.newKeySet)
 ```yaml
 # 自动装配条件
 @ConditionalOnProperty(                                 # 配置开关
-  prefix = "middleware.search",
+  prefix = "component.search",
   name = "enabled",
   havingValue = "true",
   matchIfMissing = true                                 # 默认启用
@@ -160,7 +160,7 @@ indices (ConcurrentHashMap.newKeySet)
 
 ## API 参考
 
-### SearchClient 接口方法（15 个）
+### SearchComponent 接口方法（15 个）
 
 #### 索引操作（3 个）
 
@@ -221,9 +221,9 @@ indices (ConcurrentHashMap.newKeySet)
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `middleware.search.enabled` | `boolean` | `true` | 是否启用搜索客户端 |
-| `middleware.search.default-page-size` | `int` | `10` | 默认每页大小 |
-| `middleware.search.max-page-size` | `int` | `100` | 最大每页大小 |
+| `component.search.enabled` | `boolean` | `true` | 是否启用搜索组件 |
+| `component.search.default-page-size` | `int` | `10` | 默认每页大小 |
+| `component.search.max-page-size` | `int` | `100` | 最大每页大小 |
 
 ## 使用指南
 
@@ -234,7 +234,7 @@ indices (ConcurrentHashMap.newKeySet)
 @Service
 public class ArticleService {
 
-    private final SearchClient searchClient;
+    private final SearchComponent searchClient;
 
     // 索引单条文档
     public void indexArticle(Article article) {
@@ -343,8 +343,8 @@ middleware:
 
 | 文档 | 说明 |
 |------|------|
-| [Template Method 模式](../architecture/design-patterns.md) | `AbstractSearchClient` 基类的设计模式说明 |
-| [配置前缀规范](../conventions/configuration.md) | `middleware.search.*` 配置前缀约定 |
+| [Template Method 模式](../architecture/design-patterns.md) | `AbstractSearchComponent` 基类的设计模式说明 |
+| [配置前缀规范](../conventions/configuration.md) | `component.search.*` 配置前缀约定 |
 
 ### 下游消费者
 
@@ -357,8 +357,8 @@ middleware:
 
 | 文档 | 说明 |
 |------|------|
-| [系统全景](../architecture/system-overview.md) | C4 架构中 client-search 的定位 |
-| [模块结构](../architecture/module-structure.md) | Maven 多模块结构中 client-search 的依赖关系 |
+| [系统全景](../architecture/system-overview.md) | C4 架构中 component-search 的定位 |
+| [模块结构](../architecture/module-structure.md) | Maven 多模块结构中 component-search 的依赖关系 |
 
 ## 变更历史
 | 日期 | 变更内容 |
