@@ -1,7 +1,5 @@
 package org.smm.archetype.shared.aspect.operationlog;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.DisplayName;
@@ -34,8 +32,7 @@ class LogAspectDBUTest {
     private LogAspect logAspect;
 
     private void initLogAspect() {
-        MeterRegistry meterRegistry = new SimpleMeterRegistry();
-        logAspect = new LogAspect(meterRegistry, operationLogWriter);
+        logAspect = new LogAspect(operationLogWriter);
     }
 
     private void mockJoinPoint(String methodName, Class<?>[] paramTypes, Object[] args, Object result) throws Throwable {
@@ -168,10 +165,9 @@ class LogAspectDBUTest {
     }
 
     @Test
-    @DisplayName("单参构造（无 OperationLogWriter）时不抛 NPE")
-    void should_not_throw_npe_with_single_arg_constructor() throws Throwable {
-        MeterRegistry meterRegistry = new SimpleMeterRegistry();
-        logAspect = new LogAspect(meterRegistry); // 无 OperationLogWriter
+    @DisplayName("无参构造（无 OperationLogWriter）时不抛 NPE")
+    void should_not_throw_npe_with_no_arg_constructor() throws Throwable {
+        logAspect = new LogAspect(); // 无 OperationLogWriter
         mockJoinPoint("dummySuccessMethod", new Class[] {String.class}, new Object[] {"input"}, "ok");
 
         Object result = logAspect.doAround(joinPoint);

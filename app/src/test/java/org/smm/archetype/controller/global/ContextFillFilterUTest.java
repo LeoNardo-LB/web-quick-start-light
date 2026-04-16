@@ -1,6 +1,7 @@
 package org.smm.archetype.controller.global;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -10,10 +11,14 @@ import org.mockito.Mock;
 import org.smm.archetype.component.auth.AuthComponent;
 import org.smm.archetype.support.UnitTestBase;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @DisplayName("ContextFillFilter")
 class ContextFillFilterUTest extends UnitTestBase {
@@ -82,60 +87,6 @@ class ContextFillFilterUTest extends UnitTestBase {
     }
 
     // =========================================================================
-    // resolveTraceId
-    // =========================================================================
-
-    @Nested
-    @DisplayName("resolveTraceId")
-    class ResolveTraceId {
-
-        @Test
-        @DisplayName("Header 中已有 X-Trace-Id 时应透传该值")
-        void should_pass_through_trace_id_from_header() throws Exception {
-            ContextFillFilter filter = new ContextFillFilter();
-            when(request.getHeader("X-Trace-Id")).thenReturn("existing-trace-id");
-
-            Method method = ContextFillFilter.class.getDeclaredMethod("resolveTraceId", HttpServletRequest.class);
-            method.setAccessible(true);
-            String traceId = (String) method.invoke(filter, request);
-
-            assertThat(traceId).isEqualTo("existing-trace-id");
-            assertThat(traceId).isNotEmpty();
-            verify(request).getHeader("X-Trace-Id");
-        }
-
-        @Test
-        @DisplayName("Header 中 X-Trace-Id 为空字符串时应自动生成")
-        void should_generate_trace_id_when_header_is_empty() throws Exception {
-            ContextFillFilter filter = new ContextFillFilter();
-            when(request.getHeader("X-Trace-Id")).thenReturn("");
-
-            Method method = ContextFillFilter.class.getDeclaredMethod("resolveTraceId", HttpServletRequest.class);
-            method.setAccessible(true);
-            String traceId = (String) method.invoke(filter, request);
-
-            assertThat(traceId).isNotEmpty();
-            assertThat(traceId).doesNotContain("-");
-            assertThat(traceId).hasSize(32);
-        }
-
-        @Test
-        @DisplayName("Header 中不存在 X-Trace-Id 时应自动生成")
-        void should_generate_trace_id_when_header_is_missing() throws Exception {
-            ContextFillFilter filter = new ContextFillFilter();
-            when(request.getHeader("X-Trace-Id")).thenReturn(null);
-
-            Method method = ContextFillFilter.class.getDeclaredMethod("resolveTraceId", HttpServletRequest.class);
-            method.setAccessible(true);
-            String traceId = (String) method.invoke(filter, request);
-
-            assertThat(traceId).isNotNull();
-            assertThat(traceId).isNotEmpty();
-            assertThat(traceId).doesNotContain("-");
-        }
-    }
-
-    // =========================================================================
     // doFilterInternal
     // =========================================================================
 
@@ -144,14 +95,12 @@ class ContextFillFilterUTest extends UnitTestBase {
     class DoFilterInternal {
 
         @Test
-        @DisplayName("应将 traceId 设置到 response header 并继续过滤链")
-        void should_set_trace_id_to_response_and_continue_chain() throws Exception {
+        @DisplayName("应正常执行过滤链")
+        void should_continue_filter_chain() throws Exception {
             ContextFillFilter filter = new ContextFillFilter();
-            when(request.getHeader("X-Trace-Id")).thenReturn("my-trace-123");
 
             filter.doFilterInternal(request, response, filterChain);
 
-            verify(response).setHeader("X-Trace-Id", "my-trace-123");
             verify(filterChain).doFilter(request, response);
         }
 
@@ -159,13 +108,58 @@ class ContextFillFilterUTest extends UnitTestBase {
         @DisplayName("无 AuthComponent 时应使用 SYSTEM 作为 userId 并正常完成过滤")
         void should_use_system_user_when_no_auth_client() throws Exception {
             ContextFillFilter filter = new ContextFillFilter();
-            when(request.getHeader("X-Trace-Id")).thenReturn(null);
 
             filter.doFilterInternal(request, response, filterChain);
 
-            verify(response).setHeader(eq("X-Trace-Id"), anyString());
             verify(filterChain).doFilter(request, response);
-            verifyNoInteractions(authComponent);
+        }
+
+        @Test
+        @DisplayName("有 AuthComponent 时应从 AuthComponent 获取 userId")
+        void should_get_user_id_from_auth_component() throws Exception {
+            when(authComponent.getCurrentUserId()).thenReturn("user-99");
+            ContextFillFilter filter = new ContextFillFilter(authComponent);
+
+            filter.doFilterInternal(request, response, filterChain);
+
+            verify(authComponent).getCurrentUserId();
+            verify(filterChain).doFilter(request, response);
+        }
+
+        @Test
+        @DisplayName("AuthComponent 返回 null 时 doFilterInternal 应使用 ANONYMOUS 作为 userId")
+        void should_use_anonymous_when_auth_component_returns_null() throws Exception {
+            when(authComponent.getCurrentUserId()).thenReturn(null);
+            ContextFillFilter filter = new ContextFillFilter(authComponent);
+
+            filter.doFilterInternal(request, response, filterChain);
+
+            verify(authComponent).getCurrentUserId();
+            verify(filterChain).doFilter(request, response);
+        }
+
+        @Test
+        @DisplayName("filterChain 抛出 IOException 时应包装为 RuntimeException")
+        void should_wrap_io_exception_as_runtime_exception() throws Exception {
+            ContextFillFilter filter = new ContextFillFilter();
+            doThrow(new IOException("simulated IO error"))
+                    .when(filterChain).doFilter(request, response);
+
+            assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasCauseInstanceOf(IOException.class);
+        }
+
+        @Test
+        @DisplayName("filterChain 抛出 ServletException 时应包装为 RuntimeException")
+        void should_wrap_servlet_exception_as_runtime_exception() throws Exception {
+            ContextFillFilter filter = new ContextFillFilter();
+            doThrow(new ServletException("simulated servlet error"))
+                    .when(filterChain).doFilter(request, response);
+
+            assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasCauseInstanceOf(ServletException.class);
         }
     }
 

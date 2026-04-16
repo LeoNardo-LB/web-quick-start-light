@@ -61,6 +61,9 @@ public final class KryoSerializer {
         kryo.setReferences(true);              // 启用循环引用支持
         kryo.setAutoReset(true);               // 自动重置避免状态污染
         DEFAULT_SERIALIZERS.forEach(kryo::register);
+        // 对 InetAddress 和 URL 的子类也使用自定义序列化器，避免 Kryo 对子类使用反射序列化器
+        kryo.addDefaultSerializer(InetAddress.class, DEFAULT_SERIALIZERS.get(InetAddress.class));
+        kryo.addDefaultSerializer(URL.class, DEFAULT_SERIALIZERS.get(URL.class));
         return kryo;
     });
 

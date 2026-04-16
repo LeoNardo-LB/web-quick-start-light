@@ -3,7 +3,7 @@ package org.smm.archetype.shared.util.dal;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
-import org.smm.archetype.shared.util.context.ScopedThreadContext;
+import org.smm.archetype.shared.util.context.BizContext;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,7 +14,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void insertFill(MetaObject metaObject) {
-        String userId = ScopedThreadContext.getUserId();
+        String userId = BizContext.getUserId();
         if (userId == null)
             userId = "system";
 
@@ -26,7 +26,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        String userId = ScopedThreadContext.getUserId();
+        String userId = BizContext.getUserId();
         if (userId == null)
             userId = "system";
 

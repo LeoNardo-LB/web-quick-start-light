@@ -80,13 +80,18 @@ class ApiEndpointITest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("INV: traceId 同时出现在响应头和响应体中")
-        void should_traceIdAppearInBothHeaderAndBody() {
+        @DisplayName("INV: traceId 出现在响应体中（32 字符 hex）")
+        void should_traceIdAppearInResponseBody() {
             webTestClient.get().uri("/api/test/hello")
                     .exchange()
                     .expectStatus().isOk()
-                    .expectHeader().value("X-Trace-Id", traceId ->
-                            assertThat(traceId).isNotNull().isNotBlank());
+                    .expectBody(Map.class)
+                    .consumeWith(response -> {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> body = response.getResponseBody();
+                        String traceId = (String) body.get("traceId");
+                        assertThat(traceId).isNotNull().hasSize(32);
+                    });
         }
     }
 

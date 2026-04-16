@@ -1,6 +1,7 @@
 package org.smm.archetype.entity.base;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.opentelemetry.api.trace.Span;
 import lombok.Getter;
 import lombok.Setter;
 import org.smm.archetype.exception.CommonErrorCode;
@@ -50,7 +51,7 @@ public class BasePageResult<T> extends BaseResult<List<T>> {
         basePageResult.setData(page.getRecords());
         basePageResult.setSuccess(true);
         basePageResult.setTime(Instant.now());
-        basePageResult.setTraceId(org.smm.archetype.shared.util.context.ScopedThreadContext.getTraceId());
+        basePageResult.setTraceId(Span.current().getSpanContext().getTraceId());
         return basePageResult;
     }
     

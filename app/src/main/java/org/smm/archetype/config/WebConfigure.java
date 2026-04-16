@@ -31,7 +31,8 @@ public class WebConfigure {
         FilterRegistrationBean<ContextFillFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new ContextFillFilter(authComponent));
         registration.addUrlPatterns("/*");
-        registration.setOrder(1);
+        // Order 确保在 OTel Servlet Filter 之后执行，以便 OTel Span 已创建
+        registration.setOrder(100);
         registration.setName("contextFillFilter");
         return registration;
     }

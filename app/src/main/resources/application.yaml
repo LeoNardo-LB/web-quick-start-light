@@ -27,6 +27,16 @@ springdoc:
 logging:
   config: classpath:logback-spring.xml
 
+# Actuator 端点暴露
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  tracing:
+    sampling:
+      probability: 1.0
+
 # App info (used by AppInfoProperties for startup banner)
 app:
   port: ${server.port}

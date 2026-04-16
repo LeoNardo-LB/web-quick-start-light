@@ -1,0 +1,27 @@
+# Jaeger All-in-One 配置（Testcontainers 用）
+# 仅用于开发/测试环境的轻量级追踪后端
+#
+# Jaeger 2.x 原生支持 OTLP Receiver（V3 标准），
+# 无需 COLLECTOR_OTLP_ENABLED 环境变量。
+#
+# 采集端口：4317 (gRPC) / 4318 (HTTP) — OTLP 协议
+# 查询端口：16686 (HTTP UI + V3 API) / 16685 (gRPC V3 API)
+
+connectors:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
+
+  telemetry:
+    logs:
+      level: info

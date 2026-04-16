@@ -8,32 +8,39 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.smm.archetype.component.auth.AuthComponent;
-import org.smm.archetype.shared.util.context.ScopedThreadContext;
+import org.smm.archetype.shared.util.context.BizContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
+/**
+ * 上下文桥接 Filter。
+ * <p>
+ * 职责：
+ * <ol>
+ *   <li>从 AuthComponent 获取 userId</li>
+ *   <li>通过 {@link BizContext#runWithContext} 同时填充：
+ *       <ul>
+ *         <li>ScopedValue（业务上下文：userId）</li>
+ *         <li>OTel Baggage（propagated=true 的键自动同步，如 userId）</li>
+ *       </ul>
+ *   </li>
+ * </ol>
+ * <p>
+ * 注意：traceId 由 OTel Span 全权负责，通过 BaseResult.traceId 返回给前端，
+ * 不需要手动设置 response header。
+ */
 @Slf4j
 public class ContextFillFilter extends OncePerRequestFilter {
-    private static final String TRACE_ID_HEADER = "X-Trace-Id";
     private static final String ANONYMOUS_USER = "ANONYMOUS";
     private static final String SYSTEM_USER = "SYSTEM";
 
     private final AuthComponent authComponent;
 
-    /**
-     * 兼容旧调用方式：无 AuthComponent 时使用 SYSTEM 作为 userId。
-     */
     public ContextFillFilter() {
         this(null);
     }
 
-    /**
-     * 注入 AuthComponent，用于获取当前登录用户 ID。
-     *
-     * @param authComponent 认证客户端（可为 null）
-     */
     public ContextFillFilter(@Nullable AuthComponent authComponent) {
         this.authComponent = authComponent;
     }
@@ -41,25 +48,17 @@ public class ContextFillFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
                                     @Nonnull FilterChain filterChain) throws ServletException, IOException {
-        String traceId = resolveTraceId(request);
-        response.setHeader(TRACE_ID_HEADER, traceId);
+        // 1. 解析 userId
         String userId = resolveUserId();
-        ScopedThreadContext.runWithContext(() -> {
+
+        // 2. runWithContext 自动处理 ScopedValue + OTel Baggage（propagated 键自动同步）
+        BizContext.runWithContext(() -> {
             try {
                 filterChain.doFilter(request, response);
             } catch (IOException | ServletException e) {
-                log.error("Error processing request", e);
                 throw new RuntimeException(e);
             }
-        }, userId, traceId);
-    }
-
-    private String resolveTraceId(HttpServletRequest request) {
-        String traceId = request.getHeader(TRACE_ID_HEADER);
-        if (traceId == null || traceId.isEmpty()) {
-            traceId = UUID.randomUUID().toString().replace("-", "");
-        }
-        return traceId;
+        }, BizContext.Key.USER_ID, userId);
     }
 
     private String resolveUserId() {

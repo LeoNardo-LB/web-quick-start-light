@@ -1,13 +1,13 @@
 package org.smm.archetype.facade.operationlog;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.opentelemetry.api.trace.Span;
 import lombok.RequiredArgsConstructor;
 import org.smm.archetype.entity.base.BasePageResult;
 import org.smm.archetype.entity.operationlog.OperationLog;
 import org.smm.archetype.entity.operationlog.OperationLogPageQuery;
 import org.smm.archetype.exception.CommonErrorCode;
 import org.smm.archetype.service.operationlog.OperationLogService;
-import org.smm.archetype.shared.util.context.ScopedThreadContext;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -41,7 +41,7 @@ public class OperationLogFacadeImpl implements OperationLogFacade {
         result.setData(voList);
         result.setSuccess(true);
         result.setTime(Instant.now());
-        result.setTraceId(ScopedThreadContext.getTraceId());
+        result.setTraceId(Span.current().getSpanContext().getTraceId());
         return result;
     }
 

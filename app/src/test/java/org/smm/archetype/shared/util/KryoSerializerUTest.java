@@ -315,7 +315,6 @@ class KryoSerializerUTest extends UnitTestBase {
 
         @Test
         @DisplayName("InetAddress 序列化与反序列化应保持值一致")
-        @org.junit.jupiter.api.Disabled("Java 25 模块系统禁止 Kryo 反射访问 InetAddress.holder 字段，需要 --add-opens java.base/java.net=ALL-UNNAMED")
         void should_roundtrip_inetaddress() throws Exception {
             // given
             InetAddress original = InetAddress.getByName("127.0.0.1");

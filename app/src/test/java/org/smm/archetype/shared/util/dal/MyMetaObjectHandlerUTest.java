@@ -12,7 +12,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.smm.archetype.shared.util.context.ScopedThreadContext;
+import org.smm.archetype.shared.util.context.BizContext;
 import org.smm.archetype.support.UnitTestBase;
 
 import java.time.Instant;
@@ -76,7 +76,7 @@ class MyMetaObjectHandlerUTest extends UnitTestBase {
             Instant before = Instant.now();
 
             // act
-            ScopedThreadContext.runWithContext(() -> handler.insertFill(metaObject), userId, "trace-001");
+            BizContext.runWithContext(() -> handler.insertFill(metaObject), BizContext.Key.USER_ID, userId);
 
             Instant after = Instant.now();
 
@@ -126,7 +126,7 @@ class MyMetaObjectHandlerUTest extends UnitTestBase {
             String userId = "user-003";
 
             // act
-            ScopedThreadContext.runWithContext(() -> handler.insertFill(metaObject), userId, "trace-003");
+            BizContext.runWithContext(() -> handler.insertFill(metaObject), BizContext.Key.USER_ID, userId);
 
             // assert - 验证调用了 4 次 strictInsertFill
             verify(handler).strictInsertFill(eq(metaObject), eq("createTime"), eq(Instant.class), any());
@@ -152,7 +152,7 @@ class MyMetaObjectHandlerUTest extends UnitTestBase {
             Instant before = Instant.now();
 
             // act
-            ScopedThreadContext.runWithContext(() -> handler.updateFill(metaObject), userId, "trace-002");
+            BizContext.runWithContext(() -> handler.updateFill(metaObject), BizContext.Key.USER_ID, userId);
 
             Instant after = Instant.now();
 
@@ -187,7 +187,7 @@ class MyMetaObjectHandlerUTest extends UnitTestBase {
             String userId = "user-004";
 
             // act
-            ScopedThreadContext.runWithContext(() -> handler.updateFill(metaObject), userId, "trace-004");
+            BizContext.runWithContext(() -> handler.updateFill(metaObject), BizContext.Key.USER_ID, userId);
 
             // assert
             verify(handler).strictUpdateFill(eq(metaObject), eq("updateTime"), eq(Instant.class), any());

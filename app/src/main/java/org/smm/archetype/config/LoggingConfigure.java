@@ -1,7 +1,6 @@
 package org.smm.archetype.config;
 
 import ch.qos.logback.classic.LoggerContext;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
@@ -56,12 +55,12 @@ public class LoggingConfigure implements ApplicationListener<ApplicationReadyEve
     private OperationLogWriter operationLogWriter;
 
     @Bean
-    public LogAspect logAspect(MeterRegistry meterRegistry) {
+    public LogAspect logAspect() {
         log.info("[CONFIG] LoggingConfigure: registering LogAspect");
         if (operationLogWriter != null) {
-            return new LogAspect(meterRegistry, operationLogWriter);
+            return new LogAspect(operationLogWriter);
         }
-        return new LogAspect(meterRegistry);
+        return new LogAspect();
     }
 
     @Bean

@@ -1,6 +1,5 @@
 package org.smm.archetype.config;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -153,25 +152,23 @@ class LoggingConfigureDirectoryUTest extends UnitTestBase {
     class LogAspectBean {
 
         @Test
-        @DisplayName("无 OperationLogWriter 时使用单参数构造")
+        @DisplayName("无 OperationLogWriter 时使用无参构造")
         void should_create_logAspect_without_writer() {
-            MeterRegistry meterRegistry = mock(MeterRegistry.class);
             LoggingConfigure configure = new LoggingConfigure(envWithPath(tempDir.toString()));
 
-            LogAspect aspect = configure.logAspect(meterRegistry);
+            LogAspect aspect = configure.logAspect();
 
             assertThat(aspect).isNotNull();
         }
 
         @Test
-        @DisplayName("有 OperationLogWriter 时使用双参数构造")
+        @DisplayName("有 OperationLogWriter 时使用带参构造")
         void should_create_logAspect_with_writer() {
-            MeterRegistry meterRegistry = mock(MeterRegistry.class);
             OperationLogWriter writer = mock(OperationLogWriter.class);
             LoggingConfigure configure = new LoggingConfigure(envWithPath(tempDir.toString()));
             ReflectionTestUtils.setField(configure, "operationLogWriter", writer);
 
-            LogAspect aspect = configure.logAspect(meterRegistry);
+            LogAspect aspect = configure.logAspect();
 
             assertThat(aspect).isNotNull();
         }

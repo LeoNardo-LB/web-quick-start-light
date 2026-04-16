@@ -1,10 +1,10 @@
 package org.smm.archetype.entity.base;
 
+import io.opentelemetry.api.trace.Span;
 import lombok.Getter;
 import lombok.Setter;
 import org.smm.archetype.exception.CommonErrorCode;
 import org.smm.archetype.exception.ErrorCode;
-import org.smm.archetype.shared.util.context.ScopedThreadContext;
 
 import java.time.Instant;
 
@@ -39,7 +39,7 @@ public class BaseResult<T> {
     private T data;
 
     /**
-     * traceId
+     * traceId（OTel W3C 标准 32 字符 hex）
      */
     private String traceId;
 
@@ -62,7 +62,7 @@ public class BaseResult<T> {
         result.success = false;
         result.message = msg;
         result.time = Instant.now();
-        result.traceId = ScopedThreadContext.getTraceId();
+        result.traceId = Span.current().getSpanContext().getTraceId();
         return result;
     }
 
@@ -73,7 +73,7 @@ public class BaseResult<T> {
         result.success = true;
         result.data = data;
         result.time = Instant.now();
-        result.traceId = ScopedThreadContext.getTraceId();
+        result.traceId = Span.current().getSpanContext().getTraceId();
         return result;
     }
 
