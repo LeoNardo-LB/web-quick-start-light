@@ -33,18 +33,28 @@ class TechClientInterfaceITest extends IntegrationTestBase {
     }
 
     @Test
-    @DisplayName("SearchComponent Bean 已注册（SimpleSearchComponent）")
+    @DisplayName("SearchComponent Bean 已注册且索引操作可用")
     void should_searchClientBeanBeAvailable() {
         SearchComponent client = applicationContext.getBean(SearchComponent.class);
         assertThat(client).isNotNull();
         assertThat(client.getClass().getSimpleName()).contains("Simple");
+
+        // 验证真实索引操作：创建 → 验证存在 → 删除
+        String testIndex = "itest-verify-index";
+        assertThat(client.createIndex(testIndex)).isTrue();
+        assertThat(client.existsIndex(testIndex)).isTrue();
+        assertThat(client.deleteIndex(testIndex)).isTrue();
+        assertThat(client.existsIndex(testIndex)).isFalse();
     }
 
     @Test
-    @DisplayName("OssComponent Bean 已注册（LocalOssComponent）")
+    @DisplayName("OssComponent Bean 已注册且文件操作可用")
     void should_ossClientBeanBeAvailable() {
         OssComponent client = applicationContext.getBean(OssComponent.class);
         assertThat(client).isNotNull();
         assertThat(client.getClass().getSimpleName()).contains("Local");
+
+        // 验证真实 I/O：不存在的文件返回 false
+        assertThat(client.exists("nonexistent-key-itest-" + System.nanoTime())).isFalse();
     }
 }
