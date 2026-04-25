@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# web-quick-start-light 生产环境启动脚本
+# ${rootArtifactId} 生产环境启动脚本
 # JVM 最大内存: 1G，适用于 Spring Boot 3.5 + Java 25 脚手架项目
 #
 # 用法:
@@ -13,7 +13,7 @@ set -euo pipefail
 
 # ========== 基础配置 ==========
 
-APP_NAME="web-quick-start-light"
+APP_NAME="${rootArtifactId}"
 APP_GROUP="org.smm.archetype"
 PROFILE="${1:-prod}"
 JAR_PATH="${2:-app/target/app-0.0.1-SNAPSHOT.jar}"

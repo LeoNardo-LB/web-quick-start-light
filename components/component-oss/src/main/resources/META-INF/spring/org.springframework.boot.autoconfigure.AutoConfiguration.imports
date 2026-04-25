@@ -1,1 +1,1 @@
-org.smm.archetype.component.oss.OssAutoConfiguration
+${package}.component.oss.OssAutoConfiguration

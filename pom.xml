@@ -50,38 +50,38 @@
         <dependencies>
             <!-- 内部模块 -->
             <dependency>
-                <groupId>org.smm.archetype</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.smm.archetype</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>component-cache</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.smm.archetype</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>component-oss</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.smm.archetype</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>component-email</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.smm.archetype</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>component-sms</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.smm.archetype</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>component-search</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- component-log、component-ratelimit、component-idempotent 已迁移到 app/shared/ 包下，不再作为独立模块 -->
             <dependency>
-                <groupId>org.smm.archetype</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>component-auth</artifactId>
                 <version>${project.version}</version>
             </dependency>

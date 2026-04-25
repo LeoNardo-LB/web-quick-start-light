@@ -22,12 +22,12 @@ public class AppInfoProperties {
     /**
      * 上下文路径
      */
-    private String contextPath = "/quickstart-light";
+    private String contextPath;
 
     /**
      * 应用名称
      */
-    private String appName = "quickstart-light";
+    private String appName;
 
     /**
      * Swagger UI 路径

@@ -1,0 +1,263 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-04-25T12:00:00Z",
+  "project": {
+    "name": "web-quick-start-light",
+    "description": "Spring Boot 4.x + Java 25 多模块四层架构脚手架",
+    "architecture": "layered",
+    "architectureStyle": "DDD-lite + Template Method components",
+    "rootPath": ".",
+    "group": "org.smm.archetype",
+    "version": "0.0.1-SNAPSHOT"
+  },
+  "techStack": {
+    "languages": ["Java 25"],
+    "frameworks": ["Spring Boot 4.0.2", "MyBatis-Plus 3.5.16", "Sa-Token 1.45.0"],
+    "buildTools": ["Maven"],
+    "databases": ["SQLite 3.51.3"],
+    "cache": "Caffeine",
+    "serialization": ["FastJSON2 2.0.61", "Kryo 5.6.2"],
+    "apiDoc": "SpringDoc OpenAPI 3.0.3",
+    "aop": ["Spring AOP (AspectJ)", "Bucket4j 8.17.0"],
+    "tools": ["Lombok", "Hutool 5.8.44", "MapStruct 1.6.3", "ArchUnit 1.4.1"],
+    "tracing": "OpenTelemetry + Jaeger",
+    "logging": "SLF4J + Logback + LogstashEncoder",
+    "sourcePatterns": ["src/main/java/**/*.java"]
+  },
+  "modules": [
+    {
+      "name": "common",
+      "path": "common/",
+      "layer": "foundation",
+      "description": "公共异常体系 + 错误码 + 基础类型"
+    },
+    {
+      "name": "component-auth",
+      "path": "components/component-auth/",
+      "layer": "infrastructure",
+      "description": "认证组件（Sa-Token / NoOp）"
+    },
+    {
+      "name": "component-cache",
+      "path": "components/component-cache/",
+      "layer": "infrastructure",
+      "description": "缓存组件（Caffeine）"
+    },
+    {
+      "name": "component-email",
+      "path": "components/component-email/",
+      "layer": "infrastructure",
+      "description": "邮件组件（NoOp 占位）"
+    },
+    {
+      "name": "component-oss",
+      "path": "components/component-oss/",
+      "layer": "infrastructure",
+      "description": "对象存储组件（本地文件系统）"
+    },
+    {
+      "name": "component-search",
+      "path": "components/component-search/",
+      "layer": "infrastructure",
+      "description": "搜索组件（内存实现）"
+    },
+    {
+      "name": "component-sms",
+      "path": "components/component-sms/",
+      "layer": "infrastructure",
+      "description": "短信组件（NoOp 占位）"
+    },
+    {
+      "name": "shared-util",
+      "path": "app/src/main/java/org/smm/archetype/shared/util/",
+      "layer": "shared",
+      "description": "工具类 + BizContext + 序列化 + DAL"
+    },
+    {
+      "name": "shared-aspect",
+      "path": "app/src/main/java/org/smm/archetype/shared/aspect/",
+      "layer": "shared",
+      "description": "AOP 切面（幂等/日志/限流）"
+    },
+    {
+      "name": "generated",
+      "path": "app/src/main/java/org/smm/archetype/generated/",
+      "layer": "generated",
+      "description": "MyBatis-Plus 代码生成 Entity/Mapper（禁止手动修改）"
+    },
+    {
+      "name": "entity-repo-svc",
+      "path": "app/src/main/java/org/smm/archetype/entity/",
+      "layer": "business",
+      "description": "领域实体 + Repository + Service"
+    },
+    {
+      "name": "app-upper",
+      "path": "app/src/main/java/org/smm/archetype/controller/",
+      "layer": "presentation",
+      "description": "Controller + Facade + Config + Properties"
+    }
+  ],
+  "codeStructure": {
+    "rootPath": ".",
+    "layers": [
+      {
+        "name": "controller",
+        "path": "app/src/main/java/org/smm/archetype/controller/",
+        "generalizedName": "routing"
+      },
+      {
+        "name": "facade",
+        "path": "app/src/main/java/org/smm/archetype/facade/",
+        "generalizedName": "business"
+      },
+      {
+        "name": "service",
+        "path": "app/src/main/java/org/smm/archetype/service/",
+        "generalizedName": "business"
+      },
+      {
+        "name": "repository",
+        "path": "app/src/main/java/org/smm/archetype/repository/",
+        "generalizedName": "data"
+      },
+      {
+        "name": "entity",
+        "path": "app/src/main/java/org/smm/archetype/entity/",
+        "generalizedName": "model"
+      },
+      {
+        "name": "config",
+        "path": "app/src/main/java/org/smm/archetype/config/",
+        "generalizedName": "configuration"
+      },
+      {
+        "name": "shared-aspect",
+        "path": "app/src/main/java/org/smm/archetype/shared/aspect/",
+        "generalizedName": "cross-cutting"
+      },
+      {
+        "name": "shared-util",
+        "path": "app/src/main/java/org/smm/archetype/shared/util/",
+        "generalizedName": "cross-cutting"
+      }
+    ],
+    "dependencyRules": {
+      "allowed": [
+        "Controller → Facade",
+        "Facade → Service",
+        "Service → Repository",
+        "Repository → Generated",
+        "All layers → Entity"
+      ],
+      "forbidden": [
+        "Controller → Service",
+        "Controller → Repository",
+        "Controller → Generated",
+        "Entity → Spring Framework"
+      ]
+    }
+  },
+  "docSystem": {
+    "system": "doc-sys-gen",
+    "entryFile": "AGENTS.md",
+    "totalDocuments": 22,
+    "totalLines": 8601,
+    "tracks": {
+      "Intent": {
+        "count": 4,
+        "maintainer": "Frozen",
+        "description": "设计意图，创建后冻结"
+      },
+      "Contract": {
+        "count": 15,
+        "maintainer": "AI",
+        "description": "代码契约，跟随代码同步"
+      },
+      "Constraint": {
+        "count": 3,
+        "maintainer": "Human",
+        "description": "约束规则，驱动代码生成"
+      }
+    },
+    "groups": [
+      {
+        "name": "architecture",
+        "path": "doc-sys/architecture/",
+        "role": "systemic",
+        "primaryTrack": "Intent",
+        "allowedTracks": ["Intent", "Contract"],
+        "templateLevel": "l1-coverage",
+        "documentCount": 2
+      },
+      {
+        "name": "components",
+        "path": "doc-sys/components/",
+        "role": "unit",
+        "primaryTrack": "Contract",
+        "allowedTracks": ["Intent", "Contract"],
+        "templateLevel": "l2-api",
+        "documentCount": 6
+      },
+      {
+        "name": "business",
+        "path": "doc-sys/business/",
+        "role": "unit",
+        "primaryTrack": "Contract",
+        "allowedTracks": ["Contract"],
+        "templateLevel": "l2-api",
+        "documentCount": 6
+      },
+      {
+        "name": "infrastructure",
+        "path": "doc-sys/infrastructure/",
+        "role": "systemic",
+        "primaryTrack": "Intent",
+        "allowedTracks": ["Intent", "Contract"],
+        "templateLevel": "l1-coverage",
+        "documentCount": 3
+      },
+      {
+        "name": "guides",
+        "path": "doc-sys/guides/",
+        "role": "rule",
+        "primaryTrack": "Constraint",
+        "allowedTracks": ["Constraint", "Contract"],
+        "templateLevel": "l1-coverage",
+        "documentCount": 5
+      }
+    ]
+  },
+  "generatedCode": {
+    "denyPatterns": [
+      "app/src/main/java/org/smm/archetype/generated/**"
+    ],
+    "scanResults": [
+      {
+        "path": "app/src/main/java/org/smm/archetype/generated/",
+        "tool": "MyBatis-Plus FastAutoGenerator",
+        "templateEngine": "Freemarker",
+        "fileCount": 7,
+        "breakdown": {
+          "generator": 1,
+          "entity": 3,
+          "mapper": 3
+        },
+        "policy": "DO_NOT_EDIT_MANUALLY"
+      }
+    ]
+  },
+  "glossary": {
+    "extraction": "pending",
+    "termsCount": 0,
+    "note": "术语表尚未建立，待后续迭代补充跨文档术语统一映射"
+  },
+  "quality": {
+    "selfcheckPassed": true,
+    "templateCompliance": "22/22",
+    "crossReferencesValid": "26/26",
+    "indexCoverage": "22/22",
+    "dimensionCoverage": "75/75",
+    "adrCount": 10
+  }
+}

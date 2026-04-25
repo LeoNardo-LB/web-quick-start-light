@@ -3,13 +3,12 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### IntelliJ IDEA ###
+### IDE ###
 .idea/
 *.iws
 *.iml
 *.ipr
-
-### Eclipse ###
+.vscode/
 .apt_generated
 .classpath
 .factorypath
@@ -18,29 +17,19 @@ target/
 .springBeans
 .sts4-cache
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-
-### Mac OS ###
-.DS_Store
-
-/logs/
-/data_h2/
-/.idea/
-
-_output
-### Runtime files ###
+### Runtime ###
+logs/
+data_h2/
 app/.logs/
 app/data_sqlite/
-app/logs/
-.opencode/
+*.hprof
+
+### Build ###
+_output
+build/
+
+### Archetype ###
+.doc-sys-gen/
+.generation/
+.ruff_cache/
+node_modules/

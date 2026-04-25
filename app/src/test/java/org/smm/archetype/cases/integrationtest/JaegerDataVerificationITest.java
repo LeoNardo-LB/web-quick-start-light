@@ -45,7 +45,7 @@ class JaegerDataVerificationITest extends IntegrationTestBase {
     private static final String JAEGER_IMAGE = "jaegertracing/jaeger:2.17.0";
 
     /** 应用在 Jaeger 中注册的服务名，与 spring.application.name 一致。 */
-    private static final String SERVICE_NAME = "quickstart-light";
+    private static final String SERVICE_NAME = "web-quick-start-light";
 
     /** OTLP 异步导出 + Jaeger 索引的等待时间。 */
     private static final Duration EXPORT_WAIT = Duration.ofSeconds(5);

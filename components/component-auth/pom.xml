@@ -15,7 +15,7 @@
     <dependencies>
         <!-- 内部模块 -->
         <dependency>
-            <groupId>org.smm.archetype</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>common</artifactId>
         </dependency>
 

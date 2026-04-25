@@ -27,7 +27,7 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [%X{traceId}] - %msg%n"
   level:
-    org.smm.archetype: DEBUG
+    ${package}: DEBUG
 
 # Sa-Token 配置（测试环境）
 sa-token:

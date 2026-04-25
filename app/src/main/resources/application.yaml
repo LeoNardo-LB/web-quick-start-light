@@ -1,8 +1,8 @@
 spring:
   application:
-    name: quickstart-light
+    name: ${rootArtifactId}
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    active: ${symbol_dollar}{SPRING_PROFILES_ACTIVE:dev}
   mvc:
     apiversion:
       default: "1.0"
@@ -15,7 +15,7 @@ spring:
 server:
   port: 9201
   servlet:
-    context-path: /${spring.application.name}
+    context-path: /${symbol_dollar}{spring.application.name}
 
 springdoc:
   show-actuator: true
@@ -39,11 +39,11 @@ management:
 
 # App info (used by AppInfoProperties for startup banner)
 app:
-  port: ${server.port}
-  context-path: ${server.servlet.context-path}
-  app-name: ${spring.application.name}
-  openapi-url: ${springdoc.swagger-ui.path}
-  api-doc-url: ${springdoc.api-docs.path}
+  port: ${symbol_dollar}{server.port}
+  context-path: ${symbol_dollar}{server.servlet.context-path}
+  app-name: ${symbol_dollar}{spring.application.name}
+  openapi-url: ${symbol_dollar}{springdoc.swagger-ui.path}
+  api-doc-url: ${symbol_dollar}{springdoc.api-docs.path}
 
 # Thread pool defaults
 thread-pool:

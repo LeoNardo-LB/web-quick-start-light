@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# web-quick-start-light 优雅停止脚本
+# ${rootArtifactId} 优雅停止脚本
 #
 # 用法:
 #   ./stop.sh          # 默认等待 30 秒
@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-APP_NAME="web-quick-start-light"
+APP_NAME="${rootArtifactId}"
 PID_FILE="logs/${APP_NAME}.pid"
 TIMEOUT="${1:-30}"
 

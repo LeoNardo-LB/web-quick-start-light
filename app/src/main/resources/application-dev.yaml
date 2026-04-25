@@ -21,7 +21,7 @@ mybatis-plus:
 logging:
   level:
     root: info
-    org.smm.archetype: debug
+    ${package}: debug
   slow-query:
     enabled: false
     threshold-ms: 1000
