@@ -505,9 +505,7 @@ class CodingConventionComplianceUTest extends UnitTestBase {
             ArchRuleDefinition.classes()
                     .that().resideInAPackage("..facade..")
                     .and().haveSimpleNameEndingWith("VO")
-                    .or(ArchRuleDefinition.classes()
-                            .that().resideInAPackage("..facade..")
-                            .and().haveSimpleNameEndingWith("DTO"))
+                    .or().haveSimpleNameEndingWith("DTO")
                     .should(com.tngtech.archunit.lang.conditions.ArchConditions.beRecords())
                     .check(importedClasses);
         } catch (AssertionError e) {
@@ -701,7 +699,8 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
                     if (annotationType.contains("RequestMapping") || annotationType.contains("Mapping")) {
                         // 尝试获取 value 或 path 属性
                         Object value = annotation.tryGetExplicitlyDeclaredProperty("value")
-                                .orNull(() -> annotation.tryGetExplicitlyDeclaredProperty("path").orNull());
+                                .or(() -> annotation.tryGetExplicitlyDeclaredProperty("path"))
+                                .orElse(null);
                         if (value != null) {
                             String path = value.toString();
                             if (!path.startsWith(prefix)) {
@@ -782,9 +781,9 @@ class SpringConfigComplianceUTest extends UnitTestBase {
         return new ArchCondition<>("have @ConfigurationProperties prefix starting with '" + prefix + "'") {
             @Override
             public void check(JavaClass clazz, ConditionEvents events) {
-                clazz.getAnnotationOfType("org.springframework.boot.context.properties.ConfigurationProperties")
+                clazz.tryGetAnnotationOfType("org.springframework.boot.context.properties.ConfigurationProperties")
                         .ifPresent(annotation -> {
-                            Object prefixValue = annotation.get("prefix").orNull();
+                            Object prefixValue = annotation.get("prefix").orElse(null);
                             if (prefixValue == null) return;
                             String prefixStr = prefixValue.toString();
                             if (!prefixStr.startsWith(prefix)) {
