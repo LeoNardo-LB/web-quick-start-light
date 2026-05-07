@@ -67,6 +67,7 @@ class SourceScanner {
             walk.filter(p -> p.toString().endsWith(".java"))
                 .filter(p -> p.toString().contains("/" + sourceDir + "/"))
                 .filter(p -> !p.toString().contains("/target/"))
+                .filter(p -> !p.toString().contains("/.worktrees/"))
                 .filter(fileFilter)
                 .filter(p -> {
                     try {
