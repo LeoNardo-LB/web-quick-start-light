@@ -97,12 +97,14 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
                     JavaType returnType = method.getReturnType();
                     String returnTypeName = returnType.getName();
                     if ("void".equals(returnTypeName)) continue;
-                    // 检查返回类型是否在 entity 包下且不是 VO/DTO
+                    // 检查返回类型是否在 entity 包下且不是 VO/DTO/枚举
                     // 排除 entity.base 包中的通用基类（如 BasePageResult）
+                    // 排除枚举类型（枚举在 entity 包下是合理的业务值对象）
                     if (returnTypeName.contains(".entity.")
                             && !returnTypeName.contains(".entity.base.")
                             && !returnTypeName.endsWith("VO")
-                            && !returnTypeName.endsWith("DTO")) {
+                            && !returnTypeName.endsWith("DTO")
+                            && !isEnum(returnTypeName)) {
                         events.add(SimpleConditionEvent.violated(method,
                                 String.format("%s.%s() 返回内部 Entity 类型: %s",
                                         clazz.getSimpleName(), method.getName(), returnTypeName)));
@@ -112,14 +114,39 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
         };
     }
 
-    // === M-04: API 路径以 /api 开头（MUST 强制） ===
+    /**
+     * 检查给定类名是否为枚举类型。
+     * 枚举在 entity 包下是合理的业务值对象，不算"内部 Entity 泄露"。
+     */
+    private static boolean isEnum(String className) {
+        try {
+            JavaClass jc = importedClasses.get(className);
+            return jc != null && jc.isEnum();
+        } catch (Exception e) {
+            // 类不在导入范围内，保守返回 false
+            return false;
+        }
+    }
+
+    // === M-04: Controller 路径前缀规范（MUST 强制） ===
+    // API Controller 必须 /api，Web 页面 Controller 必须 /web，Admin 必须 /api/admin
 
     @Test
-    @DisplayName("M-04: Controller API 路径必须以 /api 开头")
-    void api_path_should_start_with_api() {
+    @DisplayName("M-04: Controller 路径前缀必须符合规范（API→/api, Web→/web）")
+    void controller_path_should_follow_prefix_convention() {
+        // API Controller（非 web 页面）必须以 /api 开头
         ArchRuleDefinition.classes()
                 .that().areAnnotatedWith("org.springframework.web.bind.annotation.RequestMapping")
+                .and().resideOutsideOfPackage("..controller.web..")
                 .should(havePathStartingWith("/api"))
+                .allowEmptyShould(true)
+                .check(importedClasses);
+
+        // Web 页面 Controller 必须以 /web 开头
+        ArchRuleDefinition.classes()
+                .that().areAnnotatedWith("org.springframework.web.bind.annotation.RequestMapping")
+                .and().resideInAPackage("..controller.web..")
+                .should(havePathStartingWith("/web"))
                 .allowEmptyShould(true)
                 .check(importedClasses);
     }

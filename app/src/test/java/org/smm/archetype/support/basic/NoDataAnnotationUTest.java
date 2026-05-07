@@ -24,9 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NoDataAnnotationUTest extends UnitTestBase {
 
     /**
-     * 项目根目录（从 app 模块的 test 资源目录向上回溯）
+     * 项目根目录（复用 SourceScanner 的健壮 PROJECT_ROOT 计算）
      */
-    private static final String PROJECT_ROOT = System.getProperty("user.dir", ".").replace("/app", "");
+    private static final String PROJECT_ROOT = SourceScanner.PROJECT_ROOT;
 
     @Test
     @DisplayName("项目中的 Java 源码不应使用 @Data 注解")

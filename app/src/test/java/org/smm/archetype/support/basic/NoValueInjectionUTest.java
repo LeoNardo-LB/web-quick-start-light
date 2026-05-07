@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("@Value 注入禁止检查")
 class NoValueInjectionUTest extends UnitTestBase {
 
-    private static final String PROJECT_ROOT = System.getProperty("user.dir", ".").replace("/app", "");
+    private static final String PROJECT_ROOT = SourceScanner.PROJECT_ROOT;
 
     @Test
     @DisplayName("项目中的 Java 源码不应使用 @Value 注解注入配置")

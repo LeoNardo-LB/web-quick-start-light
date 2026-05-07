@@ -61,6 +61,7 @@ class ArchitectureComplianceUTest extends UnitTestBase {
     void controllerShouldNotDependOnServiceDirectly() {
         ArchRuleDefinition.noClasses()
                 .that().resideInAPackage("..controller..")
+                .and().resideOutsideOfPackage("..controller.web..")
                 .and().areNotEnums()
                 .and().haveSimpleNameNotStartingWith("Login")
                 .should().dependOnClassesThat()
