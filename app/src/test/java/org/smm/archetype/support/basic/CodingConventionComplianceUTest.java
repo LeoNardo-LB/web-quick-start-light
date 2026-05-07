@@ -190,30 +190,17 @@ class CodingConventionComplianceUTest extends UnitTestBase {
                 .isEmpty();
     }
 
-    // === C-06: DTO/VO 使用 record（ArchUnit，SHOULD 级别） ===
+    // === C-06: DTO/VO 使用 record（MUST 强制） ===
 
     @Test
-    @DisplayName("C-06: DTO/VO 应使用 record（SHOULD 级别，WARN 不 FAIL）")
+    @DisplayName("C-06: DTO/VO 必须使用 record")
     void dto_vo_should_use_record() {
-        // 正向验证：检查是否实际执行了规则（SHOULD 规则必须验证 try-catch 路径）
-        java.util.List<String> shouldViolations = new java.util.ArrayList<>();
-        try {
-            ArchRuleDefinition.classes()
-                    .that().resideInAPackage("..facade..")
-                    .and().haveSimpleNameEndingWith("VO")
-                    .or().haveSimpleNameEndingWith("DTO")
-                    .should(com.tngtech.archunit.lang.conditions.ArchConditions.beRecords())
-                    .check(importedClasses);
-            // 如果没有 AssertionError，说明全部合规或无匹配类
-            System.out.println("[C-06] 所有 DTO/VO 均为 record，或无匹配类（合规）");
-        } catch (AssertionError e) {
-            // SHOULD 级别：记录违规但不阻塞 CI
-            shouldViolations.add(e.getMessage());
-            System.out.println("[C-06 SHOULD 违规（不阻塞 CI）] " + e.getMessage());
-        }
-        // 断言：验证规则确实被执行（违规信息不为空时说明规则生效）
-        // 不做 assertThat(shouldViolations).isEmpty() 因为是 SHOULD 级别
-        System.out.println("[C-06] 检查完成，违规数: " + shouldViolations.size());
+        ArchRuleDefinition.classes()
+                .that().resideInAPackage("..facade..")
+                .and().haveSimpleNameEndingWith("VO")
+                .or().haveSimpleNameEndingWith("DTO")
+                .should(com.tngtech.archunit.lang.conditions.ArchConditions.beRecords())
+                .check(importedClasses);
     }
 
     // === C-07: Properties 类禁止 @Data（源码扫描） ===

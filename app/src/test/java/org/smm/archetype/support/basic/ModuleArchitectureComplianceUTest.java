@@ -112,53 +112,49 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
         };
     }
 
-    // === M-04: API 路径以 /api 开头（SHOULD 级别） ===
+    // === M-04: API 路径以 /api 开头（MUST 强制） ===
 
     @Test
-    @DisplayName("M-04: Controller API 路径应以 /api 开头（SHOULD 级别，WARN 不 FAIL）")
+    @DisplayName("M-04: Controller API 路径必须以 /api 开头")
     void api_path_should_start_with_api() {
-        // 正向验证：检查是否实际执行了规则（SHOULD 规则必须验证 try-catch 路径）
-        java.util.List<String> shouldViolations = new java.util.ArrayList<>();
-        try {
-            ArchRuleDefinition.classes()
-                    .that().areAnnotatedWith("org.springframework.web.bind.annotation.RequestMapping")
-                    .or().areAnnotatedWith("org.springframework.web.bind.annotation.RestController")
-                    .should(havePathStartingWith("/api"))
-                    .allowEmptyShould(true)
-                    .check(importedClasses);
-            // 如果没有 AssertionError，说明全部合规或无匹配类
-            System.out.println("[M-04] 所有 API 路径均以 /api 开头，或无匹配 Controller（合规）");
-        } catch (AssertionError e) {
-            // SHOULD 级别：记录违规但不阻塞 CI
-            shouldViolations.add(e.getMessage());
-            System.out.println("[M-04 SHOULD 违规（不阻塞 CI）] " + e.getMessage());
-        }
-        // 断言：验证规则确实被执行（违规信息不为空时说明规则生效）
-        // 不做 assertThat(shouldViolations).isEmpty() 因为是 SHOULD 级别
-        System.out.println("[M-04] 检查完成，违规数: " + shouldViolations.size());
+        ArchRuleDefinition.classes()
+                .that().areAnnotatedWith("org.springframework.web.bind.annotation.RequestMapping")
+                .should(havePathStartingWith("/api"))
+                .allowEmptyShould(true)
+                .check(importedClasses);
     }
 
     private static ArchCondition<JavaClass> havePathStartingWith(String prefix) {
         return new ArchCondition<>("have path starting with '" + prefix + "'") {
             @Override
             public void check(JavaClass clazz, ConditionEvents events) {
-                clazz.getAnnotations().forEach(annotation -> {
-                    String annotationType = annotation.getType().getName();
-                    if (annotationType.contains("RequestMapping") || annotationType.contains("Mapping")) {
-                        // 尝试获取 value 或 path 属性
-                        Object value = annotation.tryGetExplicitlyDeclaredProperty("value")
-                                .or(() -> annotation.tryGetExplicitlyDeclaredProperty("path"))
-                                .orElse(null);
-                        if (value != null) {
-                            String path = value.toString();
-                            if (!path.startsWith(prefix)) {
-                                events.add(SimpleConditionEvent.violated(clazz,
-                                        String.format("%s 的 API 路径 '%s' 不以 '%s' 开头",
-                                                clazz.getSimpleName(), path, prefix)));
+                // 只检查 @RequestMapping 注解上的路径
+                clazz.tryGetAnnotationOfType("org.springframework.web.bind.annotation.RequestMapping")
+                        .ifPresent(annotation -> {
+                            // 尝试获取 value 或 path 属性
+                            Object rawValue = annotation.tryGetExplicitlyDeclaredProperty("value")
+                                    .or(() -> annotation.tryGetExplicitlyDeclaredProperty("path"))
+                                    .orElse(null);
+                            if (rawValue == null) return;
+
+                            // 处理 String 和 String[] 两种类型
+                            String[] paths;
+                            if (rawValue instanceof String[]) {
+                                paths = (String[]) rawValue;
+                            } else if (rawValue instanceof String) {
+                                paths = new String[]{(String) rawValue};
+                            } else {
+                                paths = new String[]{rawValue.toString()};
                             }
-                        }
-                    }
-                });
+
+                            for (String path : paths) {
+                                if (!path.startsWith(prefix)) {
+                                    events.add(SimpleConditionEvent.violated(clazz,
+                                            String.format("%s 的 API 路径 '%s' 不以 '%s' 开头",
+                                                    clazz.getSimpleName(), path, prefix)));
+                                }
+                            }
+                        });
             }
         };
     }
