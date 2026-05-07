@@ -53,7 +53,7 @@
   - 文件内容包含字段声明 `LocalDateTime`（非 import 行）→ 违规
   - 文件内容包含字段声明 `java.util.Date`（非 import 行）→ 违规
 - **排除**：import 语句、注释（`//` 或 `/* */`）
-- **实现要点**：逐行扫描，跳过 `import` 开头的行和 `//` 注释行
+- **实现要点**：使用正则 `\bLocalDateTime\s+\w+` 匹配字段声明模式（类型名后跟空格和标识符），避免误判方法参数和局部变量。逐行扫描时跳过 `import` 行、`//` 行、以及 `/* */` 块注释内的行（由 SourceScanner 的多行注释状态机处理）。
 
 #### C-02：禁止 JPA/Hibernate 注解
 
@@ -169,9 +169,13 @@
 - **强度**：⛔ MUST
 - **检测方式**：ArchUnit
 - **实现策略**：
-  - 定义组件列表 = `[cache, oss, email, sms, search, auth]`
-  - 对每个组件 X，检查它不依赖其他任何组件：
+   - 动态发现组件列表（从 importedClasses 中提取 `component.*` 的一级子包），无需硬编码：
      ```java
+     Set<String> COMPONENTS = importedClasses.stream()
+         .map(c -> c.getPackageName())
+         .filter(p -> p.contains(".component."))
+         .map(p -> p.split("\\.component\\.")[1].split("\\.")[0])
+         .collect(Collectors.toSet());
      for (String component : COMPONENTS) {
          String[] otherPackages = COMPONENTS.stream()
              .filter(c -> !c.equals(component))
@@ -320,7 +324,14 @@ package org.smm.archetype.support.basic;
  */
 class SourceScanner {
 
-    static final String PROJECT_ROOT = System.getProperty("user.dir", ".").replace("/app", "");
+    static final String PROJECT_ROOT = computeProjectRoot();
+
+    /**
+     * 健壮的 PROJECT_ROOT 计算：
+     * 从 user.dir 向上搜索包含根 pom.xml 的目录。
+     * 比 replace("/app", "") 更可靠，兼容从 IDE 或任意目录运行。
+     */
+    private static String computeProjectRoot() { ... }
 
     /**
      * 扫描 src/main/java 下的所有 Java 文件，返回满足条件的违规文件列表。
@@ -380,3 +391,25 @@ SourceScanner 作为 7 条源码扫描规则的共同依赖，必须通过以下
 2. **先实施 ArchUnit 规则**（C-02, C-04, C-06, M-01~M-04, S-01），因为 ArchUnit API 测试编写更快、更稳定
 3. **再实施源码扫描规则**（C-01, C-03, C-05, C-07, T-01~T-03），复用 SourceScanner
 4. **最后验证全量测试通过**
+
+---
+
+## 规则汇总索引
+
+| 编号 | 规则名称 | 强度 | 检测方式 | 所在文件 |
+|------|---------|------|---------|---------|
+| C-01 | 时间字段统一 `Instant` | ⛔ MUST | 源码扫描 | CodingConventionComplianceUTest |
+| C-02 | 禁止 JPA/Hibernate 注解 | ⛔ MUST | ArchUnit | CodingConventionComplianceUTest |
+| C-03 | 禁止 `BeanUtils.copyProperties` | ⛔ MUST | 源码扫描 | CodingConventionComplianceUTest |
+| C-04 | 禁止 `System.out`/`System.err` | ⛔ MUST | ArchUnit | CodingConventionComplianceUTest |
+| C-05 | 禁止 `@With`（Lombok） | ⛔ MUST | 源码扫描 | CodingConventionComplianceUTest |
+| C-06 | DTO/VO 使用 `record` | ⚠️ SHOULD | ArchUnit | CodingConventionComplianceUTest |
+| C-07 | Properties 类禁止 `@Data` | ⛔ MUST | 源码扫描 | CodingConventionComplianceUTest |
+| M-01 | `common` 模块零 Spring 依赖 | ⛔ MUST | ArchUnit | ModuleArchitectureComplianceUTest |
+| M-02 | 组件模块间零互相依赖 | ⛔ MUST | ArchUnit | ModuleArchitectureComplianceUTest |
+| M-03 | Facade 返回值不在 entity 包 | ⛔ MUST | ArchUnit | ModuleArchitectureComplianceUTest |
+| M-04 | API 路径以 `/api` 开头 | ⚠️ SHOULD | ArchUnit | ModuleArchitectureComplianceUTest |
+| S-01 | 组件 ConfigurationProperties 前缀 | ⛔ MUST | ArchUnit | SpringConfigComplianceUTest |
+| T-01 | 测试文件名 `*UTest`/`*ITest` | ⛔ MUST | 源码扫描 | TestConventionComplianceUTest |
+| T-02 | 禁止 UTest 中 `@SpringBootTest` | ⛔ MUST | 源码扫描 | TestConventionComplianceUTest |
+| T-03 | 禁止 ITest 中 `@Mock` | ⛔ MUST | 源码扫描 | TestConventionComplianceUTest |**
