@@ -121,6 +121,64 @@ mvn clean verify
 # 报告：app/target/site/jacoco-aggregate/index.html
 ```
 
+## ⛔ ArchUnit 守护规则（自动化合规检查）
+
+> 以下 15 条规则由 ArchUnit + 源码扫描自动守护，位于 `app/src/test/java/org/smm/archetype/support/basic/` 下。
+> **所有规则均为 MUST（严格 FAIL），违反即 CI 红灯。** 修改相关代码前必须确保不引入违规。
+
+### 测试文件与检测方式
+
+| 文件 | 规则数 | 检测方式 |
+|------|--------|---------|
+| `CodingConventionComplianceUTest.java` | C-01~C-07 | ArchUnit API + SourceScanner |
+| `ModuleArchitectureComplianceUTest.java` | M-01~M-04 | ArchUnit API |
+| `SpringConfigComplianceUTest.java` | S-01 | ArchUnit API |
+| `TestConventionComplianceUTest.java` | T-01~T-03 | SourceScanner |
+| `SourceScanner.java` | — | 源码扫描工具类（块注释感知） |
+
+### 编码规范（C-01~C-07）
+
+| ID | 规则 | 说明 |
+|----|------|------|
+| C-01 | entity/repository 包禁止 LocalDateTime 和 java.util.Date | 时间字段统一使用 `Instant` |
+| C-02 | 禁止 JPA/Hibernate 注解 | ORM 仅用 MyBatis-Plus，禁止 `@Entity`/`@Table`/`@Column` 等 |
+| C-03 | 禁止 `BeanUtils.copyProperties` | 对象转换用 MapStruct |
+| C-04 | 禁止 `System.out`/`System.err` | 日志用 SLF4J（`@Slf4j`），排除 `generated` 包 |
+| C-05 | 禁止 Lombok `@With` | 用 `@Builder` 的 `withXxx()` 代替 |
+| C-06 | facade 包下 VO/DTO 必须用 record | 见"Record 规范"第 11 条 |
+| C-07 | Properties/Configure 类禁止 `@Data` | 用 `@Getter` + `@Setter` |
+
+### 模块架构（M-01~M-04）
+
+| ID | 规则 | 说明 |
+|----|------|------|
+| M-01 | exception 包零 Spring 依赖 | common 模块不依赖 Spring Framework |
+| M-02 | 组件模块间零互相依赖 | component 下各子模块互不引用（`component.dto` 共享子包除外） |
+| M-03 | Facade 方法不得返回内部 Entity | public 方法返回类型不得在 `.entity.` 包下（`.entity.base.` 通用基类除外，VO/DTO 除外） |
+| M-04 | Controller API 路径必须以 `/api` 开头 | `@RequestMapping` 的 value/path 必须以 `/api` 起始 |
+
+### Spring 配置（S-01）
+
+| ID | 规则 | 说明 |
+|----|------|------|
+| S-01 | 组件 Properties 前缀以 `component.` 开头 | `@ConfigurationProperties(prefix = "component.xxx")` |
+
+### 测试规范（T-01~T-03）
+
+| ID | 规则 | 说明 |
+|----|------|------|
+| T-01 | 含 `@Test` 的文件必须以 `UTest.java` 或 `ITest.java` 结尾 | 排除测试基础设施类（`*Configuration.java`/`*Application.java`） |
+| T-02 | UTest 禁止 `@SpringBootTest` | 纯单元测试不启动 Spring 上下文 |
+| T-03 | ITest 禁止 `@Mock` | 集成测试使用真实依赖，不用 Mockito mock |
+
+### 新增规则注意事项
+
+- SourceScanner 从 `PROJECT_ROOT` 递归遍历，自动覆盖 `app/`、`components/`、`common/` 的 `src/main/java` 和 `src/test/java`
+- 排除 `/target/` 目录和 `/generated/` 包
+- 块注释 `/* */` 内的代码不会被误判（BlockCommentTracker 状态机）
+
+---
+
 ## 核心编码规则
 
 ### 1. 四层架构约束（仅 app 模块）
