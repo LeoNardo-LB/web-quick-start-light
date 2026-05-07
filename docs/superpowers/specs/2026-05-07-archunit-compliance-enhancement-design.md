@@ -17,7 +17,7 @@
 | 文件 | 职责 | 规则数 |
 |------|------|-------|
 | `CodingConventionComplianceUTest.java` | 编码规范 | C-01~C-07（7 条） |
-| `ModuleArchitectureComplianceUTest.java` | 模块/架构约束 | M-01~M-03（3 条） |
+| `ModuleArchitectureComplianceUTest.java` | 模块/架构约束 | M-01~M-04（4 条） |
 | `SpringConfigComplianceUTest.java` | Spring 配置约束 | S-01（1 条） |
 | `TestConventionComplianceUTest.java` | 测试规范 | T-01~T-03（3 条） |
 
@@ -27,14 +27,15 @@
 
 | 策略 | 适用规则 | 说明 |
 |------|---------|------|
-| **ArchUnit API** | C-02, C-04, C-06, C-07, M-01~M-03, S-01 | 注解、字段类型、依赖、返回类型检查 |
-| **源码扫描** | C-01, C-03, C-05, T-01~T-03 | Lombok 注解（编译期消除）、字符串模式 |
+| **ArchUnit API** | C-02, C-04, C-06, M-01~M-04, S-01 | 注解、字段类型、依赖、返回类型检查 |
+| **源码扫描** | C-01, C-03, C-05, C-07, T-01~T-03 | Lombok 注解（编译期消除）、字符串模式 |
 
 ### 共用基础设施
 
 - 所有测试继承 `UnitTestBase`（`@ExtendWith(MockitoExtension.class)`），纯内存运行
 - 源码扫描工具类 `SourceScanner.java`：复用 `NoDataAnnotationUTest` 的 `PROJECT_ROOT` + `Files.walk` 模式，提取为可复用工具
 - **不使用 FreezingArchRule**（项目规模小，直接严格检查）
+- **技术栈要求**：ArchUnit 1.4.1（已声明于根 pom.xml dependencyManagement）+ Java 25。ArchUnit 1.4.1 使用 ASM 9.x，已验证支持 Java 25 的 class file format。
 
 ---
 
@@ -107,15 +108,30 @@
 - **API**：
   ```java
   ArchRuleDefinition.classes()
-      .that().resideInAPackage("..entity.api..")
-      .and().areNotInterfaces()
-      .and().areNotEnums()
-      .and().areNotAbstract()
-      .should(beRecord())
+      .that().resideInAPackage("..facade..")
+      .and().haveSimpleNameEndingWith("VO")
+      .or().haveSimpleNameEndingWith("DTO")
+      .should(ArchConditions.beRecords())
   ```
-- **检测逻辑**：`entity.api` 包下的具体类必须是 Java record
-- **排除**：枚举、接口、抽象类
-- **注意**：⚠️ SHOULD 规则，违规时仅打印警告不导致测试失败
+- **检测逻辑**：facade 包下以 VO/DTO 结尾的类必须是 Java record
+- **排除**：枚举、接口、抽象类（由 `beRecords()` 内部自动处理）
+- **⚠️ SHOULD 实现方案**：ArchUnit 原生不支持 WARN 语义，采用 try-catch 策略：
+  ```java
+  @Test
+  void dto_vo_should_use_record() {
+      try {
+          ArchRuleDefinition.classes()
+              .that().resideInAPackage("..facade..")
+              .and().haveSimpleNameEndingWith("VO")
+              .or().haveSimpleNameEndingWith("DTO")
+              .should(ArchConditions.beRecords())
+              .check(importedClasses);
+      } catch (AssertionError e) {
+          logger.warn("C-06 SHOULD 违规（不阻塞 CI）: {}", e.getMessage());
+      }
+  }
+  ```
+- **ArchUnit 版本要求**：`beRecords()` 自 ArchUnit 0.18.0 起可用，当前项目使用 1.4.1 已满足
 
 #### C-07：Properties 类禁止 `@Data`
 
@@ -155,19 +171,19 @@
 - **实现策略**：
   - 定义组件列表 = `[cache, oss, email, sms, search, auth]`
   - 对每个组件 X，检查它不依赖其他任何组件：
-    ```java
-    for (String component : COMPONENTS) {
-        List<String> otherPackages = COMPONENTS.stream()
-            .filter(c -> !c.equals(component))
-            .map(c -> "..component." + c + "..")
-            .toList();
-        ArchRuleDefinition.noClasses()
-            .that().resideInAPackage("..component." + component + "..")
-            .should().dependOnClassesThat()
-            .resideInAnyPackage(otherPackages)
-            .check(importedClasses);
-    }
-    ```
+     ```java
+     for (String component : COMPONENTS) {
+         String[] otherPackages = COMPONENTS.stream()
+             .filter(c -> !c.equals(component))
+             .map(c -> "..component." + c + "..")
+             .toArray(String[]::new);
+         ArchRuleDefinition.noClasses()
+             .that().resideInAPackage("..component." + component + "..")
+             .should().dependOnClassesThat()
+             .resideInAnyPackage(otherPackages)
+             .check(importedClasses);
+     }
+     ```
   - 每个组件单独一条规则，违规消息精确到哪个组件依赖了哪个
 - **原因**：6 个 component 只依赖 common，互相耦合会破坏可插拔设计
 
@@ -177,13 +193,55 @@
 - **强度**：⛔ MUST
 - **检测方式**：ArchUnit
 - **API**：自定义 `ArchCondition<JavaClass>`
+- **ArchCondition 实现骨架**：
+  ```java
+  private static ArchCondition<JavaClass> notReturnInternalEntity() {
+      return new ArchCondition<>("not return internal entity types") {
+          @Override
+          public void check(JavaClass clazz, ConditionEvents events) {
+              for (JavaMethod method : clazz.getMethods()) {
+                  if (!method.getModifiers().contains(JavaModifier.PUBLIC)) continue;
+                  JavaType returnType = method.getReturnType();
+                  if (returnType.getName().equals("void")) continue;
+                  String returnTypeName = returnType.getName();
+                  // 检查返回类型是否在 entity 包下且不是 VO/DTO
+                  if (returnTypeName.contains(".entity.") 
+                      && !returnTypeName.endsWith("VO") 
+                      && !returnTypeName.endsWith("DTO")) {
+                      events.add(SimpleConditionEvent.violated(method,
+                          String.format("%s.%s() 返回内部 Entity 类型: %s",
+                              clazz.getSimpleName(), method.getName(), returnTypeName)));
+                  }
+              }
+          }
+      };
+  }
+  ```
 - **检测逻辑**：
   - 遍历 facade 包下所有类的 public 方法
   - 检查返回类型的包名
-  - 如果返回类型包名包含 `..entity.` 但不包含 `..entity.api..` → 违规
-  - `entity.api` 包下是 DTO/VO（允许返回）
+  - 如果返回类型包名包含 `..entity.` 且不以 `VO`/`DTO` 结尾 → 违规
+  - VO/DTO 类（如 SystemConfigVO）允许返回（它们是对外契约）
 - **排除**：void 返回类型、private 方法
 - **原因**：防止内部 Entity 泄露到 Controller 层
+
+#### M-04：API 路径以 `/api` 开头
+
+- **来源**：`java-conventions.md` 规则 6
+- **强度**：⚠️ SHOULD
+- **检测方式**：ArchUnit
+- **API**：
+  ```java
+  ArchRuleDefinition.classes()
+      .that().areAnnotatedWith("org.springframework.web.bind.annotation.RequestMapping")
+      .or().areAnnotatedWith("org.springframework.web.bind.annotation.GetMapping")
+      .or().areAnnotatedWith("org.springframework.web.bind.annotation.PostMapping")
+      .or().areAnnotatedWith("org.springframework.web.bind.annotation.RestController")
+      .should(havePathStartingWith("/api"))
+  ```
+- **检测逻辑**：Controller 类上的 @RequestMapping/@GetMapping/@PostMapping 等注解的 value/path 属性必须以 `/api` 开头
+- **⚠️ SHOULD 实现方案**：同 C-06 的 try-catch 策略，违规时 WARN 不 FAIL
+- **说明**：统一 API 前缀，方便网关路由和前端对接
 
 ---
 
@@ -204,7 +262,7 @@
   ```
 - **约束**：component 模块下的 Properties 类前缀必须以 `component.` 开头
 - **排除**：app 模块的 Properties 类不受约束（`app`、`logging`、`thread-pool` 等前缀都合法）
-- **实现要点**：从 `@ConfigurationProperties` 注解获取 `prefix` 或 `value` 属性值检查
+- **实现要点**：从 `@ConfigurationProperties` 注解获取 `prefix` 属性值检查（Spring Boot 4.x 仅支持 `prefix`，`value` 别名已于 Spring Boot 3.0 移除）
 
 ---
 
@@ -281,10 +339,26 @@ class SourceScanner {
 
     /**
      * 判断一行是否是 import 语句。
+     * 包括 import xxx 和 import static xxx。
      */
     static boolean isImportLine(String line) { ... }
 }
 ```
+
+### SourceScanner 验收标准
+
+SourceScanner 作为 7 条源码扫描规则的共同依赖，必须通过以下单元测试：
+
+| 测试用例 | 输入 | 预期 |
+|---------|------|------|
+| `isCommentLine("// comment")` | `// comment` | `true` |
+| `isCommentLine("* javadoc line")` | `* javadoc` | `true` |
+| `isCommentLine("code // inline")` | 含行尾注释 | `false`（代码行） |
+| `isCommentLine("import foo.Bar;")` | import 行 | `false`（不是注释） |
+| `isImportLine("import foo.Bar;")` | 标准导入 | `true` |
+| `isImportLine("import static foo.Bar.baz;")` | 静态导入 | `true` |
+| `scanMainSource` 在无匹配文件时 | 空项目 | 返回空列表 |
+| `scanMainSource` 遇到非 UTF-8 文件 | GBK 文件 | 记录警告并跳过（不抛异常） |
 
 ---
 
@@ -303,6 +377,6 @@ class SourceScanner {
 ## 实施优先级
 
 1. **先实施工具类** `SourceScanner.java`（被多个规则依赖）
-2. **先实施 ArchUnit 规则**（C-02, C-04, C-06, C-07, M-01~M-03, S-01），因为 ArchUnit API 测试编写更快、更稳定
-3. **再实施源码扫描规则**（C-01, C-03, C-05, T-01~T-03），复用 SourceScanner
+2. **先实施 ArchUnit 规则**（C-02, C-04, C-06, M-01~M-04, S-01），因为 ArchUnit API 测试编写更快、更稳定
+3. **再实施源码扫描规则**（C-01, C-03, C-05, C-07, T-01~T-03），复用 SourceScanner
 4. **最后验证全量测试通过**
