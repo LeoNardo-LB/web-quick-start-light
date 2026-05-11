@@ -109,4 +109,4 @@ conventions/ 下所有文件使用**统一的固定外壳模板**：
 - [docs/architecture/README.md](../architecture/README.md) — 架构文档模板
 - [docs/modules/README.md](../modules/README.md) — 模块文档模板
 - [AGENTS.md](../../AGENTS.md) — AI 编码规范入口
-- [OpenSpec specs/](../../openspec/specs/) — 设计意图文档（🔴 Intent 轨，不在 docs/ 下）
+- OpenSpec specs/ — 设计意图文档（🔴 Intent 轨，暂未创建）

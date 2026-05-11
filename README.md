@@ -9,7 +9,7 @@
 | 语言 | Java | 25 |
 | 框架 | Spring Boot | 4.x |
 | ORM | MyBatis-Plus | 3.5.x |
-| 对象转换 | MapStruct | 1.6.x |
+| 对象转换 | MapStruct | 1.6.x（依赖已引入） |
 | 认证 | Sa-Token | 1.45.x |
 | 限流 | Bucket4j | 8.17.x |
 | 工具库 | Hutool | 5.8.x |
@@ -78,7 +78,7 @@ mvn spring-boot:run -pl app -Dspring-boot.run.profiles=prod
 
 - **四层架构**：Controller → Facade → Service → Repository，ArchUnit 守护依赖规则
 - **6 个技术组件**：缓存/存储/邮件/短信/搜索/认证（Template Method + 条件装配），+ 3 个应用层横切关注点（日志/限流/幂等，集成在 app/shared/）
-- **ScopedValue 线程上下文**：基于 Java 25 ScopedValue 的 userId/traceId 全链路传递
+- **ScopedValue 线程上下文**：基于 Java 25 ScopedValue 的 userId 全链路传递（traceId 由 OTel Span 管理）
 - **完善日志体系**：@BusinessLog 注解 + 8 个 Appender + 采样 + 慢 SQL 监控
 - **高覆盖率测试**：UTest + ITest 双分类，JaCoCo Instruction ≥ 95%
 
@@ -95,4 +95,4 @@ mvn spring-boot:run -pl app -Dspring-boot.run.profiles=prod
 | [AGENTS.md](AGENTS.md) | AI 编码规范入口 |
 | [docs/README.md](docs/README.md) | 文档系统导航 |
 
-> 本项目采用三轨文档体系：**Contract 轨**（docs/，跟随代码变化）、**Constraint 轨**（AGENTS.md + conventions/，驱动代码行为）和 **Intent 轨**（OpenSpec，编码前冻结的设计意图）。Intent 轨文档不在 docs/ 目录下，位于独立的 [openspec/specs/](openspec/specs/) 目录，记录各功能的设计初衷和决策理由。详见 [docs/README.md](docs/README.md)。
+> 本项目采用三轨文档体系：**Contract 轨**（docs/，跟随代码变化）、**Constraint 轨**（AGENTS.md + conventions/，驱动代码行为）和 **Intent 轨**（OpenSpec，编码前冻结的设计意图）。Intent 轨文档暂未创建，计划存放各功能的设计初衷和决策理由。详见 [docs/README.md](docs/README.md)。

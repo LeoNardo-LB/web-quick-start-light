@@ -44,7 +44,7 @@ sequenceDiagram
     DB-->>Repo: ResultSet
     Repo-->>Svc: Entity
     Svc-->>Fac: Entity
-    Fac-->>Ctrl: VO（MapStruct 转换）
+    Fac-->>Ctrl: VO（手写 Converter 转换）
     Ctrl-->>Client: Response（BaseResult）
 ```
 
@@ -58,7 +58,7 @@ sequenceDiagram
 | Service → Repository | `Entity` | 业务实体对象 |
 | Repository → DB | `DO` | 数据对象（MyBatis-Plus） |
 | Repository → Service | `Entity` | DO → Entity 转换 |
-| Facade → Controller | `VO` | Entity → VO 转换（MapStruct） |
+| Facade → Controller | `VO` | Entity → VO 转换（手写 @Component Converter） |
 | Controller → Client | `BaseResult<T>` | 统一响应包装 |
 
 ## 异常处理分支
@@ -105,7 +105,7 @@ sequenceDiagram
 | **全局过滤** | `ContextFillFilter` | 从 AuthComponent 获取 userId，绑定 BizContext 上下文（order=100） |
 | **线程上下文** | `BizContext` | 基于 Java 25 ScopedValue 存储 userId，请求线程内自动可访问 |
 | **控制层** | `*Controller` | 接收 HTTP 请求、Bean Validation 参数校验、调用 Facade、返回 `BaseResult<T>` |
-| **门面层** | `*FacadeImpl` | Entity→VO 转换（MapStruct）、业务编排、聚合多个 Service 调用 |
+| **门面层** | `*FacadeImpl` | Entity→VO 转换（手写 @Component Converter）、业务编排、聚合多个 Service 调用 |
 | **服务层** | `*Service` | 核心业务逻辑、事务管理（`@Transactional`）、调用 Repository |
 | **仓储层** | `*RepositoryImpl` | MyBatis-Plus Mapper 操作、Entity↔DO 转换 |
 | **数据访问** | `*Mapper` | MyBatis-Plus BaseMapper，SQL 执行 |
@@ -199,5 +199,5 @@ graph TD
 
 | 日期 | 变更内容 |
 |------|---------|
-| 2026-05-11 | ScopedThreadContext → BizContext；ContextFillFilter 移除 traceId/X-Trace-Id 处理；order=1 → order=100；审计字段 createBy/updateBy → createUser/updateUser；补充 BindException；LogAspect Micrometer → OTel |
+| 2026-05-11 | ScopedThreadContext → BizContext；ContextFillFilter 移除 traceId/X-Trace-Id 处理；order=1 → order=100；审计字段 createBy/updateBy → createUser/updateUser；补充 BindException；LogAspect Micrometer → OTel；MapStruct → 手写 Converter |
 | 2026-04-14 | 初始创建 |

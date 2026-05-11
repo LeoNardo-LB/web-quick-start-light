@@ -616,5 +616,5 @@ AI Agent 加载 docs/ 下的文档时，**⛔ 绝对禁止⛔ 直接读取全文
 
 ### Intent 轨（冻结，不在 docs/ 下）
 
-- [OpenSpec specs/](../openspec/specs/) — 21 个 capability 的设计意图文档（🔴 Intent 轨）
+- OpenSpec specs/ — 设计意图文档（🔴 Intent 轨，暂未创建，计划存放在 `openspec/specs/`）
 - [AGENTS.md 中的 OpenSpec Intent 索引](../AGENTS.md) — 完整的 capability 路径列表

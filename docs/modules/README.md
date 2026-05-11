@@ -125,4 +125,4 @@ modules/ 下所有文件使用**统一的 8 章节模板**：
 - [docs/architecture/README.md](../architecture/README.md) — 架构文档模板
 - [docs/conventions/README.md](../conventions/README.md) — 编码规范模板
 - [AGENTS.md](../../AGENTS.md) — AI 编码规范入口
-- [OpenSpec specs/](../../openspec/specs/) — 设计意图文档（🔴 Intent 轨，不在 docs/ 下）
+- OpenSpec specs/ — 设计意图文档（🔴 Intent 轨，暂未创建）

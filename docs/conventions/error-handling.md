@@ -26,7 +26,7 @@
 RuntimeException
   └── BaseException          (abstract, 持有 ErrorCode)
         ├── BizException     (业务异常 — 可预期，前端展示)
-        ├── ClientException  (组件参数异常 — 400 类)
+        ├── ClientException  (组件参数异常 — 业务码区分)
         └── SysException     (系统内部异常 — 500 类)
 ```
 
@@ -93,7 +93,7 @@ public interface ErrorCode {
 
 | 枚举值 | code | message | messageKey | 分类 |
 |--------|------|---------|------------|------|
-| `SUCCESS` | 1000 | 成功 | `error.1000` | 通用 |
+| `SUCCESS` | 1000 | success | `error.1000` | 通用 |
 | `FAIL` | 2000 | 操作失败 | `error.2000` | 通用 |
 | `ILLEGAL_ARGUMENT` | 2001 | 参数校验失败 | `error.2001` | 通用 |
 | `RPC_EXCEPTION` | 2002 | 外部服务调用失败 | `error.2002` | 通用 |
@@ -117,7 +117,7 @@ public interface ErrorCode {
 | 1000 | 成功 | 正确响应 |
 | 2000-2999 | 通用业务 | 业务/参数类异常 |
 | 5000-5999 | 系统异常 | 内部系统错误 |
-| 6000-6999 | Component 中间件 | 各组件模块错误 |
+| 6000-6999 | Component 组件 | 各组件模块错误 |
 | 9999 | 兜底 | 未知异常 |
 
 **新增错误码流程**：

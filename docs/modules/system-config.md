@@ -479,7 +479,7 @@ public class SystemConfigFacadeImpl implements SystemConfigFacade {
 - **前端管理界面**：通过 REST API 展示和编辑系统配置
 
 ### 设计依据
-- [openspec/specs/system-config/spec.md](../../openspec/specs/system-config/spec.md) — 系统配置功能设计意图（🔴 Intent 轨）
+- OpenSpec specs/system-config/ — 系统配置功能设计意图（🔴 Intent 轨，暂未创建）
 
 ## 变更历史
 | 日期 | 变更内容 |

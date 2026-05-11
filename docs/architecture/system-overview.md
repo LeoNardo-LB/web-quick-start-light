@@ -68,7 +68,7 @@ graph TD
 | 框架 | Spring Boot | 4.x |
 | ORM | MyBatis-Plus | 3.5.x |
 | 分页 | mybatis-plus-jsqlparser | 跟随 MyBatis-Plus |
-| 对象转换 | MapStruct | 1.6.x |
+| 对象转换 | MapStruct | 1.6.x（依赖已引入，当前使用手写 Converter） |
 | 参数校验 | Bean Validation (JSR 380) | - |
 | API 文档 | SpringDoc OpenAPI | 3.0.x |
 | 缓存 | Caffeine | Spring Boot BOM |

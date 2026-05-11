@@ -326,7 +326,7 @@ public class UserController {
 - `BizContext`：`ContextFillFilter` 写入 userId，全链路可用（traceId 由 OTel Span 管理）
 
 ### 设计依据
-- [openspec/specs/auth/spec.md](../../openspec/specs/auth/spec.md) — 认证功能设计意图（🔴 Intent 轨）
+- OpenSpec specs/auth/ — 认证功能设计意图（🔴 Intent 轨，暂未创建）
 
 ## 变更历史
 | 日期 | 变更内容 |

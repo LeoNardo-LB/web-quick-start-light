@@ -22,14 +22,14 @@ Maven 多模块结构和四层架构说明。项目采用 Maven POM 聚合模式
 ```
 web-quick-start-light/                     (根 POM, packaging=pom)
 ├── common/                                (异常体系: ErrorCode, CommonErrorCode, BaseException...)
-├── components/                               (parent POM, packaging=pom — 中间件接入层)
+├── components/                               (parent POM, packaging=pom — 组件接入层)
 │   ├── component-cache/                      (Caffeine 本地缓存, 10 方法, Template Method)
 │   ├── component-oss/                        (本地对象存储, NIO + 日期分层, 7 方法, Template Method)
 │   ├── component-email/                      (Jakarta Mail 邮件, 3 方法, NoOp 默认实现, 条件装配)
 │   ├── component-sms/                        (短信, 3 方法, NoOp 默认实现, 条件装配)
 │   ├── component-search/                     (内存搜索, ConcurrentHashMap, 15 方法, 条件装配)
 │   └── component-auth/                       (认证组件, Sa-Token/NoOp, Template Method, 条件装配)
-└── app/                                   (主应用, packaging=jar, 依赖 common + 中间件 component-*)
+└── app/                                   (主应用, packaging=jar, 依赖 common + 组件 component-*)
     └── shared/                            (跨层共享基础设施: 限流/幂等/操作日志/日志工具)
 ```
 
@@ -39,7 +39,7 @@ web-quick-start-light/                     (根 POM, packaging=pom)
 graph TD
     ROOT["web-quick-start-light<br/>根 POM (pom)"]
     COMMON["common<br/>异常体系"]
-    COMPONENTS["components<br/>聚合 POM (pom) — 中间件接入层"]
+    COMPONENTS["components<br/>聚合 POM (pom) — 组件接入层"]
     APP["app<br/>Spring Boot 主应用 (jar)"]
 
     ROOT --> COMMON
@@ -69,7 +69,7 @@ graph TD
     APP --> AUTH
 ```
 
-> 箭头表示 `depends on`（A → B 表示 A 的 pom.xml 中声明了对 B 的依赖）。所有 component-* 模块仅依赖 common，不互相依赖。components 模块只包含中间件接入（Template
+> 箭头表示 `depends on`（A → B 表示 A 的 pom.xml 中声明了对 B 的依赖）。所有 component-* 模块仅依赖 common，不互相依赖。components 模块只包含组件接入（Template
 > Method 模式），应用层横切关注点（限流/幂等/操作日志/日志基础设施）集成在 app 模块的 `shared/` 包下。
 
 ## 四层架构
@@ -85,7 +85,7 @@ flowchart TD
     end
 
     subgraph Facade["Facade 层 — 门面 / 编排"]
-        F1["Entity → VO 转换（MapStruct）"]
+        F1["Entity → VO 转换（手写 Converter）"]
         F2["调用 Service<br/>传递 Command / Query"]
         F3["业务编排与聚合"]
     end
@@ -217,7 +217,7 @@ org.smm.archetype/
 | Controller → Facade | 通过门面层隔离 API 与业务逻辑 |
 | Facade → Service | 门面层调用服务层获取业务数据 |
 | Service → Repository | 服务层调用仓储层访问数据 |
-| Facade 可转换 Entity → VO | MapStruct 编译期安全转换 |
+| Facade 可转换 Entity → VO | 手写 @Component Converter 转换 |
 | Repository 可转换 DO → Entity | 数据对象与业务对象转换 |
 
 ### 禁止的依赖
@@ -292,5 +292,5 @@ org.smm.archetype/
 |------------|-------------------------------------------------------------------------------------------------------------------|
 | 2026-04-14 | 初始创建                                                                                                              |
 | 2026-04-14 | 新增「app 内部包组织」章节；components 模块精简为纯中间件接入层（移除 component-log/component-ratelimit/component-idempotent）；横切关注点纳入 app 模块 `shared/` 包 |
-| 2026-05-11 | `entity/api/` → `entity/base/`；`shared/util/context/` 修正为仅含 BizContext |
+| 2026-05-11 | `entity/api/` → `entity/base/`；`shared/util/context/` 修正为仅含 BizContext；中间件→组件措辞修正；MapStruct→手写 Converter |
 | 2026-04-15 | `shared/logging/` 合并到 `shared/util/logging/`，统一 shared 下 aspect/util 两个维度 |

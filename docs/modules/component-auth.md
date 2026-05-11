@@ -365,7 +365,7 @@ component:
 
 | 文档 | 链接 | 关系 |
 |------|------|------|
-| 认证功能 Intent | [openspec/specs/auth/spec.md](../../openspec/specs/auth/spec.md) | `AuthComponent` 接口 + Sa-Token 集成 + NoOp 降级 + 路由拦截的设计意图 |
+| 认证功能 Intent | OpenSpec specs/auth/（暂未创建） | `AuthComponent` 接口 + Sa-Token 集成 + NoOp 降级 + 路由拦截的设计意图 |
 
 ## 变更历史
 | 日期 | 变更内容 |

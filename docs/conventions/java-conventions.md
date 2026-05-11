@@ -292,7 +292,9 @@ public class SystemConfigService {
 ```java
 // generated/ 包下的文件 — 禁止手动修改
 // 由 MybatisPlusGenerator 自动生成，任何手动修改都会被覆盖
-package org.smm.archetype.generated;
+package org.smm.archetype.generated.entity;
+// 或
+package org.smm.archetype.generated.mapper;
 ```
 
 ❌ 错误：
@@ -392,7 +394,7 @@ public class OrderDO {
 - [ ] DTO/VO 使用 `record`，基类保持 `class`
 - [ ] 单元测试命名为 `*UTest`，集成测试命名为 `*ITest`
 - [ ] 没有使用 JPA / Hibernate 注解
-- [ ] 对象转换使用 MapStruct
+- [ ] 对象转换使用 MapStruct 或手写 @Component Converter（禁止 BeanUtils.copyProperties）
 - [ ] API 路径以 `/api` 开头
 - [ ] 使用 `@Slf4j` + 参数化日志，没有 `System.out.println`
 - [ ] `generated/` 包下的文件未被手动修改

@@ -92,4 +92,4 @@ architecture/ 下的每个文件有**独立的固定结构**（因为每个文�
 - [docs/conventions/README.md](../conventions/README.md) — 编码规范模板
 - [docs/modules/README.md](../modules/README.md) — 模块文档模板
 - [AGENTS.md](../../AGENTS.md) — AI 编码规范入口
-- [OpenSpec specs/](../../openspec/specs/) — 设计意图文档（🔴 Intent 轨，不在 docs/ 下）
+- OpenSpec specs/ — 设计意图文档（🔴 Intent 轨，暂未创建）

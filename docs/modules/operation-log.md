@@ -447,7 +447,7 @@ public class UserFacadeImpl implements UserFacade {
 - **Prometheus + Grafana**：通过 OTel 自动 instrumentation 指标监控方法执行耗时和错误率
 
 ### 设计依据
-- [openspec/specs/operation-log/spec.md](../../openspec/specs/operation-log/spec.md) — 操作日志功能设计意图（🔴 Intent 轨）
+- OpenSpec specs/operation-log/ — 操作日志功能设计意图（🔴 Intent 轨，暂未创建）
 
 ## 变更历史
 | 日期 | 变更内容 |

@@ -148,7 +148,7 @@ mvn clean verify
 |----|------|------|
 | C-01 | entity/repository 包禁止 LocalDateTime 和 java.util.Date | 时间字段统一使用 `Instant` |
 | C-02 | 禁止 JPA/Hibernate 注解 | ORM 仅用 MyBatis-Plus，禁止 `@Entity`/`@Table`/`@Column` 等 |
-| C-03 | 禁止 `BeanUtils.copyProperties` | 对象转换用 MapStruct |
+| C-03 | 禁止 `BeanUtils.copyProperties` | 对象转换用 MapStruct 或手写 Converter |
 | C-04 | 禁止 `System.out`/`System.err` | 日志用 SLF4J（`@Slf4j`），排除 `generated` 包 |
 | C-05 | 禁止 Lombok `@With` | 用 `@Builder` 的 `withXxx()` 代替 |
 | C-06 | facade 包下 VO/DTO 必须用 record | 见"Record 规范"第 11 条 |
@@ -221,7 +221,7 @@ mvn clean verify
 - ORM 仅允许 MyBatis-Plus（禁止 JPA / Hibernate）
 - 工具库优先：Hutool / Apache Commons / Guava
 - 序列化：Jackson（JSON）、Kryo（二进制）
-- 对象转换：MapStruct（编译期安全）
+- 对象转换：MapStruct（编译期安全）/ 手写 @Component Converter（当前使用方式）
 
 ### 7. 线程上下文
 - 使用 `BizContext`（基于 Java 25 ScopedValue）传递 userId（traceId 由 OTel Span 管理）
@@ -329,9 +329,11 @@ mvn clean verify
 
 ## OpenSpec Intent 索引
 
-见：openspec/specs 与 openspec/changes 目录
+> 暂未创建。Intent 轨文档计划存放在独立的 `openspec/specs/` 目录，记录各功能的设计初衷和决策理由。
 
 ## graphify
+
+> 暂未生成。`graphify-out/` 目录不存在时，忽略以下规则，使用 grep/glob 探索代码库。
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
 

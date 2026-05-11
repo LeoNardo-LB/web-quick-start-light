@@ -159,7 +159,7 @@ logging:
 |---------|----------|------|
 | `dev` | `application-dev.yaml` | 开发环境（默认） |
 | `prod` | `application-prod.yaml` | 生产环境 |
-| `test` | `application-test.yaml` | 测试环境（ITest 使用） |
+| `test` | `application-test.yaml`（位于 `app/src/test/resources/`） | 测试环境（ITest 使用） |
 | — | `application-component.yaml` | 组件配置（可选功能开关） |
 
 **环境切换方式**：
