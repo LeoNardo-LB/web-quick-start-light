@@ -28,7 +28,7 @@
 
 #### Scenario: 采集率控制日志持久化
 - **WHEN** 方法标注了 `@BusinessLog(samplingRate = 0.5)` 
-- **THEN** 系统 SHALL 以约 50% 的概率将日志写入数据库，但 Micrometer 指标和文件日志 SHALL 全量记录
+- **THEN** 系统 SHALL 以约 50% 的概率将日志写入数据库，但 OTel 指标和文件日志 SHALL 全量记录
 
 ### Requirement: 操作日志分页查询 API
 系统 SHALL 提供 `GET /api/system/operation-logs` 分页查询端点，支持按 module、operationType、startTime、endTime 筛选。

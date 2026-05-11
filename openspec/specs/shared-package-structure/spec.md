@@ -5,7 +5,7 @@
 app 模块 SHALL 包含 `shared` 包作为跨层共享基础设施的统一存放位置，采用职责子包模式组织：
 
 - `shared/aspect/`：AOP 切面及配套组件，按业务再分子包（ratelimit/、idempotent/、operationlog/）
-- `shared/logging/`：日志基础设施工具（慢查询拦截器、采样过滤器、脱敏工具、Marker 常量、日志目录验证）
+- `shared/util/logging/`：日志基础设施工具（慢查询拦截器、采样过滤器、脱敏工具、Marker 常量、日志目录验证）
 - `shared/util/`：通用工具类（线程上下文传递、DAL 横切处理、序列化、IP 工具等）
 
 #### Scenario: 新增横切关注点放置位置

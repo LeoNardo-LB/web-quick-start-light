@@ -15,14 +15,14 @@
 
 ## 概述
 
-通过 `@BusinessLog` 注解自动记录业务操作日志，支持 Micrometer 指标采集、采样率控制和分页查询，日志可通过 `OperationLogWriter` 接口持久化到数据库。
+通过 `@BusinessLog` 注解自动记录业务操作日志，支持采样率控制和分页查询，日志可通过 `OperationLogWriter` 接口持久化到数据库。可观测性指标由 OTel 自动 instrumentation 覆盖。
 
 ## 业务场景
 
 1. **业务方法日志记录**：在任意 Service/Facade 方法上添加 `@BusinessLog` 注解，自动记录方法名、参数、返回值、执行时间、状态
 2. **操作日志持久化**：通过 `OperationLogWriter` 接口将日志异步写入数据库，由 app 模块实现具体的持久化逻辑
 3. **分页查询日志**：通过 REST API 分页查询操作日志，支持按模块、操作类型、时间范围过滤
-4. **Micrometer 指标采集**：自动注册执行耗时 Timer、执行计数 Counter、错误计数 Counter
+4. **OTel 自动 instrumentation**：方法耗时、错误计数等可观测性指标由 OTel 自动覆盖，无需手动注册
 5. **采样控制**：高并发场景通过 `samplingRate` 属性控制日志记录比例
 
 ## 技术设计
@@ -35,7 +35,7 @@ sequenceDiagram
     participant Target as 被注解方法
     participant LogAspect as LogAspect 切面
     participant Logger as SLF4J Logger
-    participant Metrics as Micrometer
+    participant Metrics as OTel
     participant Writer as OperationLogWriter
     participant DB as 数据库
 
@@ -218,7 +218,7 @@ classDiagram
 | 类 | 位置 | 职责 |
 |---|---|---|
 | `@BusinessLog` | `app/.../shared/aspect/operationlog/` | 方法级注解，标注需要记录日志的业务方法 |
-| `LogAspect` | `app/.../shared/aspect/operationlog/` | AOP 切面，`@Around` 环绕通知，记录执行日志 + Micrometer 指标 + 持久化 |
+| `LogAspect` | `app/.../shared/aspect/operationlog/` | AOP 切面，`@Around` 环绕通知，记录执行日志 + 持久化 |
 | `OperationType` | `app/.../shared/aspect/operationlog/` | 操作类型枚举：CREATE / UPDATE / DELETE / QUERY / EXPORT / IMPORT |
 | `OperationLogWriter` | `app/.../shared/aspect/operationlog/` | 操作日志写入器接口，由 app 模块实现具体持久化逻辑 |
 | `OperationLogRecord` | `app/.../shared/aspect/operationlog/` | 操作日志数据载体 record，在 LogAspect 与 Writer 之间传递 |
@@ -238,13 +238,9 @@ classDiagram
 | `operation` | OperationType | `QUERY` | 操作类型（CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT） |
 | `samplingRate` | double | `1.0` | 采样率（0.0~1.0），1.0 表示全部记录 |
 
-### Micrometer 指标
+### 可观测性
 
-| 指标名 | 类型 | 说明 |
-|---|---|---|
-| `log_aspect_timer_seconds` | Timer | 方法执行耗时分布 |
-| `log_aspect_counter_total` | Counter | 方法执行总次数 |
-| `log_aspect_errors_total` | Counter | 方法执行错误次数 |
+操作日志模块不手动注册 Micrometer Timer/Counter，指标由 OTel 自动 instrumentation 覆盖（如方法耗时、错误计数等），无需额外配置。
 
 ## API 参考
 
@@ -330,7 +326,7 @@ classDiagram
 
 ### 条件装配
 
-- `LoggingConfigure`：编译期依赖保证（缺少 Micrometer/AspectJ 时编译失败），无显式 `@ConditionalOnClass`
+- `LoggingConfigure`：编译期依赖保证（缺少 AspectJ 时编译失败），无显式 `@ConditionalOnClass`
 - `SlowQueryInterceptor` 条件：`logging.slow-query.enabled=true`（`@ConditionalOnProperty`）
 - `SamplingTurboFilter` 条件：`logging.sampling.enabled=true`（`@ConditionalOnProperty`）
 
@@ -412,7 +408,7 @@ curl "http://localhost:8080/api/system/operation-logs?pageNo=1&pageSize=20&opera
 
 ### 在 Facade 层使用 @BusinessLog
 
-在 Facade 层方法上添加 `@BusinessLog` 注解，记录业务操作日志并自动采集 Micrometer 指标：
+在 Facade 层方法上添加 `@BusinessLog` 注解，记录业务操作日志（可观测性指标由 OTel 自动覆盖）：
 
 ```java
 @Facade
@@ -448,7 +444,7 @@ public class UserFacadeImpl implements UserFacade {
 
 ### 下游消费者
 - **运维监控面板**：通过分页查询 API 展示操作日志，支持按模块/类型/时间范围过滤
-- **Prometheus + Grafana**：通过 Micrometer 指标（Timer/Counter）监控方法执行耗时和错误率
+- **Prometheus + Grafana**：通过 OTel 自动 instrumentation 指标监控方法执行耗时和错误率
 
 ### 设计依据
 - [openspec/specs/operation-log/spec.md](../../openspec/specs/operation-log/spec.md) — 操作日志功能设计意图（🔴 Intent 轨）

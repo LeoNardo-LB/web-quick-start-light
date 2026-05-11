@@ -15,7 +15,7 @@
 
 ## 概述
 
-基于 Java 25 `ScopedValue` 的线程上下文传递机制。项目使用 `ScopedThreadContext` 管理请求级别的 `userId` 和 `traceId`，在同步场景中通过 `ScopedValue.where().run()` 自动传递，在异步场景中通过 `ContextRunnable` / `ContextCallable` 包装器捕获并恢复上下文。同时配合 SLF4J MDC 实现日志上下文传递。
+基于 Java 25 `ScopedValue` 的线程上下文传递机制。项目使用 `BizContext`（`org.smm.archetype.shared.util.context.BizContext`）管理请求级别的 `userId`，在同步场景中通过 `ScopedValue.where().run()` 自动传递，在异步场景中通过 `ContextPropagatingTaskDecorator`（三合一：BizContext + OTel Context + MDC）自动传播上下文。`BizContext.Key.USER_ID` 标记为 `propagated=true`，设置值时自动同步至 OTel Baggage。traceId 由 OTel Span 全权管理，不属于 BizContext 职责。
 
 ## ScopedValue 传递链
 
@@ -35,7 +35,7 @@
 
 ```mermaid
 flowchart LR
-    A["ContextFillFilter<br/>解析 userId + traceId"] --> B["ScopedThreadContext<br/>.runWithContext()"]
+    A["ContextFillFilter<br/>解析 userId"] --> B["BizContext<br/>.runWithContext()"]
     B --> C["ScopedValue.where()<br/>.run(filterChain)"]
     C --> D["Controller<br/>自动携带上下文"]
     D --> E["Service<br/>自动携带上下文"]
@@ -43,14 +43,17 @@ flowchart LR
     F --> G["MyMetaObjectHandler<br/>自动填充审计字段"]
 ```
 
-### Context 数据结构
+### Holder 数据结构
 
 ```java
-// ScopedThreadContext 内部定义
-public record Context(String userId, String traceId) {}
+// BizContext 内部定义
+public static final class Holder {
+    final EnumMap<Key, String> map;    // 存储所有上下文键值
+    final boolean replica;              // 是否为副本（异步传播时为 true）
+}
 
 // 通过 ScopedValue 绑定到当前线程
-private static final ScopedValue<Context> SCOPED = ScopedValue.newInstance();
+private static final ScopedValue<Holder> SCOPED = ScopedValue.newInstance();
 ```
 
 ## 同步场景
@@ -60,19 +63,19 @@ private static final ScopedValue<Context> SCOPED = ScopedValue.newInstance();
 ```mermaid
 sequenceDiagram
     participant Filter as ContextFillFilter
-    participant Ctx as ScopedThreadContext
+    participant Ctx as BizContext
     participant Ctrl as Controller
     participant Svc as Service
     participant Repo as Repository
     participant MH as MyMetaObjectHandler
 
-    Filter->>Ctx: runWithContext(filterChain, userId, traceId)
-    Note over Ctx: ScopedValue.where(SCOPED, context)<br/>.run(runnable)
-    Ctx->>Ctrl: 请求处理开始<br/>getUserId() ✅ 可用<br/>getTraceId() ✅ 可用
+    Filter->>Ctx: runWithContext(filterChain, USER_ID, userId)
+    Note over Ctx: ScopedValue.where(SCOPED, holder)<br/>.run(runnable)
+    Ctx->>Ctrl: 请求处理开始<br/>getUserId() ✅ 可用
     Ctrl->>Svc: 业务调用<br/>上下文自动传递
     Svc->>Repo: 数据访问<br/>上下文自动传递
     Repo->>MH: MyBatis 插入/更新
-    MH->>Ctx: getUserId() → 填充 createBy/updateBy
+    MH->>Ctx: getUserId() → 填充 createUser/updateUser
     MH-->>Repo: 审计字段已填充
     Repo-->>Svc: 返回 Entity
     Svc-->>Ctrl: 返回结果
@@ -82,91 +85,63 @@ sequenceDiagram
 
 ### 关键点
 
-- **自动绑定/解绑**：`ScopedValue.where(SCOPED, context).run(runnable)` 在 runnable 执行完毕后自动解绑，无需手动清理
-- **只读访问**：同一 scope 内所有代码通过 `getUserId()` / `getTraceId()` 只读访问
+- **自动绑定/解绑**：`ScopedValue.where(SCOPED, holder).run(runnable)` 在 runnable 执行完毕后自动解绑，无需手动清理
+- **只读访问**：同一 scope 内所有代码通过 `BizContext.getUserId()` 只读访问
 - **线程隔离**：每个请求线程有独立的 ScopedValue 绑定
+- **OTel Baggage 同步**：`USER_ID` 键标记为 `propagated=true`，调用 `Key.set()` 时自动写入 OTel Baggage（`userId`），便于跨服务传播
 
 ## 异步场景
 
-在异步任务中，需要使用 `ContextRunnable` / `ContextCallable` 包装器手动捕获并传递上下文：
+在异步任务中，通过 `ContextPropagatingTaskDecorator`（位于 `ThreadPoolConfigure` 内部类）自动传播上下文，无需手动包装：
 
 ```mermaid
 sequenceDiagram
     participant Svc as Service（请求线程）
-    participant CR as ContextRunnable
+    participant TD as ContextPropagatingTaskDecorator
     participant Pool as ThreadPool
     participant AW as 异步工作线程
-    participant Ctx as ScopedThreadContext
+    participant Ctx as BizContext
 
-    Note over Svc: 当前线程 userId=U1, traceId=T1
-    Svc->>CR: new ContextRunnable(delegate)
-    Note over CR: 构造时捕获:<br/>- ScopedThreadContext.getContext() → snapshot<br/>- ScopedThreadContext.getScoped() → scoped<br/>- MDC.getCopyOfContextMap() → mdcContext
-    Svc->>Pool: executor.submit(contextRunnable)
-    Pool->>AW: 执行 ContextRunnable.run()
-    AW->>AW: MDC.setContextMap(mdcContext)
-    AW->>Ctx: ScopedValue.where(scoped, snapshot).run(delegate)
-    Note over AW,Ctx: 异步线程中:<br/>getUserId() → U1 ✅<br/>getTraceId() → T1 ✅
+    Note over Svc: 当前线程 userId=U1
+    Svc->>Pool: executor.submit(task)
+    Pool->>TD: decorate(task)
+    Note over TD: 构造时捕获（三合一）:<br/>1. BizContext.copyAsReplica() → replica<br/>2. OTel Context.current() → otelCtx<br/>3. MDC.getCopyOfContextMap() → mdcContext
+    TD-->>Pool: 包装后的 Runnable
+    Pool->>AW: 执行包装后的 Runnable
+    AW->>AW: 1. MDC.setContextMap(mdcContext)
+    AW->>AW: 2. otelCtx.makeContextCurrent()
+    AW->>Ctx: 3. ScopedValue.where(scoped, replica).run(delegate)
+    Note over AW,Ctx: 异步线程中:<br/>getUserId() → U1 ✅<br/>traceId → OTel Span.current().getSpanContext().getTraceId() ✅
     AW->>AW: delegate.run()（业务逻辑执行）
-    AW->>AW: MDC.clear()
+    AW->>AW: 清理 MDC + OTel Scope
 ```
 
-### ContextRunnable 工作原理
+### ContextPropagatingTaskDecorator 工作原理
 
-```java
-public class ContextRunnable implements Runnable {
+`ContextPropagatingTaskDecorator` 是 `ThreadPoolConfigure` 的内部类，实现了 Spring 的 `TaskDecorator` 接口，一次性处理三种上下文传播：
 
-    private final Runnable delegate;
-    private final ScopedThreadContext.Context snapshot;   // 捕获时的上下文快照
-    private final ScopedValue<ScopedThreadContext.Context> scoped;  // ScopedValue 实例引用
-    private final Map<String, String> mdcContext;         // MDC 上下文副本
+| 传播维度 | 捕获方式 | 恢复方式 |
+|----------|---------|---------|
+| BizContext | `BizContext.copyAsReplica()` → 返回 `Holder`（`replica=true`） | `ScopedValue.where(scoped, replica).run(delegate)` |
+| OTel Context | `Context.current()` | `ctx.makeContextCurrent()` + `Scope.close()` |
+| MDC | `MDC.getCopyOfContextMap()` | `MDC.setContextMap()` + `MDC.clear()` |
 
-    public ContextRunnable(Runnable delegate) {
-        this.delegate = delegate;
-        this.snapshot = ScopedThreadContext.getContext();  // 捕获当前 userId + traceId
-        this.scoped = ScopedThreadContext.getScoped();     // 获取 ScopedValue 实例
-        this.mdcContext = MDC.getCopyOfContextMap();       // 捕获 MDC 日志上下文
-    }
-
-    @Override
-    public void run() {
-        if (mdcContext != null) {
-            MDC.setContextMap(mdcContext);  // 恢复 MDC
-        }
-        try {
-            if (snapshot != null) {
-                ScopedValue.where(scoped, snapshot).run(delegate);  // 恢复 ScopedValue
-            } else {
-                delegate.run();
-            }
-        } finally {
-            MDC.clear();  // 清理 MDC，防止线程池复用污染
-        }
-    }
-}
-```
-
-### ContextCallable 工作原理
-
-`ContextCallable<V>` 与 `ContextRunnable` 类似，额外处理了 `Callable<V>` 的返回值和受检异常：
-
-- 捕获阶段：与 `ContextRunnable` 相同
-- 执行阶段：通过 `ScopedValue.where(scoped, snapshot).run()` 内部调用 `delegate.call()`
-- 异常传播：受检异常通过数组传递，在 `run()` 外重新抛出
-- 清理阶段：`finally` 中 `MDC.clear()`
+> **注意**：`replica=true` 标记的 Holder 在调用 `Key.set()` 时不会同步 OTel Baggage（避免异步线程重复写入），只保留读取能力。
 
 ## API 参考
 
 | 类 / 方法 | 说明 |
 |----------|------|
-| **ScopedThreadContext** | 基于 ScopedValue 的上下文管理器（不可实例化，私有构造器） |
-| `.runWithContext(Runnable, userId, traceId)` | 在指定上下文中执行代码块 |
-| `.getUserId()` | 获取当前线程绑定的 userId，未绑定时返回 null |
-| `.getTraceId()` | 获取当前线程绑定的 traceId，未绑定时返回 null |
-| `.getContext()` | 获取完整的 `Context` record，未绑定时返回 null |
-| `.getScoped()` | 获取 `ScopedValue<Context>` 实例（package-private，供包装器使用） |
-| **Context record** | `record Context(String userId, String traceId)` |
-| **ContextRunnable** | `Runnable` 包装器，构造时捕获上下文快照，执行时恢复 |
-| **ContextCallable\<V\>** | `Callable<V>` 包装器，构造时捕获上下文快照，执行时恢复 |
+| **BizContext** | 基于 ScopedValue 的上下文管理器（`org.smm.archetype.shared.util.context.BizContext`） |
+| `.runWithContext(Runnable, EnumMap<Key, String>)` | 在指定上下文中执行代码块 |
+| `.runWithContext(Runnable, Key, String)` | 便捷方法：设置单个键值后执行代码块 |
+| `.getContext()` | 获取当前线程绑定的 `EnumMap<Key, String>`，未绑定时返回 null |
+| `.copyContext()` | 复制当前上下文为新的 `EnumMap<Key, String>` |
+| `.copyAsReplica()` | 复制当前上下文为 `Holder`（`replica=true`），供 `TaskDecorator` 使用 |
+| `.getScoped()` | 获取 `ScopedValue<Holder>` 实例，供 `TaskDecorator` 使用 |
+| `.getUserId()` | 便捷方法：获取当前线程绑定的 userId，未绑定时返回 null |
+| **BizContext.Holder** | 上下文持有器，包含 `EnumMap<Key, String> map` 和 `boolean replica` |
+| **BizContext.Key** | 上下文键枚举，`USER_ID("userId", true)` 标记为 propagated |
 
 ## 使用示例
 
@@ -177,55 +152,51 @@ public class ContextRunnable implements Runnable {
 @Override
 protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                 FilterChain filterChain) {
-    String traceId = resolveTraceId(request);
-    String userId = resolveUserId();
-    ScopedThreadContext.runWithContext(() -> {
+    String userId = authComponent.getCurrentUserId();
+    BizContext.runWithContext(() -> {
         filterChain.doFilter(request, response);
-    }, userId, traceId);
+    }, BizContext.Key.USER_ID, userId);
 }
 
 // 任意下游代码中直接读取
 public void someServiceMethod() {
-    String userId = ScopedThreadContext.getUserId();   // 当前请求用户
-    String traceId = ScopedThreadContext.getTraceId();  // 当前请求追踪 ID
+    String userId = BizContext.getUserId();   // 当前请求用户
+    // traceId 由 OTel Span 管理：
+    String traceId = Span.current().getSpanContext().getTraceId();
 }
 ```
 
-### 异步场景（手动包装）
+### 异步场景（TaskDecorator 自动传播）
 
 ```java
-// 在 Service 中提交异步任务
+// 在 Service 中提交异步任务 — 无需手动包装
 public void asyncOperation() {
-    // 使用 ContextRunnable 包装，自动捕获并传递上下文
-    executor.submit(new ContextRunnable(() -> {
-        // 此处 ScopedThreadContext.getUserId() / getTraceId() 可用
+    // ContextPropagatingTaskDecorator 自动传播 BizContext + OTel + MDC
+    executor.submit(() -> {
+        // 此处 BizContext.getUserId() 可用
         doSomethingAsync();
-    }));
-
-    // 或使用 ContextCallable 获取返回值
-    Future<String> future = executor.submit(new ContextCallable<>(() -> {
-        String userId = ScopedThreadContext.getUserId();
-        return processAsync(userId);
-    }));
+    });
 }
 ```
+
+> **注意**：只需确保线程池配置了 `ContextPropagatingTaskDecorator`（`ThreadPoolConfigure` 自动注册），无需手动创建包装器。
 
 ### 审计字段自动填充
 
 ```java
-// MyMetaObjectHandler 中从 ScopedThreadContext 获取当前用户
+// MyMetaObjectHandler 中从 BizContext 获取当前用户
 public class MyMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
-        String userId = ScopedThreadContext.getUserId();
-        this.setFieldValByName("createBy", userId, metaObject);
-        this.setFieldValByName("updateBy", userId, metaObject);
+        String userId = BizContext.getUserId();
+        this.setFieldValByName("createUser", userId, metaObject);
+        this.setFieldValByName("updateUser", userId, metaObject);
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        String userId = ScopedThreadContext.getUserId();
-        this.setFieldValByName("updateBy", userId, metaObject);
+        String userId = BizContext.getUserId();
+        this.setFieldValByName("updateUser", userId, metaObject);
     }
 }
 ```
@@ -234,7 +205,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
 ### ScopedValue vs ThreadLocal
 
-**驱动力**：需要在请求线程（含虚拟线程）之间传递 userId / traceId 等上下文信息，且要求生命周期自动管理。
+**驱动力**：需要在请求线程（含虚拟线程）之间传递 userId 等上下文信息，且要求生命周期自动管理。
 
 **备选方案**：
 
@@ -250,10 +221,19 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 1. **不可变性**：ScopedValue 绑定后不可修改，避免了 ThreadLocal 的"中途被改写"问题，上下文数据在整个请求生命周期内保持一致
 2. **生命周期自动管理**：ScopedValue 通过 `ScopedValue.where(...).run(...)` 的 try-with-resources 模式自动清理，不会因遗漏 `remove()` 导致内存泄漏
 3. **虚拟线程友好**：ScopedValue 是 Java 21+ 专为虚拟线程（Virtual Threads / Project Loom）设计的替代方案，虚拟线程会被 pin 在载体线程上，而 ScopedValue 不会产生 pin 问题
-4. **类型安全**：泛型参数 `ScopedValue<Context>` 在编译期保证了类型安全，避免了 ThreadLocal 的强制类型转换
+4. **类型安全**：泛型参数 `ScopedValue<Holder>` 在编译期保证了类型安全，避免了 ThreadLocal 的强制类型转换
 5. **绑定范围可控**：每个 `run(...)` / `call(...)` 创建独立的绑定作用域，嵌套调用时外层绑定不会被内层覆盖
 
 > **注意**：ScopedValue 在 Java 21 中为 Preview 特性，Java 25 中已转正为正式 API。本骨架要求 Java 25，因此可直接使用。
+
+### 职责分离：BizContext vs OTel
+
+| 职责 | 负责方 | 说明 |
+|------|--------|------|
+| userId 传递 | `BizContext`（ScopedValue） | 请求线程内业务上下文 |
+| userId 跨服务传播 | OTel Baggage | `BizContext.Key.USER_ID`（propagated=true）自动同步 |
+| traceId 生成与传播 | OTel Span | `Span.current().getSpanContext().getTraceId()` |
+| 日志关联 | MDC + OTel | OTel auto-instrumentation 自动将 traceId/spanId 写入 MDC |
 
 ## 相关文档
 
@@ -268,4 +248,5 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-05-11 | 重写：ScopedThreadContext → BizContext；ContextRunnable/ContextCallable → ContextPropagatingTaskDecorator；补充 OTel Baggage 集成；审计字段 createBy/updateBy → createUser/updateUser；traceId 职责移交 OTel Span |
 | 2026-04-14 | 初始创建 |

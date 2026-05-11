@@ -119,7 +119,7 @@
 | [component-search.md](modules/component-search.md) | 搜索组件：内存搜索 + 15 方法 |
 | [component-auth.md](modules/component-auth.md) | 认证组件：AuthComponent 接口 + Sa-Token |
 
-> **注意**：`component-log.md`、`component-ratelimit.md`、`component-idempotent.md` 已迁移至 `app/.../shared/aspect/` 下，旧文档已归档至 `docs/archived/`。操作日志见 [operation-log.md](modules/operation-log.md)。
+> **注意**：`component-log.md`、`component-ratelimit.md`、`component-idempotent.md` 已迁移至 `app/.../shared/aspect/` 下，对应旧文档已删除。操作日志见 [operation-log.md](modules/operation-log.md)。
 
 ## 引用强度说明
 
@@ -137,8 +137,9 @@
 |------|---------|---------|
 | architecture/ | 6 | ✅ 已创建 |
 | conventions/ | 4 | ✅ 已创建 |
-| modules/ | 12 | ✅ 已创建 |
-| **合计** | **22** | **✅ 已创建** |
+| modules/ | 9 | ✅ 已创建 |
+| superpowers/ | — | 📋 临时工作产物（不纳入文档治理） |
+| **合计** | **19** | **✅ 已创建** |
 
 ## 文档系统设计
 
@@ -615,5 +616,5 @@ AI Agent 加载 docs/ 下的文档时，**⛔ 绝对禁止⛔ 直接读取全文
 
 ### Intent 轨（冻结，不在 docs/ 下）
 
-- [OpenSpec specs/](../openspec/specs/) — 17 个 capability 的设计意图文档（🔴 Intent 轨）
+- [OpenSpec specs/](../openspec/specs/) — 21 个 capability 的设计意图文档（🔴 Intent 轨）
 - [AGENTS.md 中的 OpenSpec Intent 索引](../AGENTS.md) — 完整的 capability 路径列表

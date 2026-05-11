@@ -37,7 +37,7 @@
 
 ### 3. 上下文填充
 
-app 模块的 `ContextFillFilter` 注入 `AuthComponent`，在请求入口处调用 `getCurrentUserId()` 获取当前用户 ID 并填充到 `ScopedThreadContext`，供下游 Service 层使用。
+app 模块的 `ContextFillFilter` 注入 `AuthComponent`，在请求入口处调用 `getCurrentUserId()` 获取当前用户 ID 并填充到 `BizContext`，供下游 Service 层使用。
 
 ### 4. 开发/测试降级
 
@@ -126,7 +126,7 @@ sequenceDiagram
     participant Filter as ContextFillFilter
     participant Interceptor as SaInterceptor
     participant AuthComponent as AuthComponent
-    participant Context as ScopedThreadContext
+    participant Context as BizContext
     participant Controller as Controller
 
     Browser->>Filter: HTTP 请求（携带 Token）
@@ -216,7 +216,7 @@ sequenceDiagram
 ### 配置示例
 
 ```yaml
-middleware:
+component:
   auth:
     enabled: true
     exclude-paths:
@@ -233,32 +233,35 @@ middleware:
 
 ```java
 import org.smm.archetype.component.auth.AuthComponent;
+import org.smm.archetype.exception.BizException;
+import org.smm.archetype.exception.CommonErrorCode;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoginFacadeImpl implements LoginFacade {
 
-    private final AuthComponent authClient;
+    private final UserRepository userRepository;
+    private final AuthComponent authComponent;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
-    public LoginResult login(LoginRequest request) {
-        // 参数校验
-        User user = userRepository.getByUsername(request.getUsername());
-        // 登录
-        String token = authClient.login(user.getId());
-        return new LoginResult(token);
+    public String login(String username, String password) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BizException(CommonErrorCode.AUTH_USER_NOT_FOUND, "用户不存在"));
+
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+            throw new BizException(CommonErrorCode.AUTH_BAD_CREDENTIALS, "用户名或密码错误");
+        }
+
+        log.info("用户登录成功: username={}", username);
+        return authComponent.login(user.getId());
     }
 
     @Override
     public void logout() {
-        authClient.logout();
-    }
-
-    @Override
-    public UserInfo getCurrentUser() {
-        authClient.checkLogin(); // 未登录抛异常
-        String userId = authClient.getCurrentUserId();
-        return userRepository.getById(Long.parseLong(userId));
+        log.info("用户注销");
+        authComponent.logout();
     }
 }
 ```
@@ -266,23 +269,40 @@ public class LoginFacadeImpl implements LoginFacade {
 ### 2. 在 ContextFillFilter 中使用 AuthComponent
 
 ```java
-@Component
-@RequiredArgsConstructor
+import org.smm.archetype.component.auth.AuthComponent;
+import org.smm.archetype.shared.util.context.BizContext;
+
+@Slf4j
 public class ContextFillFilter extends OncePerRequestFilter {
 
-    private final AuthComponent authClient;
+    private static final String ANONYMOUS_USER = "ANONYMOUS";
+    private final AuthComponent authComponent;
+
+    public ContextFillFilter(@Nullable AuthComponent authComponent) {
+        this.authComponent = authComponent;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                      HttpServletResponse response,
-                                     FilterChain filterChain) {
-        try {
-            String userId = authClient.getCurrentUserId();
-            ScopedThreadContext.setUserId(userId);
-            filterChain.doFilter(request, response);
-        } finally {
-            ScopedThreadContext.clear();
+                                     FilterChain filterChain) throws ServletException, IOException {
+        String userId = resolveUserId();
+
+        BizContext.runWithContext(() -> {
+            try {
+                filterChain.doFilter(request, response);
+            } catch (IOException | ServletException e) {
+                throw new RuntimeException(e);
+            }
+        }, BizContext.Key.USER_ID, userId);
+    }
+
+    private String resolveUserId() {
+        if (authComponent == null) {
+            return "SYSTEM";
         }
+        String userId = authComponent.getCurrentUserId();
+        return userId != null ? userId : ANONYMOUS_USER;
     }
 }
 ```
@@ -292,7 +312,7 @@ public class ContextFillFilter extends OncePerRequestFilter {
 在 `application.yaml` 中配置不需要认证的路径：
 
 ```yaml
-middleware:
+component:
   auth:
     enabled: true
     exclude-paths:
@@ -304,7 +324,7 @@ middleware:
 ### 4. 关闭认证（开发/测试环境）
 
 ```yaml
-middleware:
+component:
   auth:
     enabled: false
 ```

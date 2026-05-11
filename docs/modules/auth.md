@@ -22,7 +22,7 @@
 1. **用户登录**：接收用户名和密码，通过 BCrypt 验证后调用 Sa-Token 创建会话，返回 Token
 2. **用户注销**：调用 Sa-Token 销毁当前会话
 3. **路由拦截**：通过 `AuthInterceptorConfigurer` 配置需要认证的路由，排除白名单路径
-4. **上下文填充**：`ContextFillFilter` 在请求入口注入 `AuthComponent`，解析当前用户 ID 并写入 `ScopedThreadContext`
+4. **上下文填充**：`ContextFillFilter` 在请求入口注入 `AuthComponent`，解析当前用户 ID 并写入 `BizContext`
 
 ## 技术设计
 
@@ -160,7 +160,7 @@ classDiagram
 | `AuthProperties` | `components/component-auth/` | 认证配置属性（`component.auth.*`），含 enabled 和 excludePaths |
 | `AuthInterceptorConfigurer` | `components/component-auth/` | Sa-Token 路由拦截器，自动配置 `SaInterceptor`，拦截 `/**` 并排除白名单 |
 | `AuthAutoConfiguration` | `components/component-auth/` | 认证自动配置，条件装配 SaTokenAuthComponent 或 NoOpAuthComponent |
-| `ContextFillFilter` | `app/.../controller/global/` | 全局过滤器，解析 traceId 和 userId 写入 ScopedThreadContext |
+| `ContextFillFilter` | `app/.../controller/global/` | 全局过滤器，解析 userId 写入 BizContext（traceId 由 OTel Span 管理） |
 
 ## API 参考
 
@@ -246,7 +246,7 @@ classDiagram
 2. **配置白名单路径**：在 `application.yaml` 中配置不需要认证的路径
 
 ```yaml
-middleware:
+component:
   auth:
     enabled: true
     exclude-paths:
@@ -279,11 +279,10 @@ public class SomeService {
 }
 ```
 
-4. **获取上下文信息**：通过 `ScopedThreadContext` 在任意层获取 traceId 和 userId
+4. **获取上下文信息**：通过 `BizContext` 在任意层获取 userId（traceId 由 OTel Span 管理，通过 `Span.current().getSpanContext().getTraceId()` 获取）
 
 ```java
-String userId = ScopedThreadContext.getUserId();
-String traceId = ScopedThreadContext.getTraceId();
+String userId = BizContext.getUserId();
 ```
 
 ### 在 Controller 层使用认证守卫
@@ -324,7 +323,7 @@ public class UserController {
 ### 下游消费者
 - **所有需要认证的 Controller**：通过 `AuthInterceptorConfigurer` 拦截器统一管控
 - **所有需要获取当前用户的 Service**：通过 `AuthComponent.getCurrentUserId()` 获取
-- `ScopedThreadContext`：`ContextFillFilter` 写入 userId/traceId，全链路可用
+- `BizContext`：`ContextFillFilter` 写入 userId，全链路可用（traceId 由 OTel Span 管理）
 
 ### 设计依据
 - [openspec/specs/auth/spec.md](../../openspec/specs/auth/spec.md) — 认证功能设计意图（🔴 Intent 轨）

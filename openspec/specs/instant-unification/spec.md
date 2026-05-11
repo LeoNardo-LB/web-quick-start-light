@@ -1,11 +1,15 @@
+> ⚠️ **部分过期** — `AuditEvent` 类已移除，其余要求（BaseResult.time→Instant、VO/DTO 用 record）均已满足。
+
 ## ADDED Requirements
 
-### Requirement: AuditEvent 时间字段使用 Instant
-`AuditEvent` record 的 `timestamp` 字段 SHALL 从 `LocalDateTime` 改为 `Instant`。所有使用 `timestamp` 的代码 SHALL 适配此变更。
+### Requirement: AuditEvent 时间字段使用 Instant（~~已移除~~）
+<!-- ⚠️ AuditEvent 类已不存在/已移除，此需求不再适用 -->
+~~`AuditEvent` record 的 `timestamp` 字段 SHALL 从 `LocalDateTime` 改为 `Instant`。所有使用 `timestamp` 的代码 SHALL 适配此变更。~~
 
 #### Scenario: AuditEvent 使用 Instant
-- **WHEN** 创建 AuditEvent 实例
-- **THEN** timestamp 字段类型为 `java.time.Instant`
+<!-- ⚠️ AuditEvent 类已不存在/已移除 -->
+- ~~**WHEN** 创建 AuditEvent 实例~~
+- ~~**THEN** timestamp 字段类型为 `java.time.Instant`~~
 
 ### Requirement: BaseResult 时间字段使用 Instant
 `BaseResult` 的 `time` 字段 SHALL 从 `Long`（毫秒时间戳）改为 `Instant`。`success()` 和 `fail()` 工厂方法 SHALL 使用 `Instant.now()` 赋值。

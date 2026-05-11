@@ -233,7 +233,7 @@ public class SystemConfigService {
 }
 ```
 
-> **后果**：`RuntimeException` 无法被 `WebExceptionAdvise` 精确匹配，降级为兜底的 `UNKNOWN_ERROR(9999)`，前端只看到"未知异常"而非有意义的错误提示。同时该异常不会被 Micrometer 指标系统正确分类，影响错误监控。
+> **后果**：`RuntimeException` 无法被 `WebExceptionAdvise` 精确匹配，降级为兜底的 `UNKNOWN_ERROR(9999)`，前端只看到"未知异常"而非有意义的错误提示。同时该异常不会被 OTel 指标系统正确分类，影响错误监控。
 
 ### 场景 2: 在 Controller 中 try-catch 后返回自定义格式
 

@@ -53,14 +53,17 @@ public abstract class IntegrationTestBase {
 
 ✅ 正确：
 ```
-app/src/test/java/org/smm/archetype/cases/
-├── system/
-│   ├── SystemConfigServiceUTest.java        // 单元测试
-│   └── SystemConfigControllerITest.java     // 集成测试
-├── auth/
-│   └── LoginServiceUTest.java               // 单元测试
-└── operationlog/
-    └── OperationLogServiceUTest.java        // 单元测试
+app/src/test/java/org/smm/archetype/
+├── repository/system/
+│   └── SystemConfigConverterUTest.java        // 单元测试（按代码层级分布）
+├── facade/system/
+│   └── SystemConfigFacadeUTest.java           // 单元测试（按代码层级分布）
+├── service/auth/
+│   └── AuthServiceUTest.java                  // 单元测试
+├── cases/integrationtest/
+│   ├── AuthE2EITest.java                      // 集成测试（统一目录）
+│   ├── LoginControllerITest.java              // 集成测试
+│   └── LogAutoConfigurationITest.java         // 集成测试
 ```
 
 ❌ 错误：
@@ -110,13 +113,15 @@ class SystemConfigServiceUTest extends UnitTestBase {
         // Arrange
         SystemConfig config = SystemConfig.builder()
                 .configKey("test.key").configValue("test.value").build();
-        when(systemConfigRepository.getByKey("test.key")).thenReturn(config);
+        when(systemConfigRepository.findByConfigKey(ConfigKey.of("test.key")))
+                .thenReturn(Optional.of(config));
 
         // Act
-        SystemConfig result = systemConfigService.getByKey("test.key");
+        SystemConfig result = systemConfigService.getByKey(ConfigKey.of("test.key"));
 
         // Assert
-        assertThat(result.getConfigValue()).isEqualTo("test.value");
+        assertThat(result).isPresent();
+        assertThat(result.get().getConfigValue()).isEqualTo("test.value");
     }
 }
 ```
@@ -218,18 +223,20 @@ JaCoCo 配置说明：
 | 条件不满足 | NoOp 默认实现生效 |
 | 属性缺失 | 使用默认值 |
 
-示例（component-email 条件装配）：
+示例（component-log 条件装配）：
 ```java
 // 条件满足 — 实际实现注册
-@SpringBootTest(classes = EmailAutoConfiguration.class)
+@SpringBootTest
 @ActiveProfiles("test")
-class EmailAutoConfigurationITest extends IntegrationTestBase {
+@DisplayName("LogAutoConfiguration")
+class LogAutoConfigurationITest extends IntegrationTestBase {
     @Autowired
-    private EmailClient emailClient;
+    private ApplicationContext applicationContext;
 
     @Test
-    void shouldRegisterRealClient_whenMailJarPresent() {
-        assertThat(emailClient).isNotInstanceOf(NoOpEmailClient.class);
+    @DisplayName("MFT: LogAspect Bean 已通过 LogAutoConfiguration 自动注册")
+    void shouldRegisterLogAspect() {
+        assertThat(applicationContext.getBean("logAspect")).isNotNull();
     }
 }
 ```

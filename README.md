@@ -30,11 +30,8 @@ web-quick-start-light/                     (根 POM, packaging=pom)
 │   ├── component-email/                      (Jakarta Mail 邮件)
 │   ├── component-sms/                        (短信)
 │   ├── component-search/                     (内存搜索)
-│   ├── component-log/                        (日志组件)
-│   ├── component-ratelimit/                  (限流组件)
-│   ├── component-idempotent/                 (幂等组件)
 │   └── component-auth/                       (认证组件)
-└── app/                                   (主应用, 依赖 common + 所有 component-*)
+└── app/                                   (主应用, 依赖 common + 组件 component-*，含 shared/ 横切关注点)
 ```
 
 > 详细模块依赖和四层架构说明见 [docs/architecture/module-structure.md](docs/architecture/module-structure.md)。
@@ -80,7 +77,7 @@ mvn spring-boot:run -pl app -Dspring-boot.run.profiles=prod
 ## 核心特性
 
 - **四层架构**：Controller → Facade → Service → Repository，ArchUnit 守护依赖规则
-- **9 个技术组件**：缓存/存储/邮件/短信/搜索/日志/限流/幂等/认证，Template Method + 条件装配
+- **6 个技术组件**：缓存/存储/邮件/短信/搜索/认证（Template Method + 条件装配），+ 3 个应用层横切关注点（日志/限流/幂等，集成在 app/shared/）
 - **ScopedValue 线程上下文**：基于 Java 25 ScopedValue 的 userId/traceId 全链路传递
 - **完善日志体系**：@BusinessLog 注解 + 8 个 Appender + 采样 + 慢 SQL 监控
 - **高覆盖率测试**：UTest + ITest 双分类，JaCoCo Instruction ≥ 95%

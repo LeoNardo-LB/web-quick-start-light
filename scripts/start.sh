@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # web-quick-start-light 生产环境启动脚本
-# JVM 最大内存: 1G，适用于 Spring Boot 3.5 + Java 25 脚手架项目
+# JVM 最大内存: 1G，适用于 Spring Boot 4.x + Java 25 脚手架项目
 #
 # 用法:
 #   ./start.sh                    # 默认 prod 环境

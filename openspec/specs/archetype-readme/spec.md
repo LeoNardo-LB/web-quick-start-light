@@ -1,3 +1,5 @@
+> ⚠️ **未实现** — `ARCHETYPE_README.md` 文件不存在，此 spec 可能已不再适用。
+
 ## MODIFIED Requirements
 
 ### Requirement: ARCHETYPE_README.md 精简为纯安装教程

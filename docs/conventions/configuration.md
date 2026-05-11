@@ -97,13 +97,13 @@ thread-pool:
   daemon-core-size: 2
   scheduler-pool-size: 2
 
-middleware:
+component:
   cache:
     initial-capacity: 1000
     maximum-size: 10000
     expire-after-write: 30d
     expire-after-access: 30d
-  object-storage:
+  oss:
     type: local
     local-storage-path: ./uploads
   email:

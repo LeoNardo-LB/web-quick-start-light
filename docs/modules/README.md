@@ -29,7 +29,7 @@
 | [component-search.md](component-search.md) | 搜索组件：内存搜索 + 15 方法 |
 | [component-auth.md](component-auth.md) | 认证组件：AuthComponent 接口 + Sa-Token |
 
-> **注意**：`component-log.md`、`component-ratelimit.md`、`component-idempotent.md` 已迁移至 `app/.../shared/aspect/` 下，旧文档已归档至 `docs/archived/`。操作日志见 [operation-log.md](operation-log.md)。
+> **注意**：`component-log.md`、`component-ratelimit.md`、`component-idempotent.md` 已迁移至 `app/.../shared/aspect/` 下，对应旧文档已删除。操作日志见 [operation-log.md](operation-log.md)。
 
 ## 模板结构
 

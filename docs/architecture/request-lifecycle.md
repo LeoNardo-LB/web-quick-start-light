@@ -23,7 +23,7 @@ sequenceDiagram
     participant Client as 客户端
     participant Filter as ContextFillFilter
     participant Auth as AuthComponent
-    participant Ctx as ScopedThreadContext
+    participant Ctx as BizContext
     participant Ctrl as Controller
     participant Fac as Facade
     participant Svc as Service
@@ -33,8 +33,8 @@ sequenceDiagram
     Client->>Filter: HTTP Request
     Filter->>Auth: resolveUserId()
     Auth-->>Filter: userId
-    Filter->>Ctx: runWithContext(userId, traceId)
-    Note over Ctx: ScopedValue.where(SCOPED, context).run(...)
+    Filter->>Ctx: runWithContext(filterChain, USER_ID, userId)
+    Note over Ctx: ScopedValue.where(SCOPED, holder).run(...)
     Ctx-->>Filter: OK
     Filter->>Ctrl: 转发请求（上下文已绑定）
     Ctrl->>Fac: 调用门面（Request → Command）
@@ -92,6 +92,7 @@ sequenceDiagram
 | `ClientException` | 200 | `BaseResult.fail(errorCode, message)` | ✅ |
 | `SysException` | 200 | `BaseResult.fail(errorCode, message)` | ✅ |
 | `MethodArgumentNotValidException` | 200 | 字段校验错误拼接 | ❌ |
+| `BindException` | 200 | 绑定错误拼接 | ❌ |
 | `ConstraintViolationException` | 200 | 约束违反信息拼接 | ❌ |
 | `NotLoginException` (Sa-Token) | 401 | 未登录错误 | ✅ |
 | `NoResourceFoundException` | 404 | 资源不存在 | ❌ |
@@ -101,15 +102,15 @@ sequenceDiagram
 
 | 环节 | 类/组件 | 核心职责 |
 |------|--------|---------|
-| **全局过滤** | `ContextFillFilter` | 解析 userId（AuthComponent）、生成 traceId（X-Trace-Id Header 或 UUID）、绑定 ScopedValue 上下文 |
-| **线程上下文** | `ScopedThreadContext` | 基于 Java 25 ScopedValue 存储 userId 和 traceId，请求线程内自动可访问 |
+| **全局过滤** | `ContextFillFilter` | 从 AuthComponent 获取 userId，绑定 BizContext 上下文（order=100） |
+| **线程上下文** | `BizContext` | 基于 Java 25 ScopedValue 存储 userId，请求线程内自动可访问 |
 | **控制层** | `*Controller` | 接收 HTTP 请求、Bean Validation 参数校验、调用 Facade、返回 `BaseResult<T>` |
 | **门面层** | `*FacadeImpl` | Entity→VO 转换（MapStruct）、业务编排、聚合多个 Service 调用 |
 | **服务层** | `*Service` | 核心业务逻辑、事务管理（`@Transactional`）、调用 Repository |
 | **仓储层** | `*RepositoryImpl` | MyBatis-Plus Mapper 操作、Entity↔DO 转换 |
 | **数据访问** | `*Mapper` | MyBatis-Plus BaseMapper，SQL 执行 |
 | **全局异常** | `WebExceptionAdvise` | `@RestControllerAdvice` 捕获所有异常、i18n 消息解析、统一错误响应 |
-| **审计填充** | `MyMetaObjectHandler` | 自动填充 `createBy` / `updateBy`（从 ScopedThreadContext 获取 userId） |
+| **审计填充** | `MyMetaObjectHandler` | 自动填充 `createUser` / `updateUser`（从 BizContext 获取 userId） |
 
 ### 过滤器链与拦截器完整列表
 
@@ -118,7 +119,7 @@ sequenceDiagram
 ```mermaid
 graph TD
     REQ["HTTP 请求"] --> F1["1. CorsFilter<br/>跨域处理"]
-    F1 --> F2["2. ContextFillFilter<br/>上下文填充（order=1）"]
+    F1 --> F2["2. ContextFillFilter<br/>上下文填充（order=100）"]
     F2 --> I1["3. SaInterceptor<br/>认证检查（条件装配）"]
     I1 --> A1["4. IdempotentAspect<br/>幂等检查（@Idempotent）"]
     A1 --> A2["5. RateLimitAspect<br/>限流检查（@RateLimit）"]
@@ -130,11 +131,11 @@ graph TD
 | 序号 | 类型 | 组件 | 执行阶段 | 条件 | 说明 |
 |------|------|------|---------|------|------|
 | 1 | Servlet Filter | `CorsFilter` | 请求前/后 | 始终 | 处理跨域请求，允许 `http://localhost:*` 来源 |
-| 2 | Servlet Filter | `ContextFillFilter` | 请求前/后 | 始终（order=1） | 解析 traceId / userId，绑定 ScopedValue 上下文 |
+| 2 | Servlet Filter | `ContextFillFilter` | 请求前/后 | 始终（order=100） | 从 AuthComponent 获取 userId，绑定 BizContext 上下文 |
 | 3 | Interceptor | `SaInterceptor` | 请求前 | Sa-Token 在 classpath 且 auth.enabled=true | 拦截除 excludePaths 外的所有请求，校验登录状态 |
 | 4 | AOP Aspect | `IdempotentAspect` | 方法环绕 | 标注 `@Idempotent` 的方法 | 基于 Caffeine 幂等 Key 去重，防止重复提交 |
 | 5 | AOP Aspect | `RateLimitAspect` | 方法环绕 | 标注 `@RateLimit` 的方法 | 基于 Bucket4j 令牌桶限流，支持 SpEL Key |
-| 6 | AOP Aspect | `LogAspect` | 方法环绕 | 标注 `@BusinessLog` 的方法 | 记录业务操作日志，支持 SLF4J + Micrometer 指标 |
+| 6 | AOP Aspect | `LogAspect` | 方法环绕 | 标注 `@BusinessLog` 的方法 | 记录业务操作日志，支持 SLF4J + OTel |
 | 7 | ControllerAdvice | `WebExceptionAdvise` | 异常时 | 始终 | 捕获 `BizException` / `ClientException` / `SysException`，i18n 翻译 |
 
 > **注意**：序号 3-6 为条件装配组件，仅在对应依赖存在且配置启用时生效。详见各组件模块文档。
@@ -143,26 +144,25 @@ graph TD
 
 ### ContextFillFilter
 
-全局过滤器，继承 `OncePerRequestFilter`，每个请求执行一次：
+全局过滤器，继承 `OncePerRequestFilter`，每个请求执行一次（order=100）：
 
 | 功能 | 实现方式 |
 |------|---------|
-| 解析 traceId | 读取 `X-Trace-Id` Header，不存在则生成 UUID |
 | 解析 userId | 调用 `AuthComponent.getCurrentUserId()`，null 时返回 `"ANONYMOUS"` |
 | 无 AuthComponent | userId 默认为 `"SYSTEM"` |
-| 绑定上下文 | `ScopedThreadContext.runWithContext(runnable, userId, traceId)` |
-| 响应回写 | 设置 `X-Trace-Id` Response Header |
+| 绑定上下文 | `BizContext.runWithContext(filterChain, USER_ID, userId)` |
 
-### ScopedThreadContext
+> **注意**：ContextFillFilter 不处理 traceId，不设置 X-Trace-Id Header。traceId 由 OTel Span 全权负责。
 
-基于 Java 25 `ScopedValue` 的线程上下文管理器：
+### BizContext
+
+基于 Java 25 `ScopedValue` 的线程上下文管理器（`org.smm.archetype.shared.util.context.BizContext`）：
 
 | 方法 | 说明 |
 |------|------|
-| `runWithContext(Runnable, userId, traceId)` | 在指定上下文中执行代码块 |
+| `runWithContext(Runnable, Key, String)` | 在指定上下文中执行代码块 |
 | `getUserId()` | 获取当前线程绑定的 userId |
-| `getTraceId()` | 获取当前线程绑定的 traceId |
-| `getContext()` | 获取完整的 `Context` record |
+| `getContext()` | 获取当前线程绑定的 `EnumMap<Key, String>` |
 
 ### WebExceptionAdvise
 
@@ -199,4 +199,5 @@ graph TD
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-05-11 | ScopedThreadContext → BizContext；ContextFillFilter 移除 traceId/X-Trace-Id 处理；order=1 → order=100；审计字段 createBy/updateBy → createUser/updateUser；补充 BindException；LogAspect Micrometer → OTel |
 | 2026-04-14 | 初始创建 |

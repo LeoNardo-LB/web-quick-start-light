@@ -24,21 +24,38 @@ classDiagram
     class CacheComponent {
         <<interface>>
         +get(key) T
+        +getList(key) List~T~
+        +getList(keys) List~T~
         +put(key, value) void
+        +put(key, value, duration) void
         +delete(key) void
+        +append(key, value) void
+        +expire(key, duration) void
+        +getExpire(key) Duration
         +hasKey(key) Boolean
     }
 
     class AbstractCacheComponent {
         <<abstract>>
         +get(key) T ★final
+        +getList(key) List~T~ ★final
+        +getList(keys) List~T~ ★final
         +put(key, value) void ★final
+        +put(key, value, duration) void ★final
         +delete(key) void ★final
+        +append(key, value) void ★final
+        +expire(key, duration) void ★final
+        +getExpire(key) Duration ★final
         +hasKey(key) Boolean ★final
         #validateKey(key) void
         #doGet(key) T
+        #doGetList(key) List~T~
+        #doGetList(keys) List~T~
         #doPut(key, value, duration) void
         #doDelete(key) void
+        #doAppend(key, value) void
+        #doExpire(key, duration) void
+        #doGetExpire(key) Duration
         #doHasKey(key) Boolean
         #getDefaultDuration() Duration
     }
@@ -46,8 +63,13 @@ classDiagram
     class CaffeineCacheComponent {
         -Caffeine Cache 实例
         #doGet(key) T
+        #doGetList(key) List~T~
+        #doGetList(keys) List~T~
         #doPut(key, value, duration) void
         #doDelete(key) void
+        #doAppend(key, value) void
+        #doExpire(key, duration) void
+        #doGetExpire(key) Duration
         #doHasKey(key) Boolean
         #getDefaultDuration() Duration
     }
@@ -282,4 +304,5 @@ public class AuthAutoConfiguration {
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-05-11 | CacheComponent 类图补全 10 个方法（get/getList×2/put×2/delete/append/expire/getExpire/hasKey） |
 | 2026-04-14 | 初始创建 |

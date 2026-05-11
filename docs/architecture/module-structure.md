@@ -150,7 +150,7 @@ org.smm.archetype/
 │   ├── system/
 │   └── operationlog/
 ├── entity/
-│   ├── api/                     ← 通用基类（BaseResult、BasePageResult 等）
+│   ├── base/                     ← 通用基类（BaseResult、BasePageResult、BaseRequest、BasePageRequest、BaseDO）
 │   ├── user/
 │   ├── system/
 │   └── operationlog/
@@ -163,7 +163,7 @@ org.smm.archetype/
 │   │   ├── idempotent/          ← 幂等（@Idempotent + IdempotentAspect + 辅助类）
 │   │   └── operationlog/        ← 操作日志（@BusinessLog + LogAspect + OperationLogWriter 等）
 │   └── util/                    ← 通用工具类
-│       ├── context/             ← ScopedThreadContext / ContextRunnable / ContextCallable
+│       ├── context/             ← BizContext（ScopedValue 线程上下文）
 │       ├── dal/                 ← MyMetaObjectHandler 等 DAL 横切
 │       └── logging/             ← 日志基础设施（慢查询拦截、采样、脱敏、Marker）
 │
@@ -292,4 +292,5 @@ org.smm.archetype/
 |------------|-------------------------------------------------------------------------------------------------------------------|
 | 2026-04-14 | 初始创建                                                                                                              |
 | 2026-04-14 | 新增「app 内部包组织」章节；components 模块精简为纯中间件接入层（移除 component-log/component-ratelimit/component-idempotent）；横切关注点纳入 app 模块 `shared/` 包 |
+| 2026-05-11 | `entity/api/` → `entity/base/`；`shared/util/context/` 修正为仅含 BizContext |
 | 2026-04-15 | `shared/logging/` 合并到 `shared/util/logging/`，统一 shared 下 aspect/util 两个维度 |

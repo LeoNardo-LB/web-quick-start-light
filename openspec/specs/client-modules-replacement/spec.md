@@ -1,3 +1,5 @@
+> ⚠️ **已过期** — `client-ratelimit` 和 `client-idempotent` 已移至 `app/.../shared/aspect/`，参见 `rate-limiting/spec.md` 和 `idempotent-protection/spec.md`。
+
 ## ADDED Requirements
 
 ### Requirement: client-auth 认证客户端模块
@@ -8,7 +10,7 @@
 - **THEN** SHALL 包含 AuthClient 接口、AbstractAuthClient（Template Method）、NoOpAuthClient、SaTokenAuthClient、AuthAutoConfiguration
 
 #### Scenario: client-auth 条件装配
-- **WHEN** classpath 不存在 Sa-Token 或 middleware.auth.enabled=false
+- **WHEN** classpath 不存在 Sa-Token 或 component.auth.enabled=false
 - **THEN** SHALL 使用 NoOpAuthClient
 
 ### Requirement: client-ratelimit 限流客户端模块

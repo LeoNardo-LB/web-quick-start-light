@@ -31,15 +31,15 @@
 - **THEN** 系统 SHALL 放行，不校验登录状态
 
 ### Requirement: ContextFillFilter 集成 Sa-Token
-ContextFillFilter SHALL 从 Sa-Token 获取当前登录用户 ID 填充到 ScopedThreadContext，替代硬编码的 "SYSTEM"。未登录时 userId 为 "ANONYMOUS"。
+ContextFillFilter SHALL 从 Sa-Token 获取当前登录用户 ID 填充到 BizContext，替代硬编码的 "SYSTEM"。未登录时 userId 为 "ANONYMOUS"。
 
 #### Scenario: 已登录请求填充真实 userId
 - **WHEN** 已登录用户发送请求
-- **THEN** ScopedThreadContext.getUserId() SHALL 返回该用户的真实 ID
+- **THEN** BizContext.getUserId() SHALL 返回该用户的真实 ID
 
 #### Scenario: 未登录请求填充 ANONYMOUS
 - **WHEN** 未登录用户发送请求（访问无需认证的端点）
-- **THEN** ScopedThreadContext.getUserId() SHALL 返回 "ANONYMOUS"
+- **THEN** BizContext.getUserId() SHALL 返回 "ANONYMOUS"
 
 ### Requirement: 用户表与密码安全
 系统 SHALL 提供 `user` 数据库表（id、username、password_hash、nickname、status、create_time、update_time）。密码 SHALL 使用 BCrypt 哈希存储。
@@ -56,5 +56,5 @@ ContextFillFilter SHALL 从 Sa-Token 获取当前登录用户 ID 填充到 Scope
 - **THEN** 系统 SHALL 使用 NoOpAuthClient，所有请求视为已认证
 
 #### Scenario: 引入 Sa-Token 但配置关闭时不做认证
-- **WHEN** `middleware.auth.enabled=false`
+- **WHEN** `component.auth.enabled=false`
 - **THEN** 系统 SHALL 不加载认证拦截器，所有请求视为已认证

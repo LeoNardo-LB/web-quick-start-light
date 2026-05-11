@@ -78,8 +78,8 @@ public class SystemConfig {
 ✅ 正确：
 ```java
 public class BaseDO {
-    private Instant createdAt;
-    private Instant updatedAt;
+    private Instant createTime;
+    private Instant updateTime;
 }
 ```
 
@@ -109,16 +109,23 @@ public class BaseDO {
 ```java
 // DTO/VO 用 record
 public record SystemConfigVO(
-    String configKey,
-    String configValue,
-    String displayName
+        Long id,
+        String configKey,
+        String configValue,
+        String valueType,
+        String groupCode,
+        String displayName,
+        String description,
+        String inputType,
+        String inputConfig,
+        Integer sort
 ) {}
 
 // 值对象用 record + of()
 public record ConfigKey(String value) {
     public static ConfigKey of(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("configKey 不能为空");
+            throw new IllegalArgumentException("配置键不能为空");
         }
         return new ConfigKey(value.trim());
     }
@@ -169,7 +176,7 @@ public record BaseRequest() {}  // 错误！
 | 配置属性 | `Properties` | `CacheProperties` |
 | 枚举 | 无后缀（大驼峰） | `OperationType`、`ConfigGroup` |
 | 异常 | `Exception` | `BizException` |
-| 工具类 | `Utils` | `ScopedThreadContext` |
+| 工具类 | 无后缀（大驼峰） | `BizContext` |
 
 ### 规则 5: 依赖约束
 
@@ -179,15 +186,18 @@ public record BaseRequest() {}  // 错误！
 |------|------|------|
 | ORM | MyBatis-Plus | JPA / Hibernate |
 | 工具库 | Hutool / Apache Commons / Guava | 自行实现已有轮子 |
-| 对象转换 | MapStruct | BeanUtils.copyProperties（编译期不安全） |
-| 序列化 | Jackson（JSON）、Kryo（二进制） | - |
+| 对象转换 | 手写 Converter（`@Component`） | BeanUtils.copyProperties（编译期不安全） |
+
+> **注意**：当前项目使用手写 `@Component` Converter 类（如 `SystemConfigConverter`、`OperationLogConverter`）进行对象转换，未来可迁移至 MapStruct。禁止 `BeanUtils.copyProperties` 的红线不变。
 
 ✅ 正确：
 ```java
-// 使用 MapStruct 转换
-@Mapper(componentModel = "spring")
-public interface SystemConfigConverter {
-    SystemConfig toEntity(SystemConfigDO dto);
+// 使用手写 Converter 转换
+@Component
+public class SystemConfigConverter {
+    public SystemConfig toEntity(SystemConfigDO dto) {
+        // 手动字段映射
+    }
 }
 ```
 
@@ -207,7 +217,7 @@ public class SystemConfig {}
 
 - 所有控制器使用 `/api` 路径前缀
 - API 版本通过 HTTP Header `API-Version` 控制，不在 URL 路径中嵌入版本号
-- 配置：`spring.mvc.apiversion.use-header: "API-Version"`
+- 配置：`spring.mvc.apiversion.use.header: "API-Version"`
 
 ✅ 正确：
 ```java
@@ -332,42 +342,27 @@ public class SystemConfigController {
 
 ### 场景 2: 使用 @Data 注解 Entity 导致 Lombok 陷阱
 
-❌ 错误做法：
+❌ 错误做法（简化示例）：
 ```java
 @Data
 public class BaseDO {
     private Instant createdAt;
     private Instant updatedAt;
 }
-
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class SystemConfig extends BaseDO {
-    private String configKey;
-}
-// 问题：如果另一个类也继承 BaseDO 且有相同 createdAt/updatedAt，
-// 放入 HashSet 后 equals/hashCode 行为不可预期
 ```
 
-✅ 正确做法：
+> ⚠️ 以上为简化示例，实际字段名为 `createTime` / `updateTime`。核心问题在于 `@Data` 隐式生成的 `equals/hashCode`。
+
+✅ 正确做法（简化示例）：
 ```java
 @Builder
 @RequiredArgsConstructor
 @Getter
 @Setter
 public class BaseDO {
-    private Instant createdAt;
-    private Instant updatedAt;
+    private Instant createTime;
+    private Instant updateTime;
 }
-
-@Builder
-@RequiredArgsConstructor
-@Getter
-@Setter
-public class SystemConfig extends BaseDO {
-    private String configKey;
-}
-// equals/hashCode 由开发者显式控制，避免隐式行为
 ```
 
 ### 场景 3: 使用 LocalDateTime 导致时区问题

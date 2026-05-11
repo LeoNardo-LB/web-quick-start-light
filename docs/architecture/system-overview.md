@@ -148,7 +148,7 @@ graph TD
 | 邮件发送 | Jakarta Mail + NoOp 默认实现 | 详见[邮件组件](../modules/component-email.md) |
 | 短信发送 | 接口 + NoOp 默认实现 | 详见[短信组件](../modules/component-sms.md) |
 | 内存搜索 | 基于 Java Collection | 详见[搜索组件](../modules/component-search.md) |
-| 业务日志 | SLF4J + Micrometer | 详见[操作日志模块](../modules/operation-log.md) |
+| 业务日志 | SLF4J + OTel | 详见[操作日志模块](../modules/operation-log.md) |
 | 限流 | Bucket4j | 已迁移至 `app/.../shared/aspect/ratelimit/` |
 | 幂等保护 | Caffeine | 已迁移至 `app/.../shared/aspect/idempotent/` |
 | 认证 | Sa-Token + NoOp 默认实现 | 详见[认证模块](../modules/auth.md) |
@@ -184,4 +184,5 @@ graph TD
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-05-11 | 业务日志技术 Micrometer → OTel |
 | 2026-04-14 | 初始创建 |

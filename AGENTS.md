@@ -134,6 +134,12 @@ mvn clean verify
 | `ModuleArchitectureComplianceUTest.java` | M-01~M-04 | ArchUnit API |
 | `SpringConfigComplianceUTest.java` | S-01 | ArchUnit API |
 | `TestConventionComplianceUTest.java` | T-01~T-03 | SourceScanner |
+| `ArchitectureComplianceUTest.java` | 四层架构合规（6 条规则） | ArchUnit API |
+| `NoDataAnnotationUTest.java` | 全项目禁止 `@Data` | SourceScanner |
+| `NoValueInjectionUTest.java` | 禁止 `@Value` 注入 | SourceScanner |
+| `NoRedundantConfigureUTest.java` | 禁止冗余 Configure 类 | SourceScanner |
+| `SourceScannerUTest.java` | — | SourceScanner 单元测试 |
+| `ApplicationStartupITest.java` | — | 应用启动集成测试 |
 | `SourceScanner.java` | — | 源码扫描工具类（块注释感知） |
 
 ### 编码规范（C-01~C-07）
@@ -155,7 +161,7 @@ mvn clean verify
 | M-01 | exception 包零 Spring 依赖 | common 模块不依赖 Spring Framework |
 | M-02 | 组件模块间零互相依赖 | component 下各子模块互不引用（`component.dto` 共享子包除外） |
 | M-03 | Facade 方法不得返回内部 Entity | public 方法返回类型不得在 `.entity.` 包下（`.entity.base.` 通用基类除外，VO/DTO 除外） |
-| M-04 | Controller API 路径必须以 `/api` 开头 | `@RequestMapping` 的 value/path 必须以 `/api` 起始 |
+| M-04 | Controller 路径前缀必须符合规范（API→/api, Web→/web） | API Controller 的 `@RequestMapping` 的 value/path 必须以 `/api` 起始，Web Controller 必须以 `/web` 起始 |
 
 ### Spring 配置（S-01）
 
@@ -206,7 +212,7 @@ mvn clean verify
 
 ### 5. 日志规范
 
-- 使用 `@BusinessLog` 注解记录业务方法日志（SLF4J + Micrometer 指标）
+- 使用 `@BusinessLog` 注解记录业务方法日志（SLF4J + OTel 指标）
 - `@BusinessLog` 扩展属性：`module`（业务模块）、`operation`（操作类型）、`samplingRate`（采样率，默认 1.0）
 - 操作日志持久化：`OperationLogWriter` 接口 + `OperationLogRecord`，`OperationType` 枚举（CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT）
 - 使用 `@Slf4j` + 参数化日志，**禁止 `System.out.println`**
@@ -218,8 +224,8 @@ mvn clean verify
 - 对象转换：MapStruct（编译期安全）
 
 ### 7. 线程上下文
-- 使用 `ScopedThreadContext`（基于 Java 25 ScopedValue）传递 userId / traceId
-- 异步场景使用 `ContextRunnable` / `ContextCallable` 包装
+- 使用 `BizContext`（基于 Java 25 ScopedValue）传递 userId（traceId 由 OTel Span 管理）
+- 异步场景通过 `ThreadPoolConfigure.ContextPropagatingTaskDecorator`（三合一：BizContext + OTel Context + MDC）传播
 
 ### 8. 配置管理
 - 多环境：`application-dev.yaml` / `application-prod.yaml` / `application-component.yaml`
@@ -313,7 +319,7 @@ mvn clean verify
 | 💡 MAY | 搜索组件 | [component-search.md](docs/modules/component-search.md) | 内存搜索 + 15 方法 |
 | ⚠️ SHOULD | 认证组件 | [component-auth.md](docs/modules/component-auth.md) | AuthComponent 接口 + Sa-Token |
 
-> **注意**：限流、幂等、操作日志横切关注点已移至 app 模块 `shared/` 包下，对应的旧文档（component-ratelimit.md、component-idempotent.md、component-log.md）已归档至 `docs/archived/`。
+> **注意**：限流、幂等、操作日志横切关注点已移至 app 模块 `shared/` 包下，对应的旧文档（component-ratelimit.md、component-idempotent.md、component-log.md）已删除。
 
 ### 文档系统说明
 
@@ -324,3 +330,13 @@ mvn clean verify
 ## OpenSpec Intent 索引
 
 见：openspec/specs 与 openspec/changes 目录
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- ALWAYS read graphify-out/GRAPH_REPORT.md before reading any source files, running grep/glob searches, or answering codebase questions. The graph is your primary map of the codebase.
+- IF graphify-out/wiki/index.md EXISTS, navigate it instead of reading raw files
+- For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` over grep — these traverse the graph's EXTRACTED + INFERRED edges instead of scanning files
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

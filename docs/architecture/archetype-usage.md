@@ -33,7 +33,7 @@ flowchart LR
 |------|-----|
 | groupId | `org.smm.archetype` |
 | artifactId | `web-quick-start-light` |
-| version | `0.0.1-SNAPSHOT` |
+| version | `1.0.1` |
 | Java | 25 |
 | Spring Boot | 4.x |
 | ORM | MyBatis-Plus 3.5.x |
@@ -131,6 +131,8 @@ mvn archetype:generate -DarchetypeCatalog=local -DinteractiveMode=false -Darchet
 | `**/*.iml` | IntelliJ 模块文件 |
 | `README.md` | 项目 README（骨架自带） |
 | `data_h2/**` | H2 数据文件 |
+| `modules/**` | 模块文档 |
+| `_output/**` | 输出目录 |
 
 ## 故障排查
 
@@ -155,4 +157,5 @@ mvn archetype:generate -DarchetypeCatalog=local -DinteractiveMode=false -Darchet
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-05-11 | 版本号 0.0.1-SNAPSHOT → 1.0.1；排除规则补充 modules/** 和 _output/** |
 | 2026-04-14 | 从 ARCHETYPE_README.md 迁移至 docs/architecture/archetype-usage.md |

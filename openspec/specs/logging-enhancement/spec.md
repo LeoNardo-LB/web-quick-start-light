@@ -16,12 +16,12 @@
 
 ### Requirement: 日志基础设施工具包路径
 
-SlowQueryInterceptor、SamplingTurboFilter、SensitiveLogUtils、LogMarkers、LoggingConfiguration SHALL 位于 `org.smm.archetype.shared.logging` 包下。
+SlowQueryInterceptor、SamplingTurboFilter、SensitiveLogUtils、LogMarkers、LoggingConfiguration SHALL 位于 `org.smm.archetype.shared.util.logging` 包下。
 
 #### Scenario: LoggingConfigure Bean 注册
 
 - **WHEN** 应用启动
-- **THEN** LogAspect、SlowQueryInterceptor、SamplingTurboFilter SHALL 由 `org.smm.archetype.config.LoggingConfigure` 通过 `@Bean` 方法注册
+- **THEN** LogAspect、SlowQueryInterceptor、SamplingTurboFilter SHALL 由 `org.smm.archetype.config.LoggingConfigure`（而非 `shared.logging.LoggingConfiguration`）通过 `@Bean` 方法注册
 
 ### Requirement: LoggingProperties 配置路径
 
@@ -37,4 +37,4 @@ LoggingProperties SHALL 位于 `org.smm.archetype.config.properties` 包下，�
 ### Requirement: client-log 独立模块
 
 **Reason**: 日志是应用层横切关注点，且依赖了 mybatis-plus（SlowQueryInterceptor），超出 client 模块应有的依赖范围
-**Migration**: AOP 部分迁移到 `shared/aspect/operationlog/`，日志基础设施迁移到 `shared/logging/`
+**Migration**: AOP 部分迁移到 `shared/aspect/operationlog/`，日志基础设施迁移到 `shared/util/logging/`
