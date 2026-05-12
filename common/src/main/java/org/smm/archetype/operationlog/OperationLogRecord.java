@@ -1,11 +1,8 @@
-package org.smm.archetype.shared.aspect.operationlog;
+package org.smm.archetype.operationlog;
 
 /**
  * 操作日志记录，用于在 LogAspect 和 OperationLogWriter 之间传递日志数据。
- *
- * @deprecated 已迁移至 {@code org.smm.archetype.operationlog.OperationLogRecord}，将在阶段 4 删除。
  */
-@Deprecated
 public record OperationLogRecord(
         String traceId,
         String userId,

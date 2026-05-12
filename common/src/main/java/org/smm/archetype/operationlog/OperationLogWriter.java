@@ -1,14 +1,11 @@
-package org.smm.archetype.shared.aspect.operationlog;
+package org.smm.archetype.operationlog;
 
 /**
  * 操作日志写入器接口。
  * <p>
  * 由 app 模块实现（如 MyBatisOperationLogWriter），
  * LogAspect 通过此接口将操作日志异步写入数据库。
- *
- * @deprecated 已迁移至 {@code org.smm.archetype.operationlog.OperationLogWriter}，将在阶段 4 删除。
  */
-@Deprecated
 public interface OperationLogWriter {
 
     void write(OperationLogRecord record);

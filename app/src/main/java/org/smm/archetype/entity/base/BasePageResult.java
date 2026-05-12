@@ -10,6 +10,10 @@ import java.time.Instant;
 import java.util.List;
 
 /**
+ * @deprecated 已迁移至 {@code org.smm.archetype.shared.result.BasePageResult}，将在阶段 4 删除。
+ */
+@Deprecated
+/**
  * @param <T> 结果类型
  * @author Leonardo
  * @since 2025/7/14

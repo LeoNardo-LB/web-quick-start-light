@@ -44,3 +44,5 @@ app/.logs/
 app/data_sqlite/
 app/logs/
 .opencode/
+.todolist-loop/
+doc-review-report.md

@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
-import org.smm.archetype.entity.base.BaseResult;
+import org.smm.archetype.shared.result.BaseResult;
 import org.smm.archetype.exception.BizException;
 import org.smm.archetype.exception.ClientException;
 import org.smm.archetype.exception.CommonErrorCode;

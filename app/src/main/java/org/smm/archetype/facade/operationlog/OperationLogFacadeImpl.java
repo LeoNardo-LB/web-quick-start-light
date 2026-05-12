@@ -3,7 +3,7 @@ package org.smm.archetype.facade.operationlog;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.opentelemetry.api.trace.Span;
 import lombok.RequiredArgsConstructor;
-import org.smm.archetype.entity.base.BasePageResult;
+import org.smm.archetype.shared.result.BasePageResult;
 import org.smm.archetype.entity.operationlog.OperationLog;
 import org.smm.archetype.entity.operationlog.OperationLogPageQuery;
 import org.smm.archetype.exception.CommonErrorCode;

@@ -1,11 +1,8 @@
-package org.smm.archetype.shared.aspect.operationlog;
+package org.smm.archetype.operationlog;
 
 /**
  * 操作类型枚举，用于标注业务日志的操作分类。
- *
- * @deprecated 已迁移至 {@code org.smm.archetype.operationlog.OperationType}，将在阶段 4 删除。
  */
-@Deprecated
 public enum OperationType {
 
     CREATE("CREATE", "新增"),

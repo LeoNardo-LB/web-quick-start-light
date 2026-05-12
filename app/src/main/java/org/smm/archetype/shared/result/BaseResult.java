@@ -1,4 +1,4 @@
-package org.smm.archetype.entity.base;
+package org.smm.archetype.shared.result;
 
 import io.opentelemetry.api.trace.Span;
 import lombok.Getter;
@@ -8,10 +8,6 @@ import org.smm.archetype.exception.ErrorCode;
 
 import java.time.Instant;
 
-/**
- * @deprecated 已迁移至 {@code org.smm.archetype.shared.result.BaseResult}，将在阶段 4 删除。
- */
-@Deprecated
 /**
  * @param <T> 结果类型
  * @author Leonardo

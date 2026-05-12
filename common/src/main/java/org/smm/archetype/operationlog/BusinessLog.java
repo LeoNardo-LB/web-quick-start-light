@@ -1,19 +1,10 @@
-package org.smm.archetype.shared.aspect.operationlog;
+package org.smm.archetype.operationlog;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-/**
- * @deprecated 已迁移至 {@code org.smm.archetype.operationlog.BusinessLog}，将在阶段 4 删除。
- */
-@Deprecated
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BusinessLog {

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.smm.archetype.entity.base.BasePageResult;
+import org.smm.archetype.shared.result.BasePageResult;
 import org.smm.archetype.entity.system.ConfigGroup;
 import org.smm.archetype.entity.system.ConfigKey;
 import org.smm.archetype.entity.system.ConfigValue;

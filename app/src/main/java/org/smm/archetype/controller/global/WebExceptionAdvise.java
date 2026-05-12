@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.smm.archetype.entity.base.BaseResult;
+import org.smm.archetype.shared.result.BaseResult;
 import org.smm.archetype.exception.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
