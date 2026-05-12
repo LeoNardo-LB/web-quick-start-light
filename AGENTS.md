@@ -131,9 +131,9 @@ mvn clean verify
 | 文件 | 规则数 | 检测方式 |
 |------|--------|---------|
 | `CodingConventionComplianceUTest.java` | C-01~C-07 | ArchUnit API + SourceScanner |
-| `ModuleArchitectureComplianceUTest.java` | M-01~M-04 | ArchUnit API |
+| `ModuleArchitectureComplianceUTest.java` | M-01~M-09 | ArchUnit API |
 | `SpringConfigComplianceUTest.java` | S-01 | ArchUnit API |
-| `TestConventionComplianceUTest.java` | T-01~T-03 | SourceScanner |
+| `TestConventionComplianceUTest.java` | T-01~T-05 | SourceScanner |
 | `ArchitectureComplianceUTest.java` | 四层架构合规（6 条规则） | ArchUnit API |
 | `NoDataAnnotationUTest.java` | 全项目禁止 `@Data` | SourceScanner |
 | `NoValueInjectionUTest.java` | 禁止 `@Value` 注入 | SourceScanner |
@@ -154,7 +154,7 @@ mvn clean verify
 | C-06 | facade 包下 VO/DTO 必须用 record | 见"Record 规范"第 11 条 |
 | C-07 | Properties/Configure 类禁止 `@Data` | 用 `@Getter` + `@Setter` |
 
-### 模块架构（M-01~M-04）
+### 模块架构（M-01~M-09）
 
 | ID | 规则 | 说明 |
 |----|------|------|
@@ -162,6 +162,11 @@ mvn clean verify
 | M-02 | 组件模块间零互相依赖 | component 下各子模块互不引用（`component.dto` 共享子包除外） |
 | M-03 | Facade 方法不得返回内部 Entity | public 方法返回类型不得在 `.entity.` 包下（`.entity.base.` 通用基类除外，VO/DTO 除外） |
 | M-04 | Controller 路径前缀必须符合规范（API→/api, Web→/web） | API Controller 的 `@RequestMapping` 的 value/path 必须以 `/api` 起始，Web Controller 必须以 `/web` 起始 |
+| M-05 | 模块 internal/ 包零 Spring 依赖（Controller/Service/Converter/RepositoryImpl/FacadeImpl/ITest/ETest 除外） | 降低框架耦合 |
+| M-06 | Repository 接口方法签名不得出现 MyBatis-Plus 类型 | 接口框架无关 |
+| M-07 | 模块间不得直接访问其他模块的 internal/ 包 | 模块边界隔离 |
+| M-08 | Facade 接口不得依赖 MyBatis-Plus 类型 | 公开 API 框架无关 |
+| M-09 | 业务模块间通过根包 Facade 接口通信 | 模块间解耦 |
 
 ### Spring 配置（S-01）
 
@@ -169,13 +174,14 @@ mvn clean verify
 |----|------|------|
 | S-01 | 组件 Properties 前缀以 `component.` 开头 | `@ConfigurationProperties(prefix = "component.xxx")` |
 
-### 测试规范（T-01~T-03）
+### 测试规范（T-01~T-05）
 
 | ID | 规则 | 说明 |
 |----|------|------|
 | T-01 | 含 `@Test` 的文件必须以 `UTest.java` 或 `ITest.java` 结尾 | 排除测试基础设施类（`*Configuration.java`/`*Application.java`） |
 | T-02 | UTest 禁止 `@SpringBootTest` | 纯单元测试不启动 Spring 上下文 |
 | T-03 | ITest 禁止 `@Mock` | 集成测试使用真实依赖，不用 Mockito mock |
+| T-05 | ETest 禁止 `@Mock` | 端到端测试使用真实依赖 |
 
 ### 新增规则注意事项
 

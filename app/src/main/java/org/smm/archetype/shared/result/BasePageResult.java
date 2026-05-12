@@ -1,6 +1,5 @@
 package org.smm.archetype.shared.result;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.opentelemetry.api.trace.Span;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,17 +49,5 @@ public class BasePageResult<T> extends BaseResult<List<T>> {
         return result;
     }
 
-    /**
-     * @deprecated 已废弃，请使用 {@link #from(PageResult)}。
-     *             此方法仅在 RepositoryImpl 内部过渡使用，将在阶段 4 删除。
-     */
-    @Deprecated
-    public static <T> BasePageResult<T> fromPage(IPage<T> page) {
-        return from(PageResult.of(
-                page.getRecords(),
-                page.getTotal(),
-                (int) page.getCurrent(),
-                (int) page.getSize()
-        ));
-    }
+
 }

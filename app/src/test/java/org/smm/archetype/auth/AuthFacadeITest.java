@@ -1,9 +1,8 @@
-package org.smm.archetype.auth.internal;
+package org.smm.archetype.auth;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.smm.archetype.auth.AuthFacade;
 import org.smm.archetype.exception.BizException;
 import org.smm.archetype.exception.CommonErrorCode;
 import org.smm.archetype.support.IntegrationTestBase;

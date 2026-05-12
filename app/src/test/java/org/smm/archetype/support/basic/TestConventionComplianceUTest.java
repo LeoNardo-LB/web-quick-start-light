@@ -94,4 +94,29 @@ class TestConventionComplianceUTest extends UnitTestBase {
                 .as("ITest（集成测试）中不应使用 @Mock，应使用真实依赖")
                 .isEmpty();
     }
+
+    // === T-05: 禁止 ETest 中使用 @Mock ===
+
+    @Test
+    @DisplayName("T-05: ETest 中禁止使用 @Mock 注解")
+    void etest_should_not_use_mock() {
+        List<String> violations = SourceScanner.scanTestSource(
+                p -> p.getFileName().toString().endsWith("ETest.java"),
+                lines -> {
+                    for (String line : lines) {
+                        String trimmed = line.trim();
+                        if (SourceScanner.isImportLine(trimmed)) continue;
+                        // 精确匹配 @Mock（排除 @MockBean、@MockitoBean 等）
+                        if (trimmed.equals("@Mock") || trimmed.startsWith("@Mock(") || trimmed.startsWith("@Mock ")) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+        );
+
+        assertThat(violations)
+                .as("ETest（端到端测试）中不应使用 @Mock，应使用真实依赖")
+                .isEmpty();
+    }
 }
