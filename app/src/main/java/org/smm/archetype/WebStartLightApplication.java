@@ -15,7 +15,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @SpringBootApplication
 @EnableConfigurationProperties(AppInfoProperties.class)
 @RequiredArgsConstructor
-@org.mybatis.spring.annotation.MapperScan(basePackages = "org.smm.archetype.generated.mapper", annotationClass = Mapper.class)
+@org.mybatis.spring.annotation.MapperScan(basePackages = {"org.smm.archetype.generated.mapper", "org.smm.archetype.systemconfig.internal"}, annotationClass = Mapper.class)
 public class WebStartLightApplication implements CommandLineRunner {
 
     private final AppInfoProperties appInfoProperties;
