@@ -1,6 +1,7 @@
 package org.smm.archetype.shared.aspect.ratelimit;
 
 import io.github.bucket4j.Bucket;
+import org.smm.archetype.shared.internal.aspect.ratelimit.BucketFactory;
 import io.github.bucket4j.ConsumptionProbe;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

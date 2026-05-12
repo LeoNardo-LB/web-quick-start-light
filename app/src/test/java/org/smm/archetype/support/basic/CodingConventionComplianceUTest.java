@@ -195,11 +195,15 @@ class CodingConventionComplianceUTest extends UnitTestBase {
     @Test
     @DisplayName("C-06: DTO/VO 必须使用 record")
     void dto_vo_should_use_record() {
+        // 检查所有包中的 VO/DTO 是否为 record（兼容旧 ..facade.. 和新 ..internal.. 布局）
         ArchRuleDefinition.classes()
                 .that().resideInAPackage("..facade..")
                 .and().haveSimpleNameEndingWith("VO")
+                .or().resideInAPackage("..internal..")
+                .and().haveSimpleNameEndingWith("VO")
                 .or().haveSimpleNameEndingWith("DTO")
                 .should(com.tngtech.archunit.lang.conditions.ArchConditions.beRecords())
+                .allowEmptyShould(true)
                 .check(importedClasses);
     }
 

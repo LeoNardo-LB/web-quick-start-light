@@ -1,11 +1,17 @@
 package org.smm.archetype.shared.aspect.operationlog;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.smm.archetype.operationlog.BusinessLog;
+import org.smm.archetype.operationlog.OperationLogRecord;
+import org.smm.archetype.operationlog.OperationLogWriter;
+import org.smm.archetype.operationlog.OperationType;
+import org.smm.archetype.shared.internal.aspect.operationlog.LogAspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,10 +35,11 @@ class LogAspectDBUTest {
     @Mock
     private ProceedingJoinPoint joinPoint;
 
+    @InjectMocks
     private LogAspect logAspect;
 
     private void initLogAspect() {
-        logAspect = new LogAspect(operationLogWriter);
+        // LogAspect uses @Autowired field injection — @InjectMocks handles it
     }
 
     private void mockJoinPoint(String methodName, Class<?>[] paramTypes, Object[] args, Object result) throws Throwable {

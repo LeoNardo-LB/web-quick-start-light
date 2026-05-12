@@ -3,6 +3,7 @@ package org.smm.archetype.shared.aspect.idempotent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.smm.archetype.component.cache.CacheComponent;
+import org.smm.archetype.shared.internal.aspect.idempotent.IdempotentAspect;
 import org.smm.archetype.config.IdempotentConfigure;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 

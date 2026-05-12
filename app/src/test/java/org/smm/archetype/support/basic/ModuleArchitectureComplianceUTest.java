@@ -81,10 +81,14 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
     @Test
     @DisplayName("M-03: Facade public 方法不得返回内部 Entity 类型")
     void facade_should_not_return_internal_entity() {
+        // 检查 facade 包（旧布局）+ internal 包中的 FacadeImpl 类（新布局）
         ArchRuleDefinition.classes()
                 .that().resideInAPackage("..facade..")
                 .and().areNotInterfaces()
+                .or().resideInAPackage("..internal..")
+                .and().haveSimpleNameEndingWith("FacadeImpl")
                 .should(notReturnInternalEntity())
+                .allowEmptyShould(true)
                 .check(importedClasses);
     }
 

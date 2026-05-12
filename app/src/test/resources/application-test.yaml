@@ -14,6 +14,10 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+      - org.springframework.modulith.events.config.EventPublicationAutoConfiguration
+      - org.springframework.modulith.events.jdbc.JdbcEventPublicationAutoConfiguration
+      - org.springframework.modulith.events.config.EventExternalizationAutoConfiguration
+      - org.springframework.modulith.moments.autoconfigure.MomentsAutoConfiguration
 
 mybatis-plus:
   configuration:

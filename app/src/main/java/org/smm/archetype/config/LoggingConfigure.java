@@ -5,11 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.smm.archetype.config.properties.LoggingProperties;
-import org.smm.archetype.shared.aspect.operationlog.LogAspect;
-import org.smm.archetype.shared.aspect.operationlog.OperationLogWriter;
 import org.smm.archetype.shared.util.logging.SamplingTurboFilter;
 import org.smm.archetype.shared.util.logging.SlowQueryInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -50,18 +47,6 @@ public class LoggingConfigure implements ApplicationListener<ApplicationReadyEve
     private static final String DEFAULT_LOG_PATH = ".logs";
 
     private final Environment environment;
-
-    @Autowired(required = false)
-    private OperationLogWriter operationLogWriter;
-
-    @Bean
-    public LogAspect logAspect() {
-        log.info("[CONFIG] LoggingConfigure: registering LogAspect");
-        if (operationLogWriter != null) {
-            return new LogAspect(operationLogWriter);
-        }
-        return new LogAspect();
-    }
 
     @Bean
     @ConditionalOnProperty(name = "logging.slow-query.enabled", havingValue = "true")

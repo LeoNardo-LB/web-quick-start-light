@@ -20,12 +20,13 @@
 
 **⛔ MUST**
 
-测试分为单元测试和集成测试两类，通过文件名后缀区分：
+测试分为单元测试、集成测试和端到端测试三类，通过文件名后缀区分：
 
 | 类型 | 后缀 | 基类 | 扩展 | 运行环境 | 速度 |
 |------|------|------|------|----------|------|
 | 单元测试 | `*UTest` | `UnitTestBase` | `@ExtendWith(MockitoExtension.class)` | 纯内存，Mock 依赖 | 毫秒级 |
 | 集成测试 | `*ITest` | `IntegrationTestBase` | `@SpringBootTest` + `@ActiveProfiles("test")` | 完整 Spring 上下文 + SQLite | 秒级 |
+| 端到端测试 | `*ETest` | `EndToEndTestBase` | 继承 `IntegrationTestBase` | 完整 Spring 上下文 + SQLite | 秒级 |
 
 **基类源码位置**：`app/src/test/java/org/smm/archetype/support/`
 
@@ -49,6 +50,15 @@ public abstract class IntegrationTestBase {
     @Autowired
     protected ApplicationContext applicationContext;
 }
+
+// EndToEndTestBase — 端到端测试（业务流程编排）
+// 继承 IntegrationTestBase，复用 Spring 上下文和 WebTestClient
+// 侧重跨方法/跨端点的业务流程编排测试
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+public abstract class EndToEndTestBase extends IntegrationTestBase {
+    // HTTP 辅助方法：exchangeGet, exchangePost, exchangePut, exchangeDelete
+}
 ```
 
 ✅ 正确：
@@ -63,7 +73,10 @@ app/src/test/java/org/smm/archetype/
 ├── cases/integrationtest/
 │   ├── AuthE2EITest.java                      // 集成测试（统一目录）
 │   ├── LoginControllerITest.java              // 集成测试
-│   └── LogAutoConfigurationITest.java         // 集成测试
+│   ├── LogAutoConfigurationITest.java         // 集成测试
+├── cases/endtoend/
+│   ├── SystemConfigFacadeImplETest.java       // 端到端测试（业务流程编排）
+│   └── AuthFlowETest.java                     // 端到端测试（登录全链路）
 ```
 
 ❌ 错误：
@@ -73,7 +86,7 @@ app/src/test/java/org/smm/archetype/
 └── TestSystemConfig.java           // 前缀不规范
 ```
 
-> **为什么**：UTest 和 ITest 的运行环境完全不同——UTest 使用 Mockito Mock 所有依赖，毫秒级完成，适合验证纯业务逻辑；ITest 启动完整 Spring 上下文和 SQLite 数据库，秒级完成，适合验证端到端集成。统一的 `*UTest` / `*ITest` 后缀使得 `mvn test -Dtest="*UTest"` 可以精确筛选测试类型，避免开发调试时不必要地启动 Spring 上下文，大幅提升开发效率。
+> **为什么**：UTest 和 ITest 的运行环境完全不同——UTest 使用 Mockito Mock 所有依赖，毫秒级完成，适合验证纯业务逻辑；ITest 启动完整 Spring 上下文和 SQLite 数据库，秒级完成，适合验证端到端集成。ETest 同样使用完整 Spring 上下文，但侧重**跨端点的业务流程编排**（如「查询→修改→验证→还原」全链路），与 ITest 的单 API 调用测试形成互补。统一的 `*UTest` / `*ITest` / `*ETest` 后缀使得 `mvn test -Dtest="*UTest"` 可以精确筛选测试类型，避免开发调试时不必要地启动 Spring 上下文，大幅提升开发效率。
 
 ### 规则 2: Mock 规范
 
@@ -328,8 +341,10 @@ void createConfig_shouldRejectDuplicateKey_whenKeyAlreadyExists() {
 
 - [ ] 单元测试命名为 `*UTest`，继承 `UnitTestBase`
 - [ ] 集成测试命名为 `*ITest`，继承 `IntegrationTestBase`
+- [ ] 端到端测试命名为 `*ETest`，继承 `EndToEndTestBase`
 - [ ] UTest 使用 Mockito Mock，不加载 Spring 上下文
 - [ ] ITest 使用真实 Spring 上下文，不使用 `@Mock`
+- [ ] ETest 侧重跨端点的业务流程编排，不替代 ITest 的单 API 调用测试
 - [ ] Instruction 覆盖率 ≥ 95%，Branch 覆盖率 ≥ 90%
 - [ ] 覆盖率报告可通过 `mvn clean verify` 生成
 - [ ] 条件装配的组件模块验证了装配条件

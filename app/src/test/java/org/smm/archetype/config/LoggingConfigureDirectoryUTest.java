@@ -5,13 +5,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.smm.archetype.config.properties.LoggingProperties;
-import org.smm.archetype.shared.aspect.operationlog.LogAspect;
-import org.smm.archetype.shared.aspect.operationlog.OperationLogWriter;
 import org.smm.archetype.shared.util.logging.SamplingTurboFilter;
 import org.smm.archetype.shared.util.logging.SlowQueryInterceptor;
 import org.smm.archetype.support.UnitTestBase;
 import org.springframework.core.env.Environment;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -145,33 +142,6 @@ class LoggingConfigureDirectoryUTest extends UnitTestBase {
             assertThat(nestedDir.toFile()).exists();
         }
 
-    }
-
-    @Nested
-    @DisplayName("logAspect @Bean")
-    class LogAspectBean {
-
-        @Test
-        @DisplayName("无 OperationLogWriter 时使用无参构造")
-        void should_create_logAspect_without_writer() {
-            LoggingConfigure configure = new LoggingConfigure(envWithPath(tempDir.toString()));
-
-            LogAspect aspect = configure.logAspect();
-
-            assertThat(aspect).isNotNull();
-        }
-
-        @Test
-        @DisplayName("有 OperationLogWriter 时使用带参构造")
-        void should_create_logAspect_with_writer() {
-            OperationLogWriter writer = mock(OperationLogWriter.class);
-            LoggingConfigure configure = new LoggingConfigure(envWithPath(tempDir.toString()));
-            ReflectionTestUtils.setField(configure, "operationLogWriter", writer);
-
-            LogAspect aspect = configure.logAspect();
-
-            assertThat(aspect).isNotNull();
-        }
     }
 
     @Nested

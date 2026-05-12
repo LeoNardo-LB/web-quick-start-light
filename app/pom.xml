@@ -258,6 +258,17 @@
             <version>${archunit.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Spring Modulith — 模块边界验证 -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Spring Modulith — 事件持久化 -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-starter-jdbc</artifactId>
+        </dependency>
         <!-- Testcontainers（Jaeger v2 集成测试） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

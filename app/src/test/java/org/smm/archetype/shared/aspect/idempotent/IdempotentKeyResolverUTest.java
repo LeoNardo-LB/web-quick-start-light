@@ -3,6 +3,8 @@ package org.smm.archetype.shared.aspect.idempotent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.smm.archetype.shared.internal.aspect.idempotent.Idempotent;
+import org.smm.archetype.shared.internal.aspect.idempotent.IdempotentKeyResolver;
 
 import java.util.concurrent.TimeUnit;
 

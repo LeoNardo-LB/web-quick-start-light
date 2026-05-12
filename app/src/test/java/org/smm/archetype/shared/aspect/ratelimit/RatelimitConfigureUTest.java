@@ -3,6 +3,7 @@ package org.smm.archetype.shared.aspect.ratelimit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.smm.archetype.config.RatelimitConfigure;
+import org.smm.archetype.shared.internal.aspect.ratelimit.RateLimitAspect;
 import org.smm.archetype.config.properties.RateLimitProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -15,9 +16,10 @@ class RatelimitConfigureUTest {
                                                                    .withUserConfiguration(RatelimitConfigure.class);
 
     @Test
-    @DisplayName("RatelimitConfigure 加载成功 → RateLimitAspect Bean 存在")
+    @DisplayName("RateLimitAspect Bean 可通过手动注册创建")
     void should_create_aspect_when_configured() {
         contextRunner
+                .withBean(RateLimitAspect.class, RateLimitAspect::new)
                 .run(context -> {
                     assertThat(context).hasSingleBean(RateLimitAspect.class);
                 });

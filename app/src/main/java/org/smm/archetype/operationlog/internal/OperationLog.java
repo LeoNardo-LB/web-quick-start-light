@@ -1,0 +1,35 @@
+package org.smm.archetype.operationlog.internal;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.Instant;
+
+/**
+ * 操作日志领域实体
+ */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+class OperationLog {
+
+    private Long id;
+    private String traceId;
+    private String userId;
+    private String module;
+    private String operationType;
+    private String description;
+    private String method;
+    private String params;
+    private String result;
+    private Long executionTime;
+    private String ip;
+    private String status;
+    private String errorMessage;
+    private Instant createTime;
+}

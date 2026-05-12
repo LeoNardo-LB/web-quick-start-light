@@ -2,6 +2,9 @@ package org.smm.archetype.shared.aspect.ratelimit;
 
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
+import org.smm.archetype.shared.internal.aspect.ratelimit.LimitFallback;
+import org.smm.archetype.shared.internal.aspect.ratelimit.RateLimit;
+import org.smm.archetype.shared.internal.aspect.ratelimit.RateLimitAspect;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +58,7 @@ class RateLimitAspectUTest {
     }
 
     @SuppressWarnings("unused")
-    static class SampleService {
+    public static class SampleService {
 
         @RateLimit
         public String doSomething() {

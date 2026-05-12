@@ -2,6 +2,7 @@ package org.smm.archetype.shared.aspect.idempotent;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.smm.archetype.shared.internal.aspect.idempotent.Idempotent;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -2,6 +2,8 @@ package org.smm.archetype.shared.aspect.ratelimit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.smm.archetype.shared.internal.aspect.ratelimit.LimitFallback;
+import org.smm.archetype.shared.internal.aspect.ratelimit.RateLimit;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

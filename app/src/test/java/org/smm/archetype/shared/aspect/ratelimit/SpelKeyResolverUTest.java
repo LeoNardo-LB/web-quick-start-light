@@ -3,6 +3,7 @@ package org.smm.archetype.shared.aspect.ratelimit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.smm.archetype.shared.internal.aspect.ratelimit.SpelKeyResolver;
 
 import java.lang.reflect.Method;
 

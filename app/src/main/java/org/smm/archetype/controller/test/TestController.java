@@ -11,7 +11,7 @@ import org.smm.archetype.exception.BizException;
 import org.smm.archetype.exception.ClientException;
 import org.smm.archetype.exception.CommonErrorCode;
 import org.smm.archetype.exception.SysException;
-import org.smm.archetype.shared.aspect.operationlog.BusinessLog;
+import org.smm.archetype.operationlog.BusinessLog;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

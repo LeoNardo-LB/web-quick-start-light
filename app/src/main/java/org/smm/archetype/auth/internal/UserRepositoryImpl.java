@@ -1,0 +1,23 @@
+package org.smm.archetype.auth.internal;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+@RequiredArgsConstructor
+class UserRepositoryImpl implements UserRepository {
+
+    private final UserMapper userMapper;
+    private final UserConverter converter = new UserConverter();
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        UserDO userDO = userMapper.selectOne(
+                new LambdaQueryWrapper<UserDO>().eq(UserDO::getUsername, username)
+        );
+        return Optional.ofNullable(userDO).map(converter::toModel);
+    }
+}

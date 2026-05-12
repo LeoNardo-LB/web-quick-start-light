@@ -2,6 +2,8 @@ package org.smm.archetype.shared.aspect.operationlog;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.smm.archetype.operationlog.BusinessLog;
+import org.smm.archetype.operationlog.OperationType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

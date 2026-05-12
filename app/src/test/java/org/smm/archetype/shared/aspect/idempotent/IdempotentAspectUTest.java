@@ -1,6 +1,8 @@
 package org.smm.archetype.shared.aspect.idempotent;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.smm.archetype.shared.internal.aspect.idempotent.Idempotent;
+import org.smm.archetype.shared.internal.aspect.idempotent.IdempotentAspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

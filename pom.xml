@@ -48,6 +48,15 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Spring Modulith BOM — 模块边界验证（兼容 Spring Boot 4.x） -->
+            <dependency>
+                <groupId>org.springframework.modulith</groupId>
+                <artifactId>spring-modulith-bom</artifactId>
+                <version>2.0.6</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
             <!-- 内部模块 -->
             <dependency>
                 <groupId>org.smm.archetype</groupId>
