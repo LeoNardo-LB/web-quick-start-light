@@ -328,6 +328,8 @@ public class BasePageRequest extends BaseRequest {
 - `javac -Xlint:deprecation` 编译时，使用 BaseRequest/BasePageRequest 的代码会输出 deprecation 警告
 - 无现有业务代码引用 `BaseRequest`/`BasePageRequest`（已验证：没有 Request record 继承它们）
 
+> **注意**：Phase 4 已直接删除这些废弃文件（跳过了 @Deprecated 过渡期），因为全项目无代码依赖它们。
+
 ---
 
 ## 四、修改文件

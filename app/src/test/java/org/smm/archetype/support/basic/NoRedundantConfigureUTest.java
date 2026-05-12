@@ -17,13 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("无冗余 Configure 类")
 class NoRedundantConfigureUTest extends UnitTestBase {
 
-    private static final String CONFIG_DIR =
-            "src/main/java/org/smm/archetype/config";
+    private static final String SHARED_DIR =
+            "src/main/java/org/smm/archetype/shared";
 
     @Test
     @DisplayName("INV: CacheConfigure.java 不应存在")
     void should_notHaveCacheConfigure() {
-        assertThat(Files.exists(Path.of(CONFIG_DIR, "CacheConfigure.java")))
+        assertThat(Files.exists(Path.of(SHARED_DIR, "CacheConfigure.java")))
                 .as("CacheConfigure.java 应已被删除（component-cache AutoConfiguration 替代）")
                 .isFalse();
     }
@@ -31,7 +31,7 @@ class NoRedundantConfigureUTest extends UnitTestBase {
     @Test
     @DisplayName("INV: OssConfigure.java 不应存在")
     void should_notHaveOssConfigure() {
-        assertThat(Files.exists(Path.of(CONFIG_DIR, "OssConfigure.java")))
+        assertThat(Files.exists(Path.of(SHARED_DIR, "OssConfigure.java")))
                 .as("OssConfigure.java 应已被删除（component-oss AutoConfiguration 替代）")
                 .isFalse();
     }
@@ -39,7 +39,7 @@ class NoRedundantConfigureUTest extends UnitTestBase {
     @Test
     @DisplayName("INV: NotificationConfigure.java 不应存在")
     void should_notHaveNotificationConfigure() {
-        assertThat(Files.exists(Path.of(CONFIG_DIR, "NotificationConfigure.java")))
+        assertThat(Files.exists(Path.of(SHARED_DIR, "NotificationConfigure.java")))
                 .as("NotificationConfigure.java 应已被删除（component-email/component-sms AutoConfiguration 替代）")
                 .isFalse();
     }
@@ -47,32 +47,32 @@ class NoRedundantConfigureUTest extends UnitTestBase {
     @Test
     @DisplayName("INV: SearchConfigure.java 不应存在")
     void should_notHaveSearchConfigure() {
-        assertThat(Files.exists(Path.of(CONFIG_DIR, "SearchConfigure.java")))
+        assertThat(Files.exists(Path.of(SHARED_DIR, "SearchConfigure.java")))
                 .as("SearchConfigure.java 应已被删除（component-search AutoConfiguration 替代）")
                 .isFalse();
     }
 
     @Test
-    @DisplayName("INV: LoggingConfigure.java 应存在（从 component-log 迁移）")
+    @DisplayName("INV: LoggingConfigure.java 应存在（在 shared/logging/ 下）")
     void should_haveLoggingConfigure() {
-        assertThat(Files.exists(Path.of(CONFIG_DIR, "LoggingConfigure.java")))
-                .as("LoggingConfigure.java 应存在（从 component-log 迁移到 app/config/）")
+        assertThat(Files.exists(Path.of(SHARED_DIR, "logging", "LoggingConfigure.java")))
+                .as("LoggingConfigure.java 应存在（从 component-log 迁移到 app/shared/logging/）")
                 .isTrue();
     }
 
     @Test
-    @DisplayName("INV: config/logging/ 目录不应存在")
-    void should_notHaveLoggingConfigDirectory() {
-        assertThat(Files.exists(Path.of(CONFIG_DIR, "logging")))
-                .as("config/logging/ 目录应已被删除（迁移至 shared/logging/）")
+    @DisplayName("INV: shared/config/ 目录不应存在（Configure 已迁入功能域包）")
+    void should_notHaveConfigDirectory() {
+        assertThat(Files.exists(Path.of(SHARED_DIR, "config")))
+                .as("shared/config/ 目录应已被删除（Configure 类已迁入各功能域包）")
                 .isFalse();
     }
 
     @Test
-    @DisplayName("INV: config/properties/LoggingProperties.java 应存在（从 component-log 迁移）")
+    @DisplayName("INV: LoggingProperties.java 应存在（在 shared/logging/ 下）")
     void should_haveLoggingProperties() {
-        assertThat(Files.exists(Path.of(CONFIG_DIR, "properties", "LoggingProperties.java")))
-                .as("LoggingProperties.java 应存在（从 component-log 迁移到 app/config/properties/）")
+        assertThat(Files.exists(Path.of(SHARED_DIR, "logging", "LoggingProperties.java")))
+                .as("LoggingProperties.java 应存在（从 component-log 迁移到 app/shared/logging/）")
                 .isTrue();
     }
 

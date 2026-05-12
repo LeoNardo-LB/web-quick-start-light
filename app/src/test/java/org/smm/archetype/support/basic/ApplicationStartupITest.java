@@ -2,11 +2,11 @@ package org.smm.archetype.support.basic;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.smm.archetype.shared.internal.aspect.operationlog.LogAspect;
-import org.smm.archetype.shared.util.dal.MyMetaObjectHandler;
+import org.smm.archetype.shared.operationlog.LogAspect;
+import org.smm.archetype.shared.dal.MyMetaObjectHandler;
 import org.smm.archetype.support.IntegrationTestBase;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.smm.archetype.controller.global.ContextFillFilter;
+import org.smm.archetype.shared.web.ContextFillFilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

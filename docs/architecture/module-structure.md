@@ -126,87 +126,91 @@ flowchart TD
 
 ### app 内部包组织
 
-app 模块内部采用 **技术分层 → 业务分层** 的两级分包模式。第一级按技术职责划分，第二级按业务领域划分。
+app 模块内部只有业务模块和 shared 两个顶层概念。
 
 ```
 org.smm.archetype/
 │
-│  ═══ 四层业务流转（第一级：技术层，第二级：业务子包）═══
+│  ═══ 业务模块（Spring Modulith 模式：根包 Facade + internal/ 实现）═══
 │
-├── controller/
-│   ├── global/                  ← Web 层横切（异常处理、过滤器）
-│   ├── auth/                    ← 认证业务
-│   ├── system/                  ← 系统配置业务
-│   └── operationlog/            ← 操作日志业务（查询接口）
-├── facade/
-│   ├── system/
-│   └── operationlog/
-├── service/
-│   ├── auth/
-│   ├── system/
-│   └── operationlog/
-├── repository/
-│   ├── user/
-│   ├── system/
-│   └── operationlog/
-├── entity/
-│   ├── base/                     ← 通用基类（BaseResult、BasePageResult、BaseRequest、BasePageRequest、BaseDO）
-│   ├── user/
-│   ├── system/
-│   └── operationlog/
+├── auth/                        ← 认证模块
+│   ├── AuthFacade.java          ← 公开 API（接口）
+│   └── internal/
+│       ├── AuthFacadeImpl.java
+│       ├── User.java            ← 领域模型
+│       ├── UserDO.java
+│       ├── UserMapper.java
+│       ├── UserRepository.java
+│       ├── UserRepositoryImpl.java
+│       ├── UserConverter.java
+│       ├── LoginController.java
+│       ├── LoginRequest.java
+│       ├── LoginVO.java
+│       └── AuthConfigure.java   ← 模块专属 Bean 注册
+├── operationlog/                ← 操作日志模块
+│   ├── OperationLogFacade.java
+│   └── internal/
+│       └── ...
+├── systemconfig/                ← 系统配置模块
+│   ├── SystemConfigFacade.java
+│   └── internal/
+│       └── ...
 │
-│  ═══ 跨层共享基础设施 ═══
+│  ═══ 公共基础设施（按功能域自包含）═══
 │
-├── shared/                      ← 被多层共享的基础设施
-│   ├── aspect/                  ← AOP 切面（按业务子包）
-│   │   ├── ratelimit/           ← 限流（@RateLimit + RateLimitAspect + 辅助类）
-│   │   ├── idempotent/          ← 幂等（@Idempotent + IdempotentAspect + 辅助类）
-│   │   └── operationlog/        ← 操作日志（@BusinessLog + LogAspect + OperationLogWriter 等）
-│   └── util/                    ← 通用工具类
-│       ├── context/             ← BizContext（ScopedValue 线程上下文）
-│       ├── dal/                 ← MyMetaObjectHandler 等 DAL 横切
-│       └── logging/             ← 日志基础设施（慢查询拦截、采样、脱敏、Marker）
-│
-│  ═══ 配置与生成器 ═══
-│
-├── config/                      ← Spring @Configuration + @ConfigurationProperties
-│   └── properties/              ← Properties 类
-├── generated/                   ← 代码生成器产物（禁止手动修改）
-│   ├── mapper/
-│   └── entity/
+├── shared/                      ← 公共基础设施
+│   ├── ratelimit/               ← 限流（注解 + 切面 + 配置 + 属性）
+│   ├── idempotent/              ← 幂等（注解 + 切面 + Key 解析 + 配置）
+│   ├── logging/                 ← 日志（配置 + 属性 + 过滤器 + 拦截器 + 工具）
+│   ├── operationlog/            ← 操作日志切面（注解在 common 模块）
+│   ├── context/                 ← 业务上下文（BizContext）
+│   ├── dal/                     ← 数据访问基础设施（BaseDO + TypeHandler + MetaObjectHandler）
+│   ├── generated/               ← 代码生成器
+│   ├── mybatis/                 ← MyBatis-Plus 配置
+│   ├── threadpool/              ← 线程池配置
+│   ├── web/                     ← Web 层基础设施（配置 + 过滤器 + 异常处理 + 测试端点）
+│   ├── pagination/              ← 分页模型
+│   ├── result/                  ← 响应模型
+│   └── util/                    ← 序列化 + Spring 工具
 │
 └── WebStartLightApplication.java
 ```
 
 #### 分包原则
 
-| 区域     | 第一级                                       | 第二级                           | 说明                             |
-|--------|-------------------------------------------|-------------------------------|--------------------------------|
-| 业务流转   | 技术层（controller/facade/service/repository） | 业务子包（system/operationlog/...） | 四层架构严格单向依赖                     |
-| 共享基础设施 | `shared`                                  | 职责子包（aspect/util）            | 被多层共享，不参与四层流转                  |
-| 配置     | `config`                                  | 无（扁平）                         | @Configuration 类 + properties/ |
-| 生成器    | `generated`                               | 按类型（mapper/entity）            | 禁止手动修改                         |
+| 区域     | 组织方式                           | 说明                             |
+|--------|--------------------------------|--------------------------------|
+| 业务模块   | Spring Modulith 模式（根包 Facade + internal/） | 模块间通过 Facade 接口通信，internal/ 不跨模块访问 |
+| 公共基础设施 | 按功能域自包含                        | 每个功能域包含注解+切面+配置+属性，零跨包依赖       |
 
 #### shared 层定位
 
-`shared` 放置被多个技术层共享使用的横切关注点和基础设施，不参与四层业务流转。
+`shared` 放置被多个业务模块共享使用的横切关注点和基础设施。每个功能域是自包含的独立包：
 
-| 子包                    | 职责          | 典型内容                          |
-|-----------------------|-------------|-------------------------------|
-| `shared/aspect/`      | AOP 切面及配套组件 | 注解定义、切面类、Key 解析器、工厂类、枚举       |
-| `shared/util/`        | 通用工具        | 线程上下文传递、DAL 横切处理、序列化、IP 工具、日志工具等 |
-| `shared/util/logging/` | 日志基础设施（util 子包） | 慢查询拦截器、日志采样过滤器、脱敏工具、Marker 常量 |
+| 功能域                    | 职责          | 包含内容                          |
+|------------------------|-------------|-------------------------------|
+| `shared/ratelimit/`    | 限流          | @RateLimit + RateLimitAspect + BucketFactory + SpelKeyResolver + LimitFallback + RatelimitConfigure + RateLimitProperties |
+| `shared/idempotent/`   | 幂等          | @Idempotent + IdempotentAspect + IdempotentKeyResolver + IdempotentConfigure |
+| `shared/logging/`      | 日志          | LoggingConfigure + LoggingProperties + SamplingTurboFilter + SlowQueryInterceptor + LogMarkers + SensitiveLogUtils |
+| `shared/operationlog/` | 操作日志        | LogAspect（@BusinessLog 注解在 common 模块） |
+| `shared/context/`      | 上下文传播       | BizContext（基于 ScopedValue） |
+| `shared/dal/`          | 数据访问基础设施    | BaseDO + InstantTypeHandler + MyMetaObjectHandler |
+| `shared/generated/`    | 代码生成器       | MybatisPlusGenerator（跨模块工具，通过 --module 参数输出） |
+| `shared/mybatis/`      | MyBatis-Plus 配置 | MybatisPlusConfigure |
+| `shared/threadpool/`   | 线程池配置       | ThreadPoolConfigure + ThreadPoolProperties |
+| `shared/web/`          | Web 基础设施     | WebConfigure + ContextFillFilter + WebExceptionAdvise + TestController + AppInfoProperties + IpUtils |
+| `shared/pagination/`   | 分页模型        | PageQuery + PageResult |
+| `shared/result/`       | 响应模型        | BaseResult + BasePageResult |
+| `shared/util/`         | 序列化/Spring 工具 | KryoSerializer + SpringContextUtils |
 
-> **注意**：`shared/aspect/` 下每个业务子包（如 `ratelimit/`）是自包含的，包含注解、切面、辅助类等该横切功能所需的全部组件。不需要跨子包引用。
+> **注意**：每个功能域是自包含的——限流的所有组件都在 `shared/ratelimit/` 下，日志的所有组件都在 `shared/logging/` 下。不需要跨功能域包引用。
 
-#### config 层定位
+#### Configure 类规范
 
-| 规范                                  | 说明                                      |
-|-------------------------------------|-----------------------------------------|
-| 使用 `@Configuration`                 | 不使用 `@AutoConfiguration`（那是 starter 用的） |
-| 使用 `@EnableConfigurationProperties` | 管理配置属性类                                 |
-| 使用 `@Bean` 方法                       | 直接创建并注册 Bean                            |
-| Properties 放 `config/properties/`   | 统一管理 `@ConfigurationProperties` 类       |
+| 类型 | 位置 | 示例 |
+|------|------|------|
+| 模块专属配置 | 各模块 `internal/` 下 | `auth/internal/AuthConfigure.java` |
+| 公共基础设施配置 | shared 对应功能域包 | `shared/ratelimit/RatelimitConfigure.java`、`shared/logging/LoggingConfigure.java` |
 
 ## 层间依赖规则
 

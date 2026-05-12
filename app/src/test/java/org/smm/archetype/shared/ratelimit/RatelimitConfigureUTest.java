@@ -1,0 +1,43 @@
+package org.smm.archetype.shared.ratelimit;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.smm.archetype.shared.ratelimit.RateLimitAspect;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DisplayName("RatelimitConfigure 配置装配")
+class RatelimitConfigureUTest {
+
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+                                                                   .withUserConfiguration(RatelimitConfigure.class);
+
+    @Test
+    @DisplayName("RateLimitAspect Bean 可通过手动注册创建")
+    void should_create_aspect_when_configured() {
+        contextRunner
+                .withBean(RateLimitAspect.class, RateLimitAspect::new)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(RateLimitAspect.class);
+                });
+    }
+
+    @Test
+    @DisplayName("RateLimitProperties 应正确绑定")
+    void should_bind_properties() {
+        contextRunner
+                .withPropertyValues(
+                        "component.ratelimit.enabled=true",
+                        "component.ratelimit.default-capacity=100",
+                        "component.ratelimit.default-refill-tokens=50"
+                )
+                .run(context -> {
+                    RateLimitProperties props = context.getBean(RateLimitProperties.class);
+                    assertThat(props.isEnabled()).isTrue();
+                    assertThat(props.getDefaultCapacity()).isEqualTo(100);
+                    assertThat(props.getDefaultRefillTokens()).isEqualTo(50);
+                });
+    }
+
+}

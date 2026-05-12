@@ -3,7 +3,7 @@ package org.smm.archetype.cases.integrationtest;
 import io.opentelemetry.api.trace.Span;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.smm.archetype.shared.util.context.BizContext;
+import org.smm.archetype.shared.context.BizContext;
 import org.smm.archetype.support.IntegrationTestBase;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Qualifier;

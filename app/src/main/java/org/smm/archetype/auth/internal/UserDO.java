@@ -2,7 +2,7 @@ package org.smm.archetype.auth.internal;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
-import org.smm.archetype.entity.base.BaseDO;
+import org.smm.archetype.shared.dal.BaseDO;
 
 @Getter
 @Setter

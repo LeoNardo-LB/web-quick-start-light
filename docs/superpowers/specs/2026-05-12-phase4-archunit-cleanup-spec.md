@@ -33,7 +33,7 @@
 
 ## 一、新增 ArchUnit 规则详解
 
-### 1.1 M-05: 模块 `internal/` 包零 Spring 依赖（Controller/RepositoryImpl 除外）
+### 1.1 M-05: 模块 `internal/` 包零 Spring 依赖（Controller/Service/Converter/RepositoryImpl/FacadeImpl/Configure/ITest/ETest 除外）
 
 **目标**：确保模块内部实现不直接依赖 Spring Framework，降低框架耦合。Controller 和 RepositoryImpl 因需要 Spring 注解（`@RestController`、`@Repository`）而例外。
 
@@ -42,8 +42,13 @@
 - 检查是否有类 `dependOnClassesThat().resideInAPackage("org.springframework..")`
 - **例外类**：
   - `*Controller.java`（需要 `@RestController`、`@RequestMapping` 等）
+  - `*Service.java`（需要 `@Service`）
+  - `*Converter.java`（需要 Spring Bean 注册，部分通过 Configure @Bean）
   - `*RepositoryImpl.java`（需要 `@Repository`）
   - `*FacadeImpl.java`（需要 `@Service`）
+  - `*Configure.java`（需要 `@Configuration`/`@Bean`）
+  - `*ITest.java`（集成测试需要 Spring 上下文）
+  - `*ETest.java`（端到端测试需要 Spring 上下文）
 
 **实现方式**：ArchUnit API
 
@@ -54,8 +59,13 @@ noClasses()
     .and().resideInAPackage("..operationlog.internal..")
     .and().resideInAPackage("..systemconfig.internal..")
     .and().haveSimpleNameNotEndingWith("Controller")
+    .and().haveSimpleNameNotEndingWith("Service")
+    .and().haveSimpleNameNotEndingWith("Converter")
     .and().haveSimpleNameNotEndingWith("RepositoryImpl")
     .and().haveSimpleNameNotEndingWith("FacadeImpl")
+    .and().haveSimpleNameNotEndingWith("Configure")
+    .and().haveSimpleNameNotEndingWith("ITest")
+    .and().haveSimpleNameNotEndingWith("ETest")
     .should().dependOnClassesThat()
     .resideInAPackage("org.springframework..")
 ```
@@ -134,6 +144,12 @@ classes()
 
 **例外**：无。Facade 接口是公开契约，必须框架无关。
 
+> **设计说明：Facade 接口可以引用 internal/ 下的 VO/DTO/Command/PageQuery 类型**
+>
+> Facade 接口的参数/返回类型（VO/DTO/Command/PageQuery）虽然在 `internal/` 包下，但属于模块的公开契约。
+> Spring Modulith 的 internal 约定限制的是"其他模块不直接依赖 internal 类型"，而非"Facade 不能在自己的签名中使用它们"。
+> 同一模块内的 Facade 接口引用同模块的 internal 类型是合理的，不违反 M-07 规则。
+
 ### 1.5 M-09: 业务模块间通过根包 Facade 接口通信
 
 **目标**：业务模块间不得直接注入其他模块的 internal 类（如 Service、Repository），必须通过 Facade 接口。
@@ -210,7 +226,7 @@ org.smm.archetype.{module}/
 ### 2.4 生成的代码必须满足
 
 - 所有 ArchUnit 规则（M-01~M-09）
-- 不使用 `@Data`（用 `@Builder` + `@RequiredArgsConstructor`）
+- 不使用 `@Data`（用 `@Builder` + `@RequiredArgsConstructor`）← 已实际使用此模式
 - 时间字段使用 `Instant`
 - Facade 接口不依赖 MyBatis-Plus 类型
 - Repository 接口不暴露 `IPage`/`Page`
@@ -230,7 +246,7 @@ org.smm.archetype.{module}/
 |------|--------|--------|------|
 | Converter 方法名 | `toEntity()` | `toModel()` | DO→Model 转换 |
 | Converter 方法名 | `toEntity(DO)` | `toModel(DO)` | 重载方法 |
-| Converter 方法名 | `toDO(Entity)` | `toDO(Model)` | 参数类型 |
+| Converter 方法名 | `toDataObject(Entity)` | `toDO(Model)` | Model→DO 转换（方法名为 `toDO`，非 toDataObject） |
 | Service 方法注释 | "Entity" | "Model" | Javadoc |
 | Facade 方法注释 | "Entity" | "Model" | Javadoc |
 | 变量名 | `entity` / `entities` | `model` / `models` | 局部变量 |

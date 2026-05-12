@@ -18,7 +18,7 @@ import java.util.List;
 class OperationLogRepositoryImpl implements OperationLogRepository {
 
     private final OperationLogMapper operationLogMapper;
-    private final OperationLogConverter converter = new OperationLogConverter();
+    private final OperationLogConverter operationLogConverter;
 
     @Override
     public PageResult<OperationLog> findByPage(OperationLogPageQuery query) {
@@ -36,7 +36,7 @@ class OperationLogRepositoryImpl implements OperationLogRepository {
         var doPage = operationLogMapper.selectPage(page, wrapper);
 
         List<OperationLog> entities = doPage.getRecords().stream()
-                .map(converter::toModel)
+                .map(operationLogConverter::toModel)
                 .toList();
 
         return PageResult.of(entities, doPage.getTotal(), (int) doPage.getCurrent(), (int) doPage.getSize());

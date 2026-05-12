@@ -3,7 +3,7 @@ package org.smm.archetype;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Mapper;
-import org.smm.archetype.config.properties.AppInfoProperties;
+import org.smm.archetype.shared.web.AppInfoProperties;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,7 +16,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableConfigurationProperties(AppInfoProperties.class)
 @RequiredArgsConstructor
 @org.mybatis.spring.annotation.MapperScan(basePackages = {
-        "org.smm.archetype.generated.mapper",
+        "org.smm.archetype.shared.generated.mapper",
         "org.smm.archetype.systemconfig.internal",
         "org.smm.archetype.auth.internal",
         "org.smm.archetype.operationlog.internal"

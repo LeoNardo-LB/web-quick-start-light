@@ -40,7 +40,7 @@
 |--------|--------|---------|
 | `controller/auth/LoginController.java` | `auth/internal/LoginController.java` | 包迁移 |
 | `service/auth/LoginFacade.java` | `auth/AuthFacade.java` | 包迁移 + **重命名** |
-| `service/auth/LoginFacadeImpl.java` | `auth/internal/AuthFacadeImpl.java` | 包迁移 + **重命名** |
+| `service/auth/LoginFacadeImpl.java` | `auth/internal/AuthFacadeImpl.java` | 包迁移 + **重命名**（直接承担登录逻辑，无独立 LoginService） |
 | `entity/user/User.java` | `auth/internal/User.java` | 包迁移 |
 | `repository/user/UserRepository.java` | `auth/internal/UserRepository.java` | 包迁移 |
 | `repository/user/UserRepositoryImpl.java` | `auth/internal/UserRepositoryImpl.java` | 包迁移 + 提取 UserConverter |
@@ -262,11 +262,10 @@ package org.smm.archetype.auth.internal;
 import org.springframework.stereotype.Component;
 
 /**
- * 用户 DO → Entity 转换器。
+ * 用户 DO → Model 转换器。
  * 提取自 UserRepositoryImpl 的内联 toEntity() 方法。
  */
-@Component
-public class UserConverter {
+class UserConverter（package-private，通过 AuthConfigure @Bean 注册） {
 
     public User toModel(UserDO userDO) {
         if (userDO == null) return null;
@@ -370,6 +369,8 @@ public record OperationLogPageQuery(
 **注意**：当前 OperationLogPageQuery 不使用 Integer（非装箱类型），因此无法通过 compact constructor 做 null→默认值转换。
 若需实现与 SystemConfigPageQuery 相同的 null 安全模式，需将 `int` 改为 `Integer`。本阶段不做此项调整，
 保留现有 `int` 类型，保持与 Spring MVC 的 `@ModelAttribute` 兼容性。
+
+> **实际实现**：OperationLogPageQuery 已添加 compact constructor 和无参构造器（与 SystemConfigPageQuery 统一模式）。
 
 ---
 
@@ -563,7 +564,7 @@ Task 1-5 期间，新代码的 RepositoryImpl 和 Service 仍引用**旧的** `g
 
 | 旧路径 | 新路径 | 变更说明 |
 |--------|--------|---------|
-| `service/auth/LoginFacadeITest.java` | `auth/internal/AuthFacadeITest.java` | 包迁移 + 重命名（LoginFacade → AuthFacade） |
+| `service/auth/LoginFacadeITest.java` | `auth/AuthFacadeITest.java` | 包迁移 + 重命名（LoginFacade → AuthFacade）。注意：ITest 位于 `auth/` 根包（不在 internal/），这是合理的——集成测试需要访问 Facade 公开 API |
 
 ### 8.2 operationlog 测试
 
@@ -632,6 +633,8 @@ shared/util/**/*.java                     — 保留
 | `service/auth/` | **递归删除** |
 | `service/operationlog/` | **递归删除** |
 | `facade/operationlog/` | **递归删除** |
+
+> **注意**：空目录已在 Phase 5 清理轮次中删除。
 
 ### 9.4 generated/ 清理
 

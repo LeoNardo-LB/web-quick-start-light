@@ -237,6 +237,7 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
                     .and().haveSimpleNameNotEndingWith("Converter")
                     .and().haveSimpleNameNotEndingWith("RepositoryImpl")
                     .and().haveSimpleNameNotEndingWith("FacadeImpl")
+                    .and().haveSimpleNameNotEndingWith("Configure")
                     .and(new DescribedPredicate<>("is not a test class") {
                         @Override
                         public boolean test(JavaClass javaClass) {

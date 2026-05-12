@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.EqualsAndHashCode;
-import org.smm.archetype.entity.base.BaseDO;
+import org.smm.archetype.shared.dal.BaseDO;
 
 /**
  * 系统配置数据对象

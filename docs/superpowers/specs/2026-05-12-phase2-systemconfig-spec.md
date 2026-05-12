@@ -79,7 +79,7 @@
 
 | 旧路径 | 新路径 | 变更类型 |
 |--------|--------|---------|
-| `generated.MybatisPlusGenerator` | `systemconfig.internal.MybatisPlusGenerator` | 包迁移 + 输出包路径更新为 `org.smm.archetype.systemconfig.internal` |
+| `generated.MybatisPlusGenerator` | **修改**（保留位置） | 升级为多模块支持（--module 参数），不再迁移到各模块。详见 Phase 3/4 spec |
 
 ---
 

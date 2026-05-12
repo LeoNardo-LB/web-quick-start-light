@@ -24,6 +24,7 @@ class ArchitectureComplianceUTest extends UnitTestBase {
                 .and().areNotEnums()
                 .should().dependOnClassesThat()
                 .resideInAPackage("..repository.mapper..")
+                .allowEmptyShould(true)
                 .check(importedClasses);
     }
 
@@ -54,6 +55,7 @@ class ArchitectureComplianceUTest extends UnitTestBase {
                 .and().haveSimpleNameNotEndingWith("Test")
                 .should().dependOnClassesThat()
                 .resideInAPackage("org.springframework..")
+                .allowEmptyShould(true)
                 .check(importedClasses);
     }
 

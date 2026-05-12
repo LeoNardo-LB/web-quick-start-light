@@ -11,13 +11,13 @@ import java.util.Optional;
 class UserRepositoryImpl implements UserRepository {
 
     private final UserMapper userMapper;
-    private final UserConverter converter = new UserConverter();
+    private final UserConverter userConverter;
 
     @Override
     public Optional<User> findByUsername(String username) {
         UserDO userDO = userMapper.selectOne(
                 new LambdaQueryWrapper<UserDO>().eq(UserDO::getUsername, username)
         );
-        return Optional.ofNullable(userDO).map(converter::toModel);
+        return Optional.ofNullable(userDO).map(userConverter::toModel);
     }
 }

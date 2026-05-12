@@ -74,8 +74,7 @@ org.smm.archetype/
 ├── auth/                            ← @ApplicationModule(id = "auth")
 │   ├── AuthFacade.java              ← 公开 API
 │   └── internal/
-│       ├── AuthFacadeImpl.java
-│       ├── LoginService.java
+│       ├── AuthFacadeImpl.java     ← 直接承担登录逻辑（无独立 LoginService）
 │       ├── User.java
 │       ├── UserRepository.java
 │       ├── UserRepositoryImpl.java
@@ -173,7 +172,7 @@ Mapper (internal/)
 
 | 位置 | 职责 | 可以做 | 不可以做 |
 |------|------|--------|---------|
-| **根包/Facade** | 模块对外 API | 暴露公开方法 | 暴露 internal 类型 |
+| **根包/Facade** | 模块对外 API | 暴露公开方法 | 暴露 internal 类型（注：Facade 接口可以引用同模块 internal/ 下的 VO/DTO/Command/PageQuery，这属于模块的公开契约，不违反模块边界） |
 | **internal/Model** | 承载业务行为 | 校验、状态变更、业务规则计算 | 依赖框架、访问数据库 |
 | **internal/Service** | 编排业务流程 | 协调多个 Model、调用 Repository | 直接操作 DO/Mapper/IPage |
 | **internal/Repository** | 数据访问抽象接口 | 定义 CRUD 方法 | 返回 MyBatis-Plus 类型 |
@@ -217,7 +216,7 @@ Mapper (internal/)
 - **概念转变**：从"贫血 Entity（数据容器）"变为"Model（可承载业务行为）"
 - **包名变更**：`entity/system/` → `systemconfig/internal/`（模块内部扁平化）
 - **变量/注释**：代码注释和文档中的 "Entity" 统一改为 "Model"
-- **Converter 方法名**：`toEntity()` → `toModel()`，`fromEntity()` → `fromModel()`
+- **Converter 方法名**：`toEntity()` → `toModel()`，`fromEntity()` → `fromModel()`，`toDataObject()` → `toDO()`
 
 ### 3.3 三层模型流转
 

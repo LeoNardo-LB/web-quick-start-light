@@ -89,8 +89,20 @@ web-quick-start-light/                     (根 POM, packaging=pom)
 └── app/                                   (主应用, 依赖 common + 组件 component-*)
 ```
 
-> **注意**：限流（ratelimit）、幂等（idempotent）、操作日志（operationlog）和日志基础设施（logging）属于应用层横切关注点，直接集成在 app 模块的
-`shared/` 包下，不作为独立 component 模块。详见 [模块结构 - app 内部包组织](docs/architecture/module-structure.md#app-内部包组织)。
+> **注意**：app 模块内部只有业务模块（auth/operationlog/systemconfig）和 shared 两个顶层概念。所有公共基础设施按功能域自包含在 `shared/` 下：
+> - `shared/ratelimit/` — 限流（注解 + 切面 + 配置 + 属性）
+> - `shared/idempotent/` — 幂等（注解 + 切面 + Key 解析 + 配置）
+> - `shared/logging/` — 日志（配置 + 属性 + 过滤器 + 拦截器 + 工具）
+> - `shared/operationlog/` — 操作日志切面
+> - `shared/context/` — 业务上下文（BizContext）
+> - `shared/dal/` — 数据访问基础设施（BaseDO + TypeHandler + MetaObjectHandler）
+> - `shared/generated/` — 代码生成器
+> - `shared/mybatis/` — MyBatis-Plus 配置
+> - `shared/threadpool/` — 线程池配置
+> - `shared/web/` — Web 层基础设施（配置 + 过滤器 + 异常处理 + 测试端点）
+> - `shared/pagination/` + `shared/result/` — 分页与响应模型
+>
+> 业务模块的专属配置在各模块 `internal/` 下（如 AuthConfigure、SystemConfigConfigure）。详见 [模块结构](docs/architecture/module-structure.md)。
 
 ## 快速开始
 
@@ -162,7 +174,7 @@ mvn clean verify
 | M-02 | 组件模块间零互相依赖 | component 下各子模块互不引用（`component.dto` 共享子包除外） |
 | M-03 | Facade 方法不得返回内部 Entity | public 方法返回类型不得在 `.entity.` 包下（`.entity.base.` 通用基类除外，VO/DTO 除外） |
 | M-04 | Controller 路径前缀必须符合规范（API→/api, Web→/web） | API Controller 的 `@RequestMapping` 的 value/path 必须以 `/api` 起始，Web Controller 必须以 `/web` 起始 |
-| M-05 | 模块 internal/ 包零 Spring 依赖（Controller/Service/Converter/RepositoryImpl/FacadeImpl/ITest/ETest 除外） | 降低框架耦合 |
+| M-05 | 模块 internal/ 包零 Spring 依赖（Controller/Service/Converter/RepositoryImpl/FacadeImpl/Configure/ITest/ETest 除外） | 降低框架耦合 |
 | M-06 | Repository 接口方法签名不得出现 MyBatis-Plus 类型 | 接口框架无关 |
 | M-07 | 模块间不得直接访问其他模块的 internal/ 包 | 模块边界隔离 |
 | M-08 | Facade 接口不得依赖 MyBatis-Plus 类型 | 公开 API 框架无关 |

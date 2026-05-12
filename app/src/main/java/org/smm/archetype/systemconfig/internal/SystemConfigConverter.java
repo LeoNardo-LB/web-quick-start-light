@@ -1,14 +1,11 @@
 package org.smm.archetype.systemconfig.internal;
 
-import org.springframework.stereotype.Component;
-
 /**
  * 系统配置 DO ↔ Model 转换器
  */
-@Component
-public class SystemConfigConverter {
+class SystemConfigConverter {
 
-    public SystemConfigDO toDataObject(SystemConfig config) {
+    SystemConfigDO toDataObject(SystemConfig config) {
         if (config == null) {
             return null;
         }
@@ -29,7 +26,7 @@ public class SystemConfigConverter {
     /**
      * DO → 领域模型转换（语义重命名：toEntity → toModel）
      */
-    public SystemConfig toModel(SystemConfigDO configDO) {
+    SystemConfig toModel(SystemConfigDO configDO) {
         if (configDO == null) {
             return null;
         }

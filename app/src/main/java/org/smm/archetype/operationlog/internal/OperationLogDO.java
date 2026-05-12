@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.smm.archetype.entity.base.BaseDO;
+import org.smm.archetype.shared.dal.BaseDO;
 
 /**
  * 操作日志数据对象（DO）
