@@ -1,5 +1,7 @@
 package org.smm.archetype.cases.integrationtest;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @see <a href="https://www.jaegertracing.io/docs/latest/api/">Jaeger API Reference</a>
  */
+@Slf4j
 @DisabledIfSystemProperty(named = "skipJaegerTests", matches = "true")
 @DisplayName("Jaeger 数据验证 — OTLP 导出 + Jaeger V3 API 查询")
 class JaegerDataVerificationITest extends IntegrationTestBase {
@@ -57,7 +60,11 @@ class JaegerDataVerificationITest extends IntegrationTestBase {
         jaegerContainer = new GenericContainer<>(DockerImageName.parse(JAEGER_IMAGE))
                 .withExposedPorts(16686, 16685, 4317, 4318)
                 .waitingFor(Wait.forHttp("/").forPort(16686));
-        jaegerContainer.start();
+        try {
+            jaegerContainer.start();
+        } catch (Exception e) {
+            log.warn("Jaeger 容器启动失败（Docker 不可用？），相关测试将被跳过: {}", e.getMessage());
+        }
     }
 
     @DynamicPropertySource

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("BucketFactory")
@@ -64,11 +65,8 @@ class BucketFactoryUTest {
             assertThat(bucket.tryConsume(1)).isTrue();
             assertThat(bucket.tryConsume(1)).isFalse();
 
-            // 等待令牌补充
-            Thread.sleep(150);
-
-            // 令牌应已补充
-            assertThat(bucket.tryConsume(1)).isTrue();
+            // 等待令牌补充后可再次消费
+            await().atMost(200, TimeUnit.MILLISECONDS).until(() -> bucket.tryConsume(1));
         }
 
         @Test

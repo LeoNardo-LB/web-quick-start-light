@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
@@ -309,8 +310,9 @@ class RateLimitAspectUTest {
 
             testThread.start();
             started.await();
-            // 等待线程进入 sleep
-            Thread.sleep(100);
+            // 等待目标线程进入 TIMED_WAITING 状态（正在 Thread.sleep 中）
+            await().atMost(5, TimeUnit.SECONDS)
+                    .until(() -> testThread.getState() == Thread.State.TIMED_WAITING);
             testThread.interrupt();
             testThread.join(5000);
 

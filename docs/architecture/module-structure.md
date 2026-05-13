@@ -10,6 +10,8 @@
 - [四层架构](#四层架构)
 - [层间依赖规则](#层间依赖规则)
 - [ArchUnit 守护规则](#archunit-守护规则)
+- [Domain Event 架构](#domain-event-架构)
+- [设计考量](#设计考量)
 - [相关文档](#相关文档)
 - [变更历史](#变更历史)
 
@@ -131,47 +133,77 @@ app 模块内部只有业务模块和 shared 两个顶层概念。
 ```
 org.smm.archetype/
 │
-│  ═══ 业务模块（Spring Modulith 模式：根包 Facade + internal/ 实现）═══
+│  ═══ 业务模块（Spring Modulith 模式：根包 Facade + Event + internal/ 实现）═══
 │
-├── auth/                        ← 认证模块
-│   ├── AuthFacade.java          ← 公开 API（接口）
+├── auth/                           ← 认证模块
+│   ├── AuthFacade.java             ← 公开 API（接口）
+│   ├── UserLoggedInEvent.java      ← 领域事件 record（实现 DomainEvent）
 │   └── internal/
 │       ├── AuthFacadeImpl.java
-│       ├── User.java            ← 领域模型
-│       ├── UserDO.java
-│       ├── UserMapper.java
+│       ├── ConfigChangedEventHandler.java  ← 事件消费方（@EventListener 同步）
+│       ├── User.java               ← 领域模型
 │       ├── UserRepository.java
-│       ├── UserRepositoryImpl.java
-│       ├── UserConverter.java
 │       ├── LoginController.java
 │       ├── LoginRequest.java
 │       ├── LoginVO.java
-│       └── AuthConfigure.java   ← 模块专属 Bean 注册
-├── operationlog/                ← 操作日志模块
+│       └── infrastructure/         ← 基础设施层（Phase 6 两层分包）
+│           ├── UserDO.java
+│           ├── UserMapper.java
+│           ├── UserRepositoryImpl.java
+│           └── UserConverter.java  ← MapStruct @Mapper(config=CentralMapperConfig)
+├── operationlog/                   ← 操作日志模块
 │   ├── OperationLogFacade.java
 │   └── internal/
-│       └── ...
-├── systemconfig/                ← 系统配置模块
-│   ├── SystemConfigFacade.java
+│       ├── OperationLogFacadeImpl.java
+│       ├── OperationLog.java       ← 领域模型
+│       ├── OperationLogService.java
+│       ├── OperationLogRepository.java
+│       ├── OperationLogController.java
+│       ├── OperationLogPageQuery.java
+│       ├── OperationLogVO.java
+│       ├── UserLoggedInEventHandler.java  ← 事件消费方（@ApplicationModuleListener 异步）
+│       └── infrastructure/
+│           ├── OperationLogDO.java
+│           ├── OperationLogMapper.java
+│           ├── OperationLogRepositoryImpl.java
+│           └── OperationLogConverter.java
+├── systemconfig/                   ← 系统配置模块
+│   ├── SystemConfigFacade.java     ← 公开 API（接口）
+│   ├── ConfigChangedEvent.java     ← 领域事件 record（实现 DomainEvent）
 │   └── internal/
-│       └── ...
+│       ├── SystemConfigFacadeImpl.java
+│       ├── SystemConfig.java       ← 领域模型
+│       ├── SystemConfigService.java
+│       ├── SystemConfigRepository.java
+│       ├── SystemConfigController.java
+│       ├── ConfigGroup.java / ConfigKey.java / ConfigValue.java  ← 值对象
+│       ├── DisplayName.java / InputType.java / ValueType.java
+│       ├── SystemConfigPageQuery.java / UpdateConfigCommand.java
+│       ├── SystemConfigVO.java / ConfigGroupVO.java / UpdateConfigRequest.java
+│       └── infrastructure/
+│           ├── SystemConfigDO.java
+│           ├── SystemConfigMapper.java
+│           ├── SystemConfigRepositoryImpl.java
+│           └── SystemConfigConverter.java
 │
 │  ═══ 公共基础设施（按功能域自包含）═══
 │
-├── shared/                      ← 公共基础设施
-│   ├── ratelimit/               ← 限流（注解 + 切面 + 配置 + 属性）
-│   ├── idempotent/              ← 幂等（注解 + 切面 + Key 解析 + 配置）
-│   ├── logging/                 ← 日志（配置 + 属性 + 过滤器 + 拦截器 + 工具）
-│   ├── operationlog/            ← 操作日志切面（注解在 common 模块）
-│   ├── context/                 ← 业务上下文（BizContext）
-│   ├── dal/                     ← 数据访问基础设施（BaseDO + TypeHandler + MetaObjectHandler）
-│   ├── generated/               ← 代码生成器
-│   ├── mybatis/                 ← MyBatis-Plus 配置
-│   ├── threadpool/              ← 线程池配置
-│   ├── web/                     ← Web 层基础设施（配置 + 过滤器 + 异常处理 + 测试端点）
-│   ├── pagination/              ← 分页模型
-│   ├── result/                  ← 响应模型
-│   └── util/                    ← 序列化 + Spring 工具
+├── shared/                         ← 公共基础设施
+│   ├── CentralMapperConfig.java    ← MapStruct 全局配置（@MapperConfig）
+│   ├── event/                      ← Domain Event 基础设施
+│   ├── ratelimit/                  ← 限流（注解 + 切面 + 配置 + 属性）
+│   ├── idempotent/                 ← 幂等（注解 + 切面 + Key 解析 + 配置）
+│   ├── logging/                    ← 日志（配置 + 属性 + 过滤器 + 拦截器 + 工具）
+│   ├── operationlog/               ← 操作日志切面（注解在 common 模块）
+│   ├── context/                    ← 业务上下文（BizContext）
+│   ├── dal/                        ← 数据访问基础设施（BaseDO + TypeHandler + MetaObjectHandler）
+│   ├── generated/                  ← 代码生成器
+│   ├── mybatis/                    ← MyBatis-Plus 配置
+│   ├── threadpool/                 ← 线程池配置
+│   ├── web/                        ← Web 层基础设施（配置 + 过滤器 + 异常处理 + 测试端点）
+│   ├── pagination/                 ← 分页模型
+│   ├── result/                     ← 响应模型
+│   └── util/                       ← 序列化 + Spring 工具
 │
 └── WebStartLightApplication.java
 ```
@@ -187,21 +219,23 @@ org.smm.archetype/
 
 `shared` 放置被多个业务模块共享使用的横切关注点和基础设施。每个功能域是自包含的独立包：
 
-| 功能域                    | 职责          | 包含内容                          |
-|------------------------|-------------|-------------------------------|
-| `shared/ratelimit/`    | 限流          | @RateLimit + RateLimitAspect + BucketFactory + SpelKeyResolver + LimitFallback + RatelimitConfigure + RateLimitProperties |
-| `shared/idempotent/`   | 幂等          | @Idempotent + IdempotentAspect + IdempotentKeyResolver + IdempotentConfigure |
-| `shared/logging/`      | 日志          | LoggingConfigure + LoggingProperties + SamplingTurboFilter + SlowQueryInterceptor + LogMarkers + SensitiveLogUtils |
-| `shared/operationlog/` | 操作日志        | LogAspect（@BusinessLog 注解在 common 模块） |
-| `shared/context/`      | 上下文传播       | BizContext（基于 ScopedValue） |
-| `shared/dal/`          | 数据访问基础设施    | BaseDO + InstantTypeHandler + MyMetaObjectHandler |
-| `shared/generated/`    | 代码生成器       | MybatisPlusGenerator（跨模块工具，通过 --module 参数输出） |
-| `shared/mybatis/`      | MyBatis-Plus 配置 | MybatisPlusConfigure |
-| `shared/threadpool/`   | 线程池配置       | ThreadPoolConfigure + ThreadPoolProperties |
-| `shared/web/`          | Web 基础设施     | WebConfigure + ContextFillFilter + WebExceptionAdvise + TestController + AppInfoProperties + IpUtils |
-| `shared/pagination/`   | 分页模型        | PageQuery + PageResult |
-| `shared/result/`       | 响应模型        | BaseResult + BasePageResult |
-| `shared/util/`         | 序列化/Spring 工具 | KryoSerializer + SpringContextUtils |
+| 功能域 | 职责 | 包含内容 |
+|------|------|------|
+| `shared/CentralMapperConfig.java` | MapStruct 全局配置 | @MapperConfig(componentModel=SPRING, unmappedTargetPolicy=ERROR) |
+| `shared/event/` | Domain Event 基础设施 | DomainEvent 接口 + DomainEventPublisher 接口 + SpringDomainEventPublisher 适配器 |
+| `shared/ratelimit/` | 限流 | @RateLimit + RateLimitAspect + BucketFactory + SpelKeyResolver + LimitFallback + RatelimitConfigure + RateLimitProperties |
+| `shared/idempotent/` | 幂等 | @Idempotent + IdempotentAspect + IdempotentKeyResolver + IdempotentConfigure |
+| `shared/logging/` | 日志 | LoggingConfigure + LoggingProperties + SamplingTurboFilter + SlowQueryInterceptor + LogMarkers + SensitiveLogUtils |
+| `shared/operationlog/` | 操作日志 | LogAspect（@BusinessLog 注解在 common 模块） |
+| `shared/context/` | 上下文传播 | BizContext（基于 ScopedValue） |
+| `shared/dal/` | 数据访问基础设施 | BaseDO + InstantTypeHandler + MyMetaObjectHandler |
+| `shared/generated/` | 代码生成器 | MybatisPlusGenerator（跨模块工具，通过 --module 参数输出） |
+| `shared/mybatis/` | MyBatis-Plus 配置 | MybatisPlusConfigure |
+| `shared/threadpool/` | 线程池配置 | ThreadPoolConfigure + ThreadPoolProperties |
+| `shared/web/` | Web 基础设施 | WebConfigure + ContextFillFilter + WebExceptionAdvise + TestController + AppInfoProperties + IpUtils |
+| `shared/pagination/` | 分页模型 | PageQuery + PageResult |
+| `shared/result/` | 响应模型 | BaseResult + BasePageResult |
+| `shared/util/` | 序列化/Spring 工具 | KryoSerializer + SpringContextUtils |
 
 > **注意**：每个功能域是自包含的——限流的所有组件都在 `shared/ratelimit/` 下，日志的所有组件都在 `shared/logging/` 下。不需要跨功能域包引用。
 
@@ -209,8 +243,9 @@ org.smm.archetype/
 
 | 类型 | 位置 | 示例 |
 |------|------|------|
-| 模块专属配置 | 各模块 `internal/` 下 | `auth/internal/AuthConfigure.java` |
-| 公共基础设施配置 | shared 对应功能域包 | `shared/ratelimit/RatelimitConfigure.java`、`shared/logging/LoggingConfigure.java` |
+| 公共基础设施配置 | shared 对应功能域包 | `shared/ratelimit/RatelimitConfigure.java`、`shared/logging/LoggingConfigure.java`、`shared/event/SpringDomainEventPublisher.java` |
+
+> **Phase 6 变更**：模块专属 Configure 类（如 `AuthConfigure`）已移除。MapStruct Converter 通过 `@Mapper(config = CentralMapperConfig.class)` 自动注册为 Spring Bean，无需手动配置。
 
 ## 层间依赖规则
 
@@ -221,8 +256,8 @@ org.smm.archetype/
 | Controller → Facade | 通过门面层隔离 API 与业务逻辑 |
 | Facade → Service | 门面层调用服务层获取业务数据 |
 | Service → Repository | 服务层调用仓储层访问数据 |
-| Facade 可转换 Entity → VO | 手写 @Component Converter 转换 |
-| Repository 可转换 DO → Entity | 数据对象与业务对象转换 |
+| Facade 可转换 Entity → VO | MapStruct Converter 转换（@Mapper(config = CentralMapperConfig.class)） |
+| Repository 可转换 DO → Entity | MapStruct Converter 转换（infrastructure/ 下） |
 
 ### 禁止的依赖
 
@@ -237,7 +272,61 @@ org.smm.archetype/
 
 ## ArchUnit 守护规则
 
-项目通过 `ArchitectureComplianceUTest`（继承 `UnitTestBase`）在每次构建时自动验证四层架构约束：
+项目通过 ArchUnit + SourceScanner 在每次构建时自动验证架构约束。测试文件位于 `app/src/test/java/org/smm/archetype/support/basic/` 下。
+
+### 编码规范（CodingConventionComplianceUTest）
+
+| 规则 ID | 规则方法 | 守护的约束 | 说明 |
+|---------|---------|-----------|------|
+| C-01 | — | entity/repository 包禁止 LocalDateTime 和 java.util.Date | 时间字段统一使用 `Instant` |
+| C-02 | — | 禁止 JPA/Hibernate 注解 | ORM 仅用 MyBatis-Plus，禁止 `@Entity`/`@Table`/`@Column` 等 |
+| C-03 | — | 禁止 `BeanUtils.copyProperties` | 对象转换用 MapStruct 或手写 Converter |
+| C-04 | — | 禁止 `System.out`/`System.err` | 日志用 SLF4J（`@Slf4j`），排除 `generated` 包 |
+| C-05 | — | 禁止 Lombok `@With` | 用 `@Builder` 的 `withXxx()` 代替 |
+| C-06 | — | facade 包下 VO/DTO 必须用 record | 见"Record 规范" |
+| C-07 | — | Properties/Configure 类禁止 `@Data` | 用 `@Getter` + `@Setter` |
+| C-08 | — | 禁止 @Autowired 字段注入 | 使用构造器注入 + @RequiredArgsConstructor |
+| C-09 | — | 禁止抛出泛型异常 | 必须使用 BizException/ClientException/SysException + ErrorCode |
+| C-10 | — | Controller 返回值必须 BaseResult/BasePageResult | 统一响应包装 |
+| C-11 | — | 非 DO 类禁止 MyBatis-Plus 持久化注解 | 仅 DO（infrastructure/）可使用 @TableName/@TableId 等 |
+| C-12 | — | 禁止 java.util.logging | 统一使用 SLF4J (@Slf4j) |
+| C-13 | — | 禁止使用 @Deprecated API | 避免使用已废弃 API |
+| C-14 | — | @Service 类字段必须 final | 确保使用构造器注入 |
+| C-15 | — | Utility 类方法必须 static | 防止工具类被实例化 |
+| C-16 | — | Logger 字段必须是 private static final | SLF4J Logger 规范 |
+
+### 模块架构（ModuleArchitectureComplianceUTest）
+
+| 规则 ID | 规则方法 | 守护的约束 | 说明 |
+|---------|---------|-----------|------|
+| M-01 | — | exception 包零 Spring 依赖 | common 模块不依赖 Spring Framework |
+| M-02 | — | 组件模块间零互相依赖 | component 下各子模块互不引用 |
+| M-03 | — | Facade 方法不得返回内部 Entity | public 方法返回类型不得在 `.entity.` 包下 |
+| M-04 | — | Controller 路径前缀必须符合规范 | API Controller 以 `/api` 起始，Web Controller 以 `/web` 起始 |
+| M-05 | — | 模块 internal/ 包零 Spring 依赖 | Controller/Service/Converter/RepositoryImpl/FacadeImpl/Configure/ITest/ETest 除外，infrastructure/ 子包除外 |
+| M-06 | — | Repository 接口方法签名不得出现 MyBatis-Plus 类型 | 接口框架无关 |
+| M-07 | — | 模块间不得直接访问其他模块的 internal/ 包 | 模块边界隔离 |
+| M-08 | — | Facade 接口不得依赖 MyBatis-Plus 类型 | 公开 API 框架无关 |
+| M-09 | — | 业务模块间通过根包 Facade 接口通信 | 模块间解耦 |
+| M-10 | — | 业务模块间零循环依赖 | slices 独立检测 |
+
+### Spring 配置（SpringConfigComplianceUTest）
+
+| 规则 ID | 规则方法 | 守护的约束 | 说明 |
+|---------|---------|-----------|------|
+| S-01 | — | 组件 Properties 前缀以 `component.` 开头 | `@ConfigurationProperties(prefix = "component.xxx")` |
+
+### 测试规范（TestConventionComplianceUTest）
+
+| 规则 ID | 规则方法 | 守护的约束 | 说明 |
+|---------|---------|-----------|------|
+| T-01 | — | 含 `@Test` 的文件必须以 UTest.java 或 ITest.java 结尾 | 排除测试基础设施类 |
+| T-02 | — | UTest 禁止 `@SpringBootTest` | 纯单元测试不启动 Spring 上下文 |
+| T-03 | — | ITest 禁止 `@Mock` | 集成测试使用真实依赖 |
+| T-05 | — | ETest 禁止 `@Mock` | 端到端测试使用真实依赖 |
+| T-06 | — | 测试类禁止 Thread.sleep | 使用 Awaitility 或 CountDownLatch |
+
+### 四层架构（ArchitectureComplianceUTest）
 
 | 规则方法 | 守护的约束 | 说明 |
 |---------|-----------|------|
@@ -248,7 +337,72 @@ org.smm.archetype/
 | `repositoryShouldNotDependOnServiceOrControllerLayer` | Repository 禁止依赖 `..service..` 和 `..controller..` | 保持数据层独立 |
 | `entityShouldNotDependOnSpringFramework` | Entity 禁止依赖 `org.springframework..` | 保持领域模型纯净 |
 
-> 测试文件：`app/src/test/java/org/smm/archetype/support/basic/ArchitectureComplianceUTest.java`
+### 全局禁止规则
+
+| 测试文件 | 守护的约束 | 说明 |
+|---------|-----------|------|
+| `NoDataAnnotationUTest` | 全项目禁止 `@Data` | 使用 `@Builder` + `@RequiredArgsConstructor` |
+| `NoValueInjectionUTest` | 禁止 `@Value` 注入 | 使用 `@ConfigurationProperties` |
+| `NoRedundantConfigureUTest` | 禁止冗余 Configure 类 | 避免无实际配置的空 Configure |
+
+### Modulith 边界验证（ModulithComplianceUTest）
+
+| 验证项 | 守护的约束 | 说明 |
+|-------|-----------|------|
+| `modules.verify()` | 模块边界验证 | Spring Modulith 自动检测模块间依赖违规 |
+| exception OPEN 模块声明 | exception 模块声明为 OPEN | 允许跨模块访问异常类 |
+| component OPEN 模块声明 | component 模块声明为 OPEN | 允许跨模块访问组件接口 |
+
+> **注意**：SourceScanner 从 `PROJECT_ROOT` 递归遍历，自动覆盖 `app/`、`components/`、`common/` 的 `src/main/java` 和 `src/test/java`。排除 `/target/` 目录和 `/generated/` 包。块注释 `/* */` 内的代码不会被误判。
+
+## Domain Event 架构
+
+Phase 6 引入了领域事件机制，用于模块间的异步/同步通信，替代模块间的直接 Facade 调用（适用于"发布-订阅"场景）。
+
+### 事件流转
+
+```
+┌──────────────┐     publish(event)      ┌──────────────────────┐
+│  业务模块 A    │ ──────────────────────► │  DomainEventPublisher │
+│  (发布方)     │                          │  (Spring 适配器)       │
+└──────────────┘                          └──────────┬───────────┘
+                                                     │ Spring ApplicationEvent
+                                                     ▼
+                                          ┌──────────────────────┐
+                                          │  Spring EventBus      │
+                                          └──────────┬───────────┘
+                                                     │
+                              ┌───────────────────────┼───────────────────────┐
+                              ▼                       ▼                       ▼
+                     ┌────────────────┐      ┌────────────────┐      ┌────────────────┐
+                     │ 业务模块 B       │      │ 业务模块 C       │      │ ...            │
+                     │ @EventListener  │      │ @Application   │      │                │
+                     │ (同步)          │      │ ModuleListener  │      │                │
+                     │                │      │ (异步+独立事务)  │      │                │
+                     └────────────────┘      └────────────────┘      └────────────────┘
+```
+
+### 三层结构
+
+| 层次 | 位置 | 角色 | 示例 |
+|------|------|------|------|
+| 接口层 | `shared/event/` | DomainEvent 接口 + DomainEventPublisher 接口（零 Spring 依赖） | `DomainEvent`、`DomainEventPublisher` |
+| 适配层 | `shared/event/` | Spring 适配器实现 | `SpringDomainEventPublisher`（注入 `ApplicationEventPublisher`） |
+| 事件定义 | 各模块根包 | record 实现 DomainEvent | `auth/UserLoggedInEvent`、`systemconfig/ConfigChangedEvent` |
+
+### 关键设计决策
+
+1. **事件 record 在模块根包**（API 包）：作为模块公开 API 的一部分，其他模块可以引用事件类型
+2. **消费方在 internal/ 下**：`@ApplicationModuleListener`（异步 + 独立事务 + 自动重试）或 `@EventListener`（同步）
+3. **发布方通过 DomainEventPublisher 接口**：零 Spring 依赖，Service 层注入即可使用
+4. **事件接口零 Spring 依赖**：DomainEvent 和 DomainEventPublisher 不引入任何 Spring 类型
+
+### 当前事件清单
+
+| 事件 record | 发布方 | 消费方 | 消费方式 |
+|-------------|--------|--------|----------|
+| `UserLoggedInEvent` | auth 模块（登录成功时） | operationlog 模块 | `@ApplicationModuleListener`（异步） |
+| `ConfigChangedEvent` | systemconfig 模块（配置变更时） | auth 模块 | `@EventListener`（同步） |
 
 ## 设计考量
 
@@ -296,5 +450,6 @@ org.smm.archetype/
 |------------|-------------------------------------------------------------------------------------------------------------------|
 | 2026-04-14 | 初始创建                                                                                                              |
 | 2026-04-14 | 新增「app 内部包组织」章节；components 模块精简为纯中间件接入层（移除 component-log/component-ratelimit/component-idempotent）；横切关注点纳入 app 模块 `shared/` 包 |
-| 2026-05-11 | `entity/api/` → `entity/base/`；`shared/util/context/` 修正为仅含 BizContext；中间件→组件措辞修正；MapStruct→手写 Converter |
 | 2026-04-15 | `shared/logging/` 合并到 `shared/util/logging/`，统一 shared 下 aspect/util 两个维度 |
+| 2026-05-11 | `entity/api/` → `entity/base/`；`shared/util/context/` 修正为仅含 BizContext；中间件→组件措辞修正；MapStruct→手写 Converter |
+| 2026-05-13 | Phase 6+7 同步：MapStruct 迁移完成（@Mapper(config=CentralMapperConfig)替代手写@Component）；Domain Event 架构（shared/event/ + 模块根包 Event record）；infrastructure/ 两层分包；ArchUnit 规则扩展至 44 条（C-01~C-16/M-01~M-10/S-01/T-01~T-06/四层架构 6 条/全局禁止 3 条/Modulith 3 条）；移除已删除的 Configure 类 |

@@ -186,18 +186,21 @@ public record BaseRequest() {}  // 错误！
 |------|------|------|
 | ORM | MyBatis-Plus | JPA / Hibernate |
 | 工具库 | Hutool / Apache Commons / Guava | 自行实现已有轮子 |
-| 对象转换 | 手写 Converter（`@Component`） | BeanUtils.copyProperties（编译期不安全） |
+| 对象转换 | MapStruct（`@Mapper(config = CentralMapperConfig.class)`） | BeanUtils.copyProperties（编译期不安全） |
 
-> **注意**：当前项目使用手写 `@Component` Converter 类（如 `SystemConfigConverter`、`OperationLogConverter`）进行对象转换，未来可迁移至 MapStruct。禁止 `BeanUtils.copyProperties` 的红线不变。
+> **注意**：项目使用 MapStruct 进行对象转换，所有 Converter 接口通过 `config = CentralMapperConfig.class` 引用全局配置（`componentModel = SPRING`、`unmappedTargetPolicy = ERROR`）。MapStruct 在编译期生成类型安全的实现类，任何未映射的字段都会编译报错。禁止 `BeanUtils.copyProperties` 的红线不变。
 
 ✅ 正确：
 ```java
-// 使用手写 Converter 转换
-@Component
-public class SystemConfigConverter {
-    public SystemConfig toEntity(SystemConfigDO dto) {
-        // 手动字段映射
-    }
+// MapStruct Converter 接口（编译期自动生成 @Component 实现类）
+@Mapper(config = CentralMapperConfig.class)
+public interface SystemConfigConverter {
+    SystemConfig toModel(SystemConfigDO configDO);
+
+    @BeanMapping(builder = @Builder(disableBuilder = true))
+    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "updateTime", ignore = true)
+    SystemConfigDO toDO(SystemConfig config);
 }
 ```
 
@@ -207,9 +210,12 @@ public class SystemConfigConverter {
 @Entity  // 禁止
 @Table(name = "system_config")  // 禁止
 public class SystemConfig {}
+
+// 禁止使用 BeanUtils（运行时反射，编译期无法发现字段不匹配）
+BeanUtils.copyProperties(source, target);  // 禁止
 ```
 
-> **为什么**：混用 JPA 和 MyBatis-Plus 会导致事务管理混乱（JPA 使用 EntityManager，MyBatis-Plus 使用 SqlSession），且 JPA 的懒加载代理与 MyBatis-Plus 的实体模型不兼容，容易引发 `LazyInitializationException`。统一使用 MyBatis-Plus 可以避免两套 ORM 机制的冲突，降低维护成本。
+> **为什么**：混用 JPA 和 MyBatis-Plus 会导致事务管理混乱（JPA 使用 EntityManager，MyBatis-Plus 使用 SqlSession），且 JPA 的懒加载代理与 MyBatis-Plus 的实体模型不兼容，容易引发 `LazyInitializationException`。统一使用 MyBatis-Plus 可以避免两套 ORM 机制的冲突，降低维护成本。`CentralMapperConfig` 的 `unmappedTargetPolicy = ERROR` 确保新增字段时不会遗漏映射，编译期即可发现问题。
 
 ### 规则 6: API 路径规范
 
@@ -304,6 +310,276 @@ package org.smm.archetype.generated.mapper;
 
 > **为什么**：`generated/` 包下的代码由 `MybatisPlusGenerator` 根据数据库表结构自动生成，每次重新生成时会覆盖整个文件。手动修改会在下次生成时丢失，且与代码审查流程脱节。如需调整生成逻辑，应修改 Generator 配置后重新生成，确保代码始终与数据库结构一致。
 
+### 规则 9: 依赖注入规范（C-08）
+
+**⛔ MUST**
+
+- 禁止 `@Autowired` 字段注入
+- 使用构造器注入 + `@RequiredArgsConstructor`（Lombok 自动生成构造器）
+- 将依赖声明为 `private final` 字段，确保不可变性和显式依赖
+
+**例外**：集成测试（`*ITest`/`*ETest`）、`IntegrationTestBase`、`Configure` 类允许使用 `@Autowired`（测试基础设施和 Spring 配置类的惯例）。
+
+✅ 正确：
+```java
+@Service
+@RequiredArgsConstructor
+public class SystemConfigService {
+    private final SystemConfigRepository systemConfigRepository;
+    private final SystemConfigConverter systemConfigConverter;
+}
+```
+
+❌ 错误：
+```java
+@Service
+public class SystemConfigService {
+    @Autowired  // 禁止字段注入
+    private SystemConfigRepository systemConfigRepository;
+}
+```
+
+> **为什么**：字段注入隐藏了类的真实依赖数量，容易导致"上帝类"（God Object）。构造器注入使依赖关系在构造器签名中显式可见，当依赖过多时一目了然，便于识别设计问题。`final` 字段还确保依赖在构造后不可变，线程安全且防止意外重新赋值。
+
+### 规则 10: 异常类型规范（C-09）
+
+**⛔ MUST**
+
+- 禁止抛出泛型异常（`RuntimeException`、`Exception`、`Throwable` 等）
+- 必须使用项目异常体系：`BizException`（业务异常）/ `ClientException`（客户端参数异常）/ `SysException`（系统内部异常）+ `ErrorCode`
+
+✅ 正确：
+```java
+public void updateConfig(ConfigKey key, ConfigValue value) {
+    SystemConfig config = repository.findByKey(key)
+            .orElseThrow(() -> new BizException(SystemConfigErrorCode.CONFIG_NOT_FOUND));
+    // ...
+}
+```
+
+❌ 错误：
+```java
+public void updateConfig(String key, String value) {
+    throw new RuntimeException("配置不存在");  // 禁止泛型异常
+    throw new Exception("更新失败");           // 禁止泛型异常
+    throw new IllegalArgumentException("参数错误");  // 禁止，应使用 ClientException
+}
+```
+
+> **为什么**：泛型异常无法被全局异常处理器分类处理，前端无法区分错误类型（400 vs 500），也无法实现 i18n 消息解析。项目异常体系通过 `ErrorCode` 接口统一管理错误码和 `messageKey`，配合 `MessageSource` 实现国际化，配合 `WebExceptionAdvice` 根据 `Accept-Language` Header 自动切换语言。
+
+### 规则 11: Controller 返回类型规范（C-10）
+
+**⛔ MUST**
+
+- Controller 方法返回值必须是 `BaseResult<T>` 或 `BasePageResult<T>`
+- 统一响应包装，确保前端收到的 JSON 结构一致
+
+✅ 正确：
+```java
+@RestController
+@RequestMapping("/api/system/configs")
+public class SystemConfigController {
+
+    @GetMapping("/{key}")
+    public BaseResult<SystemConfigVO> getByKey(@PathVariable String key) {
+        return BaseResult.success(facade.getByKey(ConfigKey.of(key)));
+    }
+
+    @GetMapping("/page")
+    public BasePageResult<SystemConfigVO> page(PageRequest request) {
+        return BasePageResult.success(facade.page(request));
+    }
+}
+```
+
+❌ 错误：
+```java
+@GetMapping("/{key}")
+public SystemConfigVO getByKey(@PathVariable String key) {  // 禁止，缺少 BaseResult 包装
+    return facade.getByKey(ConfigKey.of(key));
+}
+```
+
+> **为什么**：统一响应包装确保所有 API 返回一致的 JSON 结构（`{code, message, data}`），前端可以统一处理响应拦截、错误提示和分页逻辑。缺少包装会导致前端需要针对不同接口做特殊处理，增加维护成本。
+
+### 规则 12: MyBatis-Plus 注解限制（C-11）
+
+**⛔ MUST**
+
+- 仅 DO 类（`infrastructure/` 包下）可使用 MyBatis-Plus 持久化注解（`@TableName`、`@TableId`、`@TableField` 等）
+- 非 DO 类（Entity、VO、DTO 等）禁止使用任何持久化注解
+
+✅ 正确：
+```java
+// infrastructure/ 包下的 DO 类 — 允许持久化注解
+@TableName("system_config")
+public class SystemConfigDO extends BaseDO {
+    @TableId("config_key")
+    private String configKey;
+}
+
+// Entity 类 — 禁止持久化注解
+public class SystemConfig {
+    private ConfigKey key;      // 纯领域模型，无持久化注解
+    private ConfigValue value;
+}
+```
+
+❌ 错误：
+```java
+// Entity 类使用持久化注解 — 禁止
+public class SystemConfig {
+    @TableField("config_key")   // 禁止！Entity 不应有持久化注解
+    private ConfigKey key;
+}
+```
+
+> **为什么**：持久化注解（`@TableName`、`@TableId`、`@TableField`）将领域模型与数据库表结构耦合，违反四层架构的依赖方向（Repository → DO → 数据库，Service → Entity → 业务逻辑）。Entity 作为纯领域模型应保持框架无关，持久化细节仅存在于 `infrastructure/` 包的 DO 类中。
+
+### 规则 13: 日志框架统一（C-12）
+
+**⛔ MUST**
+
+- 禁止使用 `java.util.logging`（JUL）
+- 统一使用 SLF4J（通过 `@Slf4j` 注解）
+
+✅ 正确：
+```java
+@Slf4j
+@Service
+public class SystemConfigService {
+    public void updateConfig(String key) {
+        log.info("更新配置: key={}", key);
+    }
+}
+```
+
+❌ 错误：
+```java
+import java.util.logging.Logger;  // 禁止
+
+@Service
+public class SystemConfigService {
+    private static final Logger logger = Logger.getLogger(SystemConfigService.class.getName());  // 禁止
+
+    public void updateConfig(String key) {
+        logger.info("更新配置: " + key);  // 禁止 JUL
+    }
+}
+```
+
+> **为什么**：项目统一使用 SLF4J + Logback 作为日志门面和实现。混用 `java.util.logging` 会导致日志配置无法统一管控（级别、格式、输出目标），日志聚合系统（如 ELK）也无法统一收集。SLF4J 的参数化日志在对应级别未启用时不会执行字符串拼接，性能更优。
+
+### 规则 14: 废弃 API 限制（C-13）
+
+**⛔ MUST**
+
+- 禁止使用 `@Deprecated` 标记的 API
+- 优先使用推荐的新 API 替代方案
+
+✅ 正确：
+```java
+// 使用推荐的新 API
+Instant now = Instant.now();
+```
+
+❌ 错误：
+```java
+// 使用已废弃的 API
+@SuppressWarnings("deprecation")  // 禁止压制废弃警告
+Date date = new Date();           // 已废弃，应使用 Instant
+```
+
+> **为什么**：`@Deprecated` 标记的 API 通常存在设计缺陷、安全隐患或将在未来版本移除。使用废弃 API 会在升级依赖时引入兼容性风险，且可能错过重要的 bug 修复或性能改进。
+
+### 规则 15: Service 字段规范（C-14）
+
+**⛔ MUST**
+
+- `@Service` 类的字段必须声明为 `final`
+- 确保使用构造器注入模式，字段构造后不可变
+
+✅ 正确：
+```java
+@Service
+@RequiredArgsConstructor
+public class SystemConfigService {
+    private final SystemConfigRepository repository;      // final ✓
+    private final SystemConfigConverter converter;        // final ✓
+}
+```
+
+❌ 错误：
+```java
+@Service
+public class SystemConfigService {
+    private SystemConfigRepository repository;   // 禁止，缺少 final
+    private SystemConfigConverter converter;     // 禁止，缺少 final
+}
+```
+
+> **为什么**：非 `final` 字段意味着可以被重新赋值，破坏不可变性约束，在并发场景下可能导致可见性问题。`final` 字段配合 `@RequiredArgsConstructor` 确保所有依赖在构造时注入且不可变，这是构造器注入模式的基础保障。
+
+### 规则 16: 工具类方法规范（C-15）
+
+**⛔ MUST**
+
+- Utility 类的方法必须声明为 `static`
+- 防止工具类被实例化
+
+✅ 正确：
+```java
+public final class StringHelper {
+    private StringHelper() {}  // 私有构造器防止实例化
+
+    public static boolean isBlank(String str) {
+        return str == null || str.isBlank();
+    }
+}
+```
+
+❌ 错误：
+```java
+public class StringHelper {
+    public boolean isBlank(String str) {  // 禁止，缺少 static
+        return str == null || str.isBlank();
+    }
+}
+```
+
+> **为什么**：工具类（Utility Class）是无状态的辅助类，不应被实例化。非 `static` 方法暗示需要实例化才能使用，违反直觉且浪费内存。结合 `final` 类和私有构造器，可以完全防止工具类被继承或实例化。
+
+### 规则 17: Logger 声明规范（C-16）
+
+**⛔ MUST**
+
+- Logger 字段必须是 `private static final`
+- 配合 `@Slf4j` 自动生成符合规范的 Logger
+
+✅ 正确：
+```java
+@Slf4j  // 自动生成: private static final Logger log = LoggerFactory.getLogger(Xxx.class);
+@Service
+public class SystemConfigService {
+    public void doSomething() {
+        log.info("处理完成");
+    }
+}
+```
+
+❌ 错误：
+```java
+@Service
+public class SystemConfigService {
+    private Logger log = LoggerFactory.getLogger(SystemConfigService.class);  // 禁止，缺少 static final
+    protected static Logger log = ...;  // 禁止，必须是 private
+    public final Logger log = ...;      // 禁止，必须是 private static
+}
+```
+
+> **为什么**：`private` 防止子类意外覆盖 Logger 字段；`static` 确保所有实例共享同一个 Logger（Logger 是线程安全的）；`final` 防止运行时重新赋值。这三个修饰符缺一不可。使用 `@Slf4j` 可以自动生成符合规范的声明，避免手动声明出错。
+
 ## 常见违规场景
 
 ### 场景 1: Controller 直接注入 Mapper（层次穿透）
@@ -394,10 +670,19 @@ public class OrderDO {
 - [ ] DTO/VO 使用 `record`，基类保持 `class`
 - [ ] 单元测试命名为 `*UTest`，集成测试命名为 `*ITest`
 - [ ] 没有使用 JPA / Hibernate 注解
-- [ ] 对象转换使用 MapStruct 或手写 @Component Converter（禁止 BeanUtils.copyProperties）
+- [ ] 对象转换使用 MapStruct（`@Mapper(config = CentralMapperConfig.class)`），禁止 `BeanUtils.copyProperties`
 - [ ] API 路径以 `/api` 开头
 - [ ] 使用 `@Slf4j` + 参数化日志，没有 `System.out.println`
 - [ ] `generated/` 包下的文件未被手动修改
+- [ ] 使用构造器注入 + `@RequiredArgsConstructor`，禁止 `@Autowired` 字段注入
+- [ ] 抛出项目异常体系（`BizException`/`ClientException`/`SysException` + `ErrorCode`），禁止泛型异常
+- [ ] Controller 返回值是 `BaseResult` 或 `BasePageResult`
+- [ ] MyBatis-Plus 持久化注解仅在 `infrastructure/` 包的 DO 类中使用
+- [ ] 没有使用 `java.util.logging`（JUL），统一 `@Slf4j`
+- [ ] 没有使用 `@Deprecated` API
+- [ ] `@Service` 类字段声明为 `final`
+- [ ] 工具类方法声明为 `static`
+- [ ] Logger 字段为 `private static final`
 
 ## 相关文档
 

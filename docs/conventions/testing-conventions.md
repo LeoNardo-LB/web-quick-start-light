@@ -6,6 +6,7 @@
 
 - [规范目的](#规范目的)
 - [规则](#规则)
+  - [规则 7: 禁止 Thread.sleep](#规则-7-禁止-threadsleep)
 - [常见违规场景](#常见违规场景)
 - [检查清单](#检查清单)
 - [相关文档](#相关文档)
@@ -254,6 +255,34 @@ class LogAutoConfigurationITest extends IntegrationTestBase {
 }
 ```
 
+### 规则 7: 禁止 Thread.sleep（T-06）
+
+**⛔ MUST**
+
+测试类中禁止使用 `Thread.sleep`，使用 Awaitility 或 CountDownLatch 替代。
+
+当前此规则作为 `@Disabled` 检查点保留（`TestConventionComplianceUTest.java` 中 T-06 测试方法标记 `@Disabled`），启用前需确保所有 `Thread.sleep` 使用已清理。
+
+✅ 正确：
+```java
+// 使用 Awaitility 等待条件满足
+Awaitility.await()
+    .atMost(5, TimeUnit.SECONDS)
+    .untilAsserted(() -> assertThat(result).isNotNull());
+
+// 使用 CountDownLatch 同步
+CountDownLatch latch = new CountDownLatch(1);
+latch.await(5, TimeUnit.SECONDS);
+```
+
+❌ 错误：
+```java
+// 禁止使用 Thread.sleep
+Thread.sleep(1000);  // 不确定延迟，可能导致测试不稳定
+```
+
+> **为什么**：`Thread.sleep` 基于固定时间等待，在 CI 环境中因性能差异可能导致测试不稳定（太快则条件未满足，太慢则浪费时间）。Awaitility 基于条件轮询，满足条件立即继续，既可靠又高效。CountDownLatch 则提供了精确的线程同步语义。
+
 ## 常见违规场景
 
 ### 场景 1: 在 UTest 中使用 @SpringBootTest
@@ -348,6 +377,7 @@ void createConfig_shouldRejectDuplicateKey_whenKeyAlreadyExists() {
 - [ ] Instruction 覆盖率 ≥ 95%，Branch 覆盖率 ≥ 90%
 - [ ] 覆盖率报告可通过 `mvn clean verify` 生成
 - [ ] 条件装配的组件模块验证了装配条件
+- [ ] 测试类中未使用 `Thread.sleep`（使用 Awaitility 或 CountDownLatch 替代）
 
 ## 相关文档
 
