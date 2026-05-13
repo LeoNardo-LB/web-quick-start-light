@@ -317,4 +317,194 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
                 .allowEmptyShould(true)
                 .check(importedClasses);
     }
+
+    // === C-08: 禁止 @Autowired 字段注入 ===
+
+    @Test
+    @DisplayName("C-08: 禁止 @Autowired 字段注入 — 推荐使用构造器注入 + @RequiredArgsConstructor")
+    void should_not_use_autowired_field_injection() {
+        ArchRuleDefinition.fields()
+                .that().areDeclaredInClassesThat()
+                .resideInAPackage("org.smm.archetype..")
+                .and().areDeclaredInClassesThat().resideOutsideOfPackage("..support.basic..")
+                // ITest/ETest 集成测试允许 @Autowired
+                .and().areDeclaredInClassesThat().resideOutsideOfPackage("..cases..")
+                .and().areDeclaredInClassesThat().haveSimpleNameNotEndingWith("ITest")
+                .and().areDeclaredInClassesThat().haveSimpleNameNotEndingWith("ETest")
+                // WebConfigure 等基础设施 Configure 类允许 @Autowired
+                .and().areDeclaredInClassesThat().haveSimpleNameNotEndingWith("Configure")
+                // IntegrationTestBase 允许 @Autowired
+                .and().areDeclaredInClassesThat().haveSimpleNameNotEndingWith("TestBase")
+                .should().notBeAnnotatedWith(org.springframework.beans.factory.annotation.Autowired.class)
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === C-09: 禁止抛出泛型异常 ===
+
+    @Test
+    @DisplayName("C-09: 禁止抛出泛型异常 — 必须使用 BizException/ClientException/SysException")
+    void should_not_throw_generic_exceptions() {
+        ArchRuleDefinition.noClasses()
+                .that().resideInAPackage("org.smm.archetype..")
+                .and().resideOutsideOfPackage("..exception..")
+                .and().resideOutsideOfPackage("..support.basic..")
+                .and().resideOutsideOfPackage("..shared.web..")
+                .and().resideOutsideOfPackage("..component..")
+                .should().callConstructor(RuntimeException.class)
+                .orShould().callConstructor(Exception.class)
+                .orShould().callConstructor(Throwable.class)
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === C-10: Controller 公开方法返回值必须 BaseResult/BasePageResult ===
+
+    @Test
+    @DisplayName("C-10: Controller 公开方法返回值必须为 BaseResult 或 BasePageResult")
+    void controller_public_methods_should_return_base_result() {
+        ArchRuleDefinition.methods()
+                .that().arePublic()
+                .and().areDeclaredInClassesThat()
+                .resideInAPackage("org.smm.archetype..")
+                .and().areDeclaredInClassesThat().areAnnotatedWith("org.springframework.web.bind.annotation.RestController")
+                .and().areDeclaredInClassesThat().resideOutsideOfPackage("..shared.web..")
+                .should(new ArchCondition<JavaMethod>("return BaseResult or BasePageResult") {
+                    @Override
+                    public void check(JavaMethod method, ConditionEvents events) {
+                        JavaClass returnType = method.getRawReturnType();
+                        String name = returnType.getName();
+                        if ("void".equals(name)) return;
+                        if (name.startsWith("org.springframework.")) return;
+                        if (name.equals("java.util.Map")) return;
+                        if (!name.contains(".result.BaseResult") && !name.contains(".result.BasePageResult")) {
+                            events.add(SimpleConditionEvent.violated(method,
+                                method.getFullName() + " returns " + name
+                                + " — must return BaseResult or BasePageResult"));
+                        }
+                    }
+                })
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === C-11: 非 DO 类禁止 MyBatis-Plus 持久化注解 ===
+
+    @Test
+    @DisplayName("C-11: 非 DO 类禁止 MyBatis-Plus 持久化注解 — 仅 DO（infrastructure/）可使用")
+    void non_do_classes_should_not_have_mybatis_plus_annotations() {
+        ArchRuleDefinition.noClasses()
+                .that().haveSimpleNameNotEndingWith("DO")
+                .and().resideInAPackage("org.smm.archetype..")
+                .and().resideOutsideOfPackage("..shared.dal..")
+                .should().beAnnotatedWith("com.baomidou.mybatisplus.annotation.TableName")
+                .orShould().beAnnotatedWith("com.baomidou.mybatisplus.annotation.TableId")
+                .orShould().beAnnotatedWith("com.baomidou.mybatisplus.annotation.TableField")
+                .orShould().beAnnotatedWith("com.baomidou.mybatisplus.annotation.TableLogic")
+                .orShould().beAnnotatedWith("com.baomidou.mybatisplus.annotation.Version")
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === C-12: 禁止 java.util.logging ===
+
+    @Test
+    @DisplayName("C-12: 禁止 java.util.logging — 统一使用 SLF4J (@Slf4j)")
+    void should_not_use_java_util_logging() {
+        ArchRuleDefinition.noClasses()
+                .that().resideInAPackage("org.smm.archetype..")
+                .and().resideOutsideOfPackage("..support.basic..")
+                .should().dependOnClassesThat()
+                .resideInAPackage("java.util.logging..")
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === C-13: 禁止使用 @Deprecated API ===
+
+    @Test
+    @DisplayName("C-13: 禁止使用 @Deprecated API")
+    void should_not_use_deprecated_api() {
+        ArchRuleDefinition.noClasses()
+                .that().resideInAPackage("org.smm.archetype..")
+                .and().resideOutsideOfPackage("..support.basic..")
+                .should().dependOnClassesThat()
+                .areAnnotatedWith(Deprecated.class)
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === M-10: 业务模块间零循环依赖 ===
+
+    @Test
+    @DisplayName("M-10: 业务模块间零循环依赖（ArchUnit slices 独立检测）")
+    void modules_should_be_free_of_cycles() {
+        // 只检测业务模块（auth/operationlog/systemconfig）之间的循环依赖
+        // 排除 shared/support/component/exception 等基础设施包，它们之间有合理的横向依赖
+        com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices()
+                .matching("org.smm.archetype.(auth|operationlog|systemconfig)..")
+                .should().beFreeOfCycles()
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === C-14: @Service 类字段必须 final ===
+
+    @Test
+    @DisplayName("C-14: @Service 类字段必须 final — 确保使用构造器注入")
+    void service_fields_should_be_final() {
+        ArchRuleDefinition.classes()
+                .that().areAnnotatedWith("org.springframework.stereotype.Service")
+                .and().resideInAPackage("org.smm.archetype..")
+                .should(new ArchCondition<JavaClass>("have no non-final instance fields") {
+                    @Override
+                    public void check(JavaClass clazz, ConditionEvents events) {
+                        for (var field : clazz.getFields()) {
+                            if (field.getModifiers().contains(JavaModifier.STATIC)) continue;
+                            if (field.getModifiers().contains(JavaModifier.FINAL)) continue;
+                            events.add(SimpleConditionEvent.violated(field,
+                                field.getFullName() + " is not final in @Service class "
+                                + clazz.getSimpleName()));
+                        }
+                    }
+                })
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === C-15: Utility 类方法必须 static ===
+
+    @Test
+    @DisplayName("C-15: Utility 类方法必须 static")
+    void utility_class_methods_should_be_static() {
+        ArchRuleDefinition.methods()
+                .that().arePublic()
+                .and().areDeclaredInClassesThat()
+                .haveSimpleNameEndingWith("Utils")
+                .and().areDeclaredInClassesThat()
+                .resideInAPackage("org.smm.archetype..")
+                // 排除 Spring 回调方法（如 setApplicationContext）
+                .and().doNotHaveName("setApplicationContext")
+                .should().beStatic()
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
+
+    // === C-16: Logger 字段必须是 private static final ===
+
+    @Test
+    @DisplayName("C-16: SLF4J Logger 字段必须是 private static final")
+    void logger_fields_should_be_private_static_final() {
+        ArchRuleDefinition.fields()
+                .that().haveRawType(org.slf4j.Logger.class)
+                .and().areDeclaredInClassesThat()
+                .resideInAPackage("org.smm.archetype..")
+                .and().areDeclaredInClassesThat()
+                .resideOutsideOfPackage("..support.basic..")
+                .should().bePrivate()
+                .andShould().beStatic()
+                .andShould().beFinal()
+                .allowEmptyShould(true)
+                .check(importedClasses);
+    }
 }

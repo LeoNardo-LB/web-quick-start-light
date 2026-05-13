@@ -119,4 +119,29 @@ class TestConventionComplianceUTest extends UnitTestBase {
                 .as("ETest（端到端测试）中不应使用 @Mock，应使用真实依赖")
                 .isEmpty();
     }
+
+    // === T-06: 测试类禁止 Thread.sleep ===
+
+    @Test
+    @DisplayName("T-06: 测试类禁止 Thread.sleep — 使用 Awaitility 或 CountDownLatch")
+    @org.junit.jupiter.api.Disabled("启用后需清理现有使用，当前保留为代码审查检查点")
+    void test_classes_should_not_use_thread_sleep() {
+        List<String> violations = SourceScanner.scanTestSource(
+                p -> p.getFileName().toString().endsWith(".java")
+                        && !p.getFileName().toString().contains("TestConventionCompliance"),
+                lines -> {
+                    for (String line : lines) {
+                        if (!SourceScanner.isCommentLine(line)
+                                && !SourceScanner.isImportLine(line)
+                                && line.contains("Thread.sleep")) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+        );
+        assertThat(violations)
+                .describedAs("测试类不应使用 Thread.sleep，请使用 Awaitility 或 CountDownLatch")
+                .isEmpty();
+    }
 }

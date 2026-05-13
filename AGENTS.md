@@ -145,7 +145,7 @@ mvn clean verify
 | `CodingConventionComplianceUTest.java` | C-01~C-07 | ArchUnit API + SourceScanner |
 | `ModuleArchitectureComplianceUTest.java` | M-01~M-09 | ArchUnit API |
 | `SpringConfigComplianceUTest.java` | S-01 | ArchUnit API |
-| `TestConventionComplianceUTest.java` | T-01~T-05 | SourceScanner |
+| `TestConventionComplianceUTest.java` | T-01~T-06 | SourceScanner |
 | `ArchitectureComplianceUTest.java` | 四层架构合规（6 条规则） | ArchUnit API |
 | `NoDataAnnotationUTest.java` | 全项目禁止 `@Data` | SourceScanner |
 | `NoValueInjectionUTest.java` | 禁止 `@Value` 注入 | SourceScanner |
@@ -165,6 +165,15 @@ mvn clean verify
 | C-05 | 禁止 Lombok `@With` | 用 `@Builder` 的 `withXxx()` 代替 |
 | C-06 | facade 包下 VO/DTO 必须用 record | 见"Record 规范"第 11 条 |
 | C-07 | Properties/Configure 类禁止 `@Data` | 用 `@Getter` + `@Setter` |
+| C-08 | 禁止 @Autowired 字段注入 | 使用构造器注入 + @RequiredArgsConstructor |
+| C-09 | 禁止抛出泛型异常 | 必须使用 BizException/ClientException/SysException + ErrorCode |
+| C-10 | Controller 返回值必须 BaseResult/BasePageResult | 统一响应包装 |
+| C-11 | 非 DO 类禁止 MyBatis-Plus 持久化注解 | 仅 DO（infrastructure/）可使用 @TableName/@TableId 等 |
+| C-12 | 禁止 java.util.logging | 统一使用 SLF4J (@Slf4j) |
+| C-13 | 禁止使用 @Deprecated API | 避免使用已废弃 API |
+| C-14 | @Service 类字段必须 final | 确保使用构造器注入 |
+| C-15 | Utility 类方法必须 static | 防止工具类被实例化 |
+| C-16 | Logger 字段必须是 private static final | SLF4J Logger 规范 |
 
 ### 模块架构（M-01~M-09）
 
@@ -179,6 +188,7 @@ mvn clean verify
 | M-07 | 模块间不得直接访问其他模块的 internal/ 包 | 模块边界隔离 |
 | M-08 | Facade 接口不得依赖 MyBatis-Plus 类型 | 公开 API 框架无关 |
 | M-09 | 业务模块间通过根包 Facade 接口通信 | 模块间解耦 |
+| M-10 | 业务模块间零循环依赖 | slices 独立检测，双保险（Modulith + ArchUnit） |
 
 ### Spring 配置（S-01）
 
@@ -194,6 +204,7 @@ mvn clean verify
 | T-02 | UTest 禁止 `@SpringBootTest` | 纯单元测试不启动 Spring 上下文 |
 | T-03 | ITest 禁止 `@Mock` | 集成测试使用真实依赖，不用 Mockito mock |
 | T-05 | ETest 禁止 `@Mock` | 端到端测试使用真实依赖 |
+| T-06 | 测试类禁止 Thread.sleep | 使用 Awaitility 或 CountDownLatch（@Disabled 检查点） |
 
 ### 新增规则注意事项
 
