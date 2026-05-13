@@ -1,0 +1,956 @@
+2026-05-13 22:40:46.843 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1107282 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:40:46.845 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:40:46.845 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:40:48.754 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:40:48.764 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:40:48.765 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:40:48.787 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1829 ms
+2026-05-13 22:40:49.153 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:40:49.353 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:40:49.486 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:40:50.484 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:40:50.813 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:40:50.990 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@16ca4532
+2026-05-13 22:40:50.994 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:40:51.173 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'databaseType' defined in class path resource [org/springframework/modulith/events/jdbc/JdbcEventPublicationAutoConfiguration.class]: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+2026-05-13 22:40:51.177 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:40:51.194 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:40:51.247 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:29)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:40:51.254 | quickstart-light | main | - | INFO  | i.o.sdk.logs.SdkLoggerProvider | Calling shutdown() multiple times.
+2026-05-13 22:40:51.255 | quickstart-light | main | - | INFO  | i.o.e.internal.http.HttpExporter | Calling shutdown() multiple times.
+2026-05-13 22:40:51.255 | quickstart-light | main | - | INFO  | i.o.sdk.trace.SdkTracerProvider | Calling shutdown() multiple times.
+2026-05-13 22:40:51.255 | quickstart-light | main | - | INFO  | i.o.e.internal.http.HttpExporter | Calling shutdown() multiple times.
+2026-05-13 22:40:51.260 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Stopping service [Tomcat]
+2026-05-13 22:40:51.273 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:40:51.287 | quickstart-light | main | - | ERROR | o.s.boot.SpringApplication | Application run failedorg.springframework.beans.factory.BeanCreationException: Error creating bean with name 'databaseType' defined in class path resource [org/springframework/modulith/events/jdbc/JdbcEventPublicationAutoConfiguration.class]: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:645)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1362)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1194)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:993)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:620)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:29)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:183)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:72)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:152)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653)
+	... 26 common frames omitted
+Caused by: java.lang.IllegalArgumentException: Unsupported database type: SQLite
+	at org.springframework.modulith.events.jdbc.DatabaseType.lambda$from$1(DatabaseType.java:128)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at org.springframework.modulith.events.jdbc.DatabaseType.from(DatabaseType.java:128)
+	at org.springframework.modulith.events.jdbc.JdbcEventPublicationAutoConfiguration.databaseType(JdbcEventPublicationAutoConfiguration.java:55)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:155)
+	... 29 common frames omitted
+
+2026-05-13 22:43:35.220 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1115996 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:43:35.222 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:43:35.223 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:43:36.553 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:43:36.561 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:43:36.562 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:43:36.579 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1299 ms
+2026-05-13 22:43:36.854 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:43:36.947 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:43:37.023 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:43:37.629 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:43:37.886 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:43:38.027 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@25cef4b3
+2026-05-13 22:43:38.028 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:43:38.163 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'databaseType' defined in class path resource [org/springframework/modulith/events/jdbc/JdbcEventPublicationAutoConfiguration.class]: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+2026-05-13 22:43:38.168 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:43:38.192 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:43:38.242 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:29)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:43:38.246 | quickstart-light | main | - | INFO  | i.o.sdk.logs.SdkLoggerProvider | Calling shutdown() multiple times.
+2026-05-13 22:43:38.246 | quickstart-light | main | - | INFO  | i.o.e.internal.http.HttpExporter | Calling shutdown() multiple times.
+2026-05-13 22:43:38.246 | quickstart-light | main | - | INFO  | i.o.sdk.trace.SdkTracerProvider | Calling shutdown() multiple times.
+2026-05-13 22:43:38.247 | quickstart-light | main | - | INFO  | i.o.e.internal.http.HttpExporter | Calling shutdown() multiple times.
+2026-05-13 22:43:38.250 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Stopping service [Tomcat]
+2026-05-13 22:43:38.261 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:43:38.273 | quickstart-light | main | - | ERROR | o.s.boot.SpringApplication | Application run failedorg.springframework.beans.factory.BeanCreationException: Error creating bean with name 'databaseType' defined in class path resource [org/springframework/modulith/events/jdbc/JdbcEventPublicationAutoConfiguration.class]: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:645)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1362)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1194)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:993)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:620)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:29)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:183)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:72)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:152)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653)
+	... 26 common frames omitted
+Caused by: java.lang.IllegalArgumentException: Unsupported database type: SQLite
+	at org.springframework.modulith.events.jdbc.DatabaseType.lambda$from$1(DatabaseType.java:128)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at org.springframework.modulith.events.jdbc.DatabaseType.from(DatabaseType.java:128)
+	at org.springframework.modulith.events.jdbc.JdbcEventPublicationAutoConfiguration.databaseType(JdbcEventPublicationAutoConfiguration.java:55)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:155)
+	... 29 common frames omitted
+
+2026-05-13 22:44:26.278 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1119177 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:44:26.281 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:44:26.281 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:44:28.716 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:44:28.725 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:44:28.725 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:44:28.741 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 2383 ms
+2026-05-13 22:44:29.305 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:44:29.518 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:44:29.719 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:44:30.773 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:44:30.995 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:44:31.218 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@5bb661e0
+2026-05-13 22:44:31.219 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:44:31.379 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:44:31.447 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-13 22:44:31.457 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:44:31.483 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:44:31.542 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:34)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:44:31.576 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:44:31.603 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:44:40.320 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1119966 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:44:40.322 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:44:40.323 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:44:41.472 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:44:41.480 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:44:41.481 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:44:41.497 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1127 ms
+2026-05-13 22:44:41.717 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:44:41.790 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:44:41.851 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:44:42.382 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:44:42.520 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:44:42.620 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@36e11b60
+2026-05-13 22:44:42.621 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:44:42.732 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:44:42.771 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-13 22:44:42.774 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:44:42.784 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:44:42.823 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:34)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:44:42.836 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:44:42.846 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:44:53.741 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1120436 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:44:53.743 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:44:53.743 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:44:54.914 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:44:54.922 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:44:54.922 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:44:54.937 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1137 ms
+2026-05-13 22:44:55.150 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:44:55.226 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:44:55.282 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:44:55.780 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:44:55.902 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:44:55.997 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@7bbc11ed
+2026-05-13 22:44:55.998 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:44:56.096 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:44:56.133 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-13 22:44:56.136 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:44:56.161 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:44:56.197 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:34)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:44:56.212 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:44:56.220 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:06.346 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1120862 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:45:06.348 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:45:06.348 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:45:07.595 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:45:07.604 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:45:07.604 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:45:07.626 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1227 ms
+2026-05-13 22:45:07.852 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:45:07.934 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:45:08.023 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:45:08.578 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:45:08.730 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:45:08.868 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@76d220eb
+2026-05-13 22:45:08.870 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:45:08.994 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:45:09.054 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-13 22:45:09.058 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:45:09.067 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:45:09.112 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:34)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:45:09.125 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:45:09.136 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:18.421 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1121263 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:45:18.422 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:45:18.423 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:45:19.667 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:45:19.679 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:45:19.680 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:45:19.697 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1219 ms
+2026-05-13 22:45:19.971 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:45:20.031 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:45:20.532 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:45:20.654 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:45:20.729 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@25630ede
+2026-05-13 22:45:20.730 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:45:20.854 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:45:20.895 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-13 22:45:20.898 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:45:20.926 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:45:20.935 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:45:20.944 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:31.700 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1121682 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:45:31.702 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:45:31.702 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:45:32.999 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:45:33.008 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:45:33.008 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:45:33.026 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1267 ms
+2026-05-13 22:45:33.240 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:45:33.311 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:45:33.366 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:45:33.840 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:45:33.975 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:45:34.050 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@1de6f29d
+2026-05-13 22:45:34.051 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:45:34.165 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:45:34.206 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-13 22:45:34.210 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:45:34.214 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:45:34.253 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:34)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:45:34.266 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:45:34.274 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:43.330 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1122072 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:45:43.332 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:45:43.332 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:45:44.458 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:45:44.465 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:45:44.465 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:45:44.481 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1097 ms
+2026-05-13 22:45:44.673 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:45:44.743 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:45:44.801 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:45:45.311 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:45:45.472 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:45:45.574 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@76d220eb
+2026-05-13 22:45:45.576 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:45:45.686 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:45:45.729 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-13 22:45:45.732 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:45:45.738 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:45:45.788 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:34)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:45:45.805 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:45:45.819 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:55.361 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1122472 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:45:55.363 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:45:55.364 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:45:56.543 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:45:56.550 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:45:56.550 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:45:56.564 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1140 ms
+2026-05-13 22:45:56.773 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:45:56.846 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:45:56.899 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:45:57.372 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:45:57.509 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:45:57.594 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@29dcad7e
+2026-05-13 22:45:57.595 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:45:57.765 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:45:57.805 | quickstart-light | main | - | WARN  | o.s.b.w.s.s.c.AnnotationConfigServletWebServerApplicationContext | Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-13 22:45:57.808 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:45:57.819 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.
+2026-05-13 22:45:57.856 | quickstart-light | main | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.invokeCustomDestroyMethod(DisposableBeanAdapter.java:312)
+	at org.springframework.beans.factory.support.DisposableBeanAdapter.destroy(DisposableBeanAdapter.java:247)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroyBean(DefaultSingletonBeanRegistry.java:795)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingleton(DefaultSingletonBeanRegistry.java:745)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingleton(DefaultListableBeanFactory.java:1500)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.destroySingletons(DefaultSingletonBeanRegistry.java:704)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.destroySingletons(DefaultListableBeanFactory.java:1493)
+	at org.springframework.context.support.AbstractApplicationContext.destroyBeans(AbstractApplicationContext.java:1225)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:643)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:34)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 27 common frames omitted
+
+2026-05-13 22:45:57.868 | quickstart-light | main | - | INFO  | o.s.b.a.l.ConditionEvaluationReportLogger | 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-13 22:45:57.876 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:46:18.945 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Starting WebStartLightApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 1123235 (/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/app/target/app-0.0.1-SNAPSHOT.jar started by leonardo123 in /home/leonardo123/develop/code/mine/archetype/web-quick-start-light)
+2026-05-13 22:46:18.947 | quickstart-light | main | - | DEBUG | o.s.a.WebStartLightApplication | Running with Spring Boot v4.0.2, Spring v7.0.3
+2026-05-13 22:46:18.948 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | The following 1 profile is active: "dev"
+2026-05-13 22:46:20.121 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat initialized with port 9201 (http)
+2026-05-13 22:46:20.129 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardService | Starting service [Tomcat]
+2026-05-13 22:46:20.129 | quickstart-light | main | - | INFO  | o.a.catalina.core.StandardEngine | Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-05-13 22:46:20.146 | quickstart-light | main | - | INFO  | o.s.b.w.c.s.WebApplicationContextInitializer | Root WebApplicationContext: initialization completed in 1139 ms
+2026-05-13 22:46:20.369 | quickstart-light | main | - | INFO  | i.m.c.i.push.PushMeterRegistry | Publishing metrics for OtlpMeterRegistry every 1m to http://localhost:4318/v1/metrics with resource attributes {service.name=quickstart-light}
+2026-05-13 22:46:20.459 | quickstart-light | main | - | DEBUG | o.s.a.shared.web.ContextFillFilter | Filter 'contextFillFilter' configured for use
+2026-05-13 22:46:20.514 | quickstart-light | main | - | WARN  | c.b.m.e.s.MybatisSqlSessionFactoryBean | Property 'mapperLocations' was specified but matching resources are not found.
+2026-05-13 22:46:21.034 | quickstart-light | main | - | INFO  | o.s.a.c.oss.LocalOssComponent | 本地存储根目录: /home/leonardo123/develop/code/mine/archetype/web-quick-start-light/uploads
+2026-05-13 22:46:21.190 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Starting...
+2026-05-13 22:46:21.275 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.pool.HikariPool | HikariPool-1 - Added connection org.sqlite.jdbc4.JDBC4Connection@69862a1
+2026-05-13 22:46:21.276 | quickstart-light | main | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Start completed.
+2026-05-13 22:46:21.386 | quickstart-light | main | - | INFO  | o.s.b.a.e.web.EndpointLinksResolver | Exposing 3 endpoints beneath base path '/actuator'
+2026-05-13 22:46:21.435 | quickstart-light | main | - | INFO  | o.s.boot.tomcat.TomcatWebServer | Tomcat started on port 9201 (http) with context path '/quickstart-light'
+2026-05-13 22:46:21.445 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Started WebStartLightApplication in 3.081 seconds (process running for 3.437)
+2026-05-13 22:46:21.489 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | [quickstart-light]应用启动成功!
+2026-05-13 22:46:21.490 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Request URL: http://127.0.0.1:9201/quickstart-light
+2026-05-13 22:46:21.490 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | Swagger URL: http://127.0.0.1:9201/quickstart-light/openapi-doc.html
+2026-05-13 22:46:21.490 | quickstart-light | main | - | INFO  | o.s.a.WebStartLightApplication | API-Doc URL: http://127.0.0.1:9201/quickstart-light/v3/api-docs
+2026-05-13 22:46:21.491 | quickstart-light | main | - | WARN  | o.s.c.events.SpringDocAppInitializer | SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-05-13 22:46:21.491 | quickstart-light | main | - | WARN  | o.s.c.events.SpringDocAppInitializer | SpringDoc /openapi-doc.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-05-13 22:46:21.492 | quickstart-light | main | - | INFO  | o.s.a.s.logging.LoggingConfigure | [CONFIG] 日志配置验证完成 | 路径:/home/leonardo123/develop/code/mine/archetype/web-quick-start-light/.logs
+2026-05-13 22:46:48.053 | quickstart-light | SpringApplicationShutdownHook | - | WARN  | i.m.registry.otlp.OtlpMeterRegistry | Failed to publish metrics to OTLP receiver (context: url=http://localhost:4318/v1/metrics, resource-attributes={service.name=quickstart-light})java.lang.Exception: java.net.ConnectException: Connection refused
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:61)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.publish(OtlpMeterRegistry.java:190)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.publishSafelyOrSkipIfInProgress(PushMeterRegistry.java:63)
+	at io.micrometer.core.instrument.push.PushMeterRegistry.close(PushMeterRegistry.java:143)
+	at io.micrometer.registry.otlp.OtlpMeterRegistry.close(OtlpMeterRegistry.java:305)
+	at org.springframework.boot.micrometer.metrics.autoconfigure.MetricsAutoConfiguration$MeterRegistryCloser.onApplicationEvent(MetricsAutoConfiguration.java:116)
+	at org.springframework.boot.micrometer.metrics.autoconfigure.MetricsAutoConfiguration$MeterRegistryCloser.onApplicationEvent(MetricsAutoConfiguration.java:100)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:180)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:173)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:151)
+	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:447)
+	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:380)
+	at org.springframework.context.support.AbstractApplicationContext.doClose(AbstractApplicationContext.java:1169)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.doClose(ServletWebServerApplicationContext.java:176)
+	at org.springframework.context.support.AbstractApplicationContext.close(AbstractApplicationContext.java:1132)
+	at org.springframework.boot.SpringApplicationShutdownHook.closeAndWait(SpringApplicationShutdownHook.java:147)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.boot.SpringApplicationShutdownHook.run(SpringApplicationShutdownHook.java:116)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+Caused by: java.net.ConnectException: Connection refused
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:639)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:550)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:594)
+	at java.base/java.net.Socket.connect(Socket.java:659)
+	at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:161)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:516)
+	at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:604)
+	at java.base/sun.net.www.http.HttpClient.<init>(HttpClient.java:276)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:380)
+	at java.base/sun.net.www.http.HttpClient.New(HttpClient.java:393)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getNewHttpClient(HttpURLConnection.java:1030)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect0(HttpURLConnection.java:963)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.plainConnect(HttpURLConnection.java:899)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.connect(HttpURLConnection.java:872)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream0(HttpURLConnection.java:1163)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getOutputStream(HttpURLConnection.java:1127)
+	at io.micrometer.core.ipc.http.HttpUrlConnectionSender.send(HttpUrlConnectionSender.java:99)
+	at io.micrometer.core.ipc.http.HttpSender$Request$Builder.send(HttpSender.java:306)
+	at io.micrometer.registry.otlp.OtlpHttpMetricsSender.send(OtlpHttpMetricsSender.java:58)
+	... 18 common frames omitted
+
+2026-05-13 22:46:48.056 | quickstart-light | SpringApplicationShutdownHook | - | INFO  | o.s.boot.tomcat.GracefulShutdown | Commencing graceful shutdown. Waiting for active requests to complete
+2026-05-13 22:46:48.063 | quickstart-light | tomcat-shutdown | - | INFO  | o.s.boot.tomcat.GracefulShutdown | Graceful shutdown complete
+2026-05-13 22:46:48.069 | quickstart-light | SpringApplicationShutdownHook | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown initiated...
+2026-05-13 22:46:48.070 | quickstart-light | SpringApplicationShutdownHook | - | INFO  | com.zaxxer.hikari.HikariDataSource | HikariPool-1 - Shutdown completed.

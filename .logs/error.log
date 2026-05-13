@@ -1,0 +1,200 @@
+2026-05-13 22:40:51.287 | quickstart-light | main | - | ERROR | o.s.boot.SpringApplication | Application run failedorg.springframework.beans.factory.BeanCreationException: Error creating bean with name 'databaseType' defined in class path resource [org/springframework/modulith/events/jdbc/JdbcEventPublicationAutoConfiguration.class]: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:645)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1362)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1194)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:993)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:620)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:29)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:183)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:72)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:152)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653)
+	... 26 common frames omitted
+Caused by: java.lang.IllegalArgumentException: Unsupported database type: SQLite
+	at org.springframework.modulith.events.jdbc.DatabaseType.lambda$from$1(DatabaseType.java:128)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at org.springframework.modulith.events.jdbc.DatabaseType.from(DatabaseType.java:128)
+	at org.springframework.modulith.events.jdbc.JdbcEventPublicationAutoConfiguration.databaseType(JdbcEventPublicationAutoConfiguration.java:55)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:155)
+	... 29 common frames omitted
+
+2026-05-13 22:43:38.273 | quickstart-light | main | - | ERROR | o.s.boot.SpringApplication | Application run failedorg.springframework.beans.factory.BeanCreationException: Error creating bean with name 'databaseType' defined in class path resource [org/springframework/modulith/events/jdbc/JdbcEventPublicationAutoConfiguration.class]: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:645)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1362)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1194)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:993)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:620)
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.smm.archetype.WebStartLightApplication.main(WebStartLightApplication.java:29)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:106)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40)
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.modulith.events.jdbc.DatabaseType]: Factory method 'databaseType' threw exception with message: Unsupported database type: SQLite
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:183)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:72)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:152)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653)
+	... 26 common frames omitted
+Caused by: java.lang.IllegalArgumentException: Unsupported database type: SQLite
+	at org.springframework.modulith.events.jdbc.DatabaseType.lambda$from$1(DatabaseType.java:128)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at org.springframework.modulith.events.jdbc.DatabaseType.from(DatabaseType.java:128)
+	at org.springframework.modulith.events.jdbc.JdbcEventPublicationAutoConfiguration.databaseType(JdbcEventPublicationAutoConfiguration.java:55)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:155)
+	... 29 common frames omitted
+
+2026-05-13 22:44:31.603 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:44:42.846 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:44:56.220 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:09.136 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:20.944 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:34.274 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:45.819 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+
+2026-05-13 22:45:57.876 | quickstart-light | main | - | ERROR | o.s.b.d.LoggingFailureAnalysisReporter | 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9201 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9201 or configure this application to listen on another port.
+

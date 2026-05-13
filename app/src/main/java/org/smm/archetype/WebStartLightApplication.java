@@ -12,7 +12,12 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @Slf4j
 @EnableAspectJAutoProxy
-@SpringBootApplication
+@SpringBootApplication(excludeName = {
+        "org.springframework.modulith.events.config.EventPublicationAutoConfiguration",
+        "org.springframework.modulith.events.jdbc.JdbcEventPublicationAutoConfiguration",
+        "org.springframework.modulith.events.config.EventExternalizationAutoConfiguration",
+        "org.springframework.modulith.moments.autoconfigure.MomentsAutoConfiguration"
+})
 @EnableConfigurationProperties(AppInfoProperties.class)
 @RequiredArgsConstructor
 @org.mybatis.spring.annotation.MapperScan(basePackages = {
