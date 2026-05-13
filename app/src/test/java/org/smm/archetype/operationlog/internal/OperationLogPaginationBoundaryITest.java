@@ -8,6 +8,8 @@ import org.smm.archetype.support.IntegrationTestBase;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.smm.archetype.operationlog.internal.infrastructure.OperationLogDO;
+import org.smm.archetype.operationlog.internal.infrastructure.OperationLogMapper;
 
 import java.time.Instant;
 

@@ -2,7 +2,9 @@ package org.smm.archetype.systemconfig.internal;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.smm.archetype.shared.event.DomainEventPublisher;
 import org.smm.archetype.shared.pagination.PageResult;
+import org.smm.archetype.systemconfig.ConfigChangedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import java.util.List;
 public class SystemConfigService {
 
     private final SystemConfigRepository systemConfigRepository;
+    private final DomainEventPublisher eventPublisher;
 
     /**
      * 获取所有配置分组（返回枚举值，由 Facade 层转换为 VO）
@@ -52,9 +55,13 @@ public class SystemConfigService {
         log.info("Updating config: {}", command.configKey());
         SystemConfig config = systemConfigRepository.findByConfigKey(ConfigKey.of(command.configKey()))
                 .orElseThrow(() -> new IllegalArgumentException("Config not found: " + command.configKey()));
+        String oldValue = config.getConfigValue() != null ? config.getConfigValue().value() : null;
         config.updateValue(ConfigValue.of(command.configValue()));
         systemConfigRepository.save(config);
         log.info("Config updated: {}", command.configKey());
+
+        // 发布配置变更事件
+        eventPublisher.publish(ConfigChangedEvent.of(command.configKey(), oldValue, command.configValue()));
     }
 
     /**

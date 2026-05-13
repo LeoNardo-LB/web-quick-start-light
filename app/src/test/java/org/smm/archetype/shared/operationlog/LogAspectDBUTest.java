@@ -174,7 +174,7 @@ class LogAspectDBUTest {
     @Test
     @DisplayName("无参构造（无 OperationLogWriter）时不抛 NPE")
     void should_not_throw_npe_with_no_arg_constructor() throws Throwable {
-        logAspect = new LogAspect(); // 无 OperationLogWriter
+        logAspect = new LogAspect(null); // 无 OperationLogWriter
         mockJoinPoint("dummySuccessMethod", new Class[] {String.class}, new Object[] {"input"}, "ok");
 
         Object result = logAspect.doAround(joinPoint);

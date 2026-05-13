@@ -3,22 +3,25 @@ package org.smm.archetype.systemconfig.internal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import org.smm.archetype.support.UnitTestBase;
+import org.smm.archetype.systemconfig.internal.infrastructure.SystemConfigConverter;
+import org.smm.archetype.systemconfig.internal.infrastructure.SystemConfigDO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("SystemConfigConverter")
 class SystemConfigConverterUTest extends UnitTestBase {
 
-    private final SystemConfigConverter converter = new SystemConfigConverter();
+    private final SystemConfigConverter converter = Mappers.getMapper(SystemConfigConverter.class);
 
     // =========================================================================
-    // toDataObject
+    // toDO
     // =========================================================================
 
     @Nested
-    @DisplayName("toDataObject")
-    class ToDataObject {
+    @DisplayName("toDO")
+    class ToDO {
 
         @Test
         @DisplayName("正常转换 — 所有字段非 null")
@@ -37,7 +40,7 @@ class SystemConfigConverterUTest extends UnitTestBase {
             config.setSort(10);
 
             // when
-            SystemConfigDO configDO = converter.toDataObject(config);
+            SystemConfigDO configDO = converter.toDO(config);
 
             // then
             assertThat(configDO).isNotNull();
@@ -62,7 +65,7 @@ class SystemConfigConverterUTest extends UnitTestBase {
             config.setDescription("仅描述有值");
 
             // when
-            SystemConfigDO configDO = converter.toDataObject(config);
+            SystemConfigDO configDO = converter.toDO(config);
 
             // then
             assertThat(configDO).isNotNull();
@@ -79,7 +82,7 @@ class SystemConfigConverterUTest extends UnitTestBase {
         @Test
         @DisplayName("输入 null 应返回 null")
         void should_return_null_when_input_is_null() {
-            SystemConfigDO configDO = converter.toDataObject(null);
+            SystemConfigDO configDO = converter.toDO(null);
 
             assertThat(configDO).isNull();
         }
@@ -146,6 +149,7 @@ class SystemConfigConverterUTest extends UnitTestBase {
             assertThat(config).isNotNull();
             assertThat(config.getId()).isEqualTo(2L);
             assertThat(config.getConfigKey()).isNull();
+            // MapStruct toConfigValue: null → ConfigValue.of(null) → ConfigValue("")（of 内部 null→""）
             assertThat(config.getConfigValue()).isNotNull();
             assertThat(config.getConfigValue().value()).isEmpty();
             assertThat(config.getValueType()).isNull();
@@ -173,7 +177,7 @@ class SystemConfigConverterUTest extends UnitTestBase {
     class RoundTrip {
 
         @Test
-        @DisplayName("toDataObject + toModel 往返应保持数据一致")
+        @DisplayName("toDO + toModel 往返应保持数据一致")
         void should_preserve_data_in_round_trip() {
             // given
             SystemConfig original = new SystemConfig();
@@ -189,7 +193,7 @@ class SystemConfigConverterUTest extends UnitTestBase {
             original.setSort(5);
 
             // when — Model → DO → Model
-            SystemConfigDO configDO = converter.toDataObject(original);
+            SystemConfigDO configDO = converter.toDO(original);
             SystemConfig restored = converter.toModel(configDO);
 
             // then

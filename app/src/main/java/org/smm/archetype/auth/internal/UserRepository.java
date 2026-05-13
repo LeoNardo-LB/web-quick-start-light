@@ -2,7 +2,7 @@ package org.smm.archetype.auth.internal;
 
 import java.util.Optional;
 
-interface UserRepository {
+public interface UserRepository {
 
     Optional<User> findByUsername(String username);
 }

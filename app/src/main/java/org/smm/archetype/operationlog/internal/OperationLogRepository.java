@@ -5,7 +5,7 @@ import org.smm.archetype.shared.pagination.PageResult;
 /**
  * 操作日志仓储接口
  */
-interface OperationLogRepository {
+public interface OperationLogRepository {
 
     /**
      * 分页查询操作日志

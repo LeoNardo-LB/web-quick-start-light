@@ -1,9 +1,12 @@
-package org.smm.archetype.operationlog.internal;
+package org.smm.archetype.operationlog.internal.infrastructure;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import org.smm.archetype.operationlog.internal.OperationLog;
+import org.smm.archetype.operationlog.internal.OperationLogPageQuery;
+import org.smm.archetype.operationlog.internal.OperationLogRepository;
 import org.smm.archetype.shared.pagination.PageResult;
 import org.springframework.stereotype.Repository;
 

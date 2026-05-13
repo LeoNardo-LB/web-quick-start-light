@@ -1,4 +1,4 @@
-package org.smm.archetype.operationlog.internal;
+package org.smm.archetype.operationlog.internal.infrastructure;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ import org.smm.archetype.shared.dal.BaseDO;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @TableName("operation_log")
-class OperationLogDO extends BaseDO {
+public class OperationLogDO extends BaseDO {
     private String traceId;
     private String userId;
     private String module;

@@ -1,7 +1,9 @@
-package org.smm.archetype.auth.internal;
+package org.smm.archetype.auth.internal.infrastructure;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import org.smm.archetype.auth.internal.User;
+import org.smm.archetype.auth.internal.UserRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

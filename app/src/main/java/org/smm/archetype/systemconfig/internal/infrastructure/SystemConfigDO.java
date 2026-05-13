@@ -1,4 +1,4 @@
-package org.smm.archetype.systemconfig.internal;
+package org.smm.archetype.systemconfig.internal.infrastructure;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;

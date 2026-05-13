@@ -1,4 +1,4 @@
-package org.smm.archetype.auth.internal;
+package org.smm.archetype.auth.internal.infrastructure;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;

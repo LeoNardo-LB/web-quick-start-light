@@ -1,5 +1,10 @@
-package org.smm.archetype.systemconfig.internal;
+package org.smm.archetype.systemconfig.internal.infrastructure;
 
+import org.smm.archetype.systemconfig.internal.ConfigGroup;
+import org.smm.archetype.systemconfig.internal.ConfigKey;
+import org.smm.archetype.systemconfig.internal.SystemConfig;
+import org.smm.archetype.systemconfig.internal.SystemConfigPageQuery;
+import org.smm.archetype.systemconfig.internal.SystemConfigRepository;
 import org.smm.archetype.shared.pagination.PageResult;
 import org.springframework.stereotype.Repository;
 
@@ -48,7 +53,7 @@ public class SystemConfigRepositoryImpl implements SystemConfigRepository {
 
     @Override
     public SystemConfig save(SystemConfig config) {
-        SystemConfigDO configDO = converter.toDataObject(config);
+        SystemConfigDO configDO = converter.toDO(config);
         if (configDO.getId() == null) {
             systemConfigMapper.insert(configDO);
             config.setId(configDO.getId());

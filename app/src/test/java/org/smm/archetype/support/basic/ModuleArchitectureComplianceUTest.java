@@ -33,12 +33,15 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
     }
 
     // === M-01: common 模块零 Spring 依赖 ===
+    // 注意: package-info.java 中的 @ApplicationModule 是 Modulith 基础设施元数据，
+    // 不属于业务代码对 Spring 的依赖，因此排除 package-info。
 
     @Test
     @DisplayName("M-01: common 模块（exception 包）不得依赖 Spring Framework")
     void common_module_should_not_depend_on_spring() {
         ArchRuleDefinition.noClasses()
                 .that().resideInAPackage("..exception..")
+                .and().doNotHaveSimpleName("package-info")
                 .should().dependOnClassesThat()
                 .resideInAPackage("org.springframework..")
                 .allowEmptyShould(true)
@@ -221,23 +224,22 @@ class ModuleArchitectureComplianceUTest extends UnitTestBase {
                 .collect(Collectors.toList());
     }
 
-    // === M-05: 模块 internal/ 包零 Spring 依赖（Controller/Service/Converter/RepositoryImpl/FacadeImpl/测试类除外） ===
+    // === M-05: 模块 internal/ 包零 Spring 依赖（infrastructure/ 包 + Controller/Service/RepositoryImpl/FacadeImpl/EventHandler/测试类除外） ===
 
     @Test
-    @DisplayName("M-05: 模块 internal/ 包零 Spring 依赖（Controller/Service/Converter/RepositoryImpl/FacadeImpl/测试类除外）")
+    @DisplayName("M-05: 模块 internal/ 包零 Spring 依赖（infrastructure/ 包 + Controller/Service/RepositoryImpl/FacadeImpl/EventHandler/测试类除外）")
     void module_internal_should_not_depend_on_spring_except_allowed() {
         List<String> modules = discoverBusinessModules();
 
         for (String module : modules) {
-            // internal 包中，排除需要 Spring 的四层架构组件和测试类
             ArchRuleDefinition.noClasses()
                     .that().resideInAPackage("..archetype." + module + ".internal..")
+                    .and().resideOutsideOfPackage("..archetype." + module + ".internal.infrastructure..")
                     .and().haveSimpleNameNotEndingWith("Controller")
                     .and().haveSimpleNameNotEndingWith("Service")
-                    .and().haveSimpleNameNotEndingWith("Converter")
                     .and().haveSimpleNameNotEndingWith("RepositoryImpl")
                     .and().haveSimpleNameNotEndingWith("FacadeImpl")
-                    .and().haveSimpleNameNotEndingWith("Configure")
+                    .and().haveSimpleNameNotEndingWith("EventHandler")
                     .and(new DescribedPredicate<>("is not a test class") {
                         @Override
                         public boolean test(JavaClass javaClass) {

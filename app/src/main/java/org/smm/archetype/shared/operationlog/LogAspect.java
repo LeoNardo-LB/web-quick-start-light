@@ -40,8 +40,11 @@ public class LogAspect {
     private static final String                TRUNCATED_SUFFIX = "...(truncated)";
     private static final Map<Class<?>, Logger> LOGGER_MAP       = new ConcurrentHashMap<>();
 
-    @Autowired(required = false)
-    private OperationLogWriter operationLogWriter;
+    private final OperationLogWriter operationLogWriter;
+
+    public LogAspect(@Autowired(required = false) OperationLogWriter operationLogWriter) {
+        this.operationLogWriter = operationLogWriter;
+    }
 
     private static String toSafeJson(Object obj) {
         if (obj == null)

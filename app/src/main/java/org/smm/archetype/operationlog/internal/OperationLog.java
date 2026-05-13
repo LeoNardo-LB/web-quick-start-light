@@ -16,7 +16,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class OperationLog {
+public class OperationLog {
 
     private Long id;
     private String traceId;
