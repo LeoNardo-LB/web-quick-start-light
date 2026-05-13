@@ -13,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ModulithComplianceUTest extends UnitTestBase {
 
     /**
-     * component 包来自外部 Maven 模块（components/*），不属于 app 内业务模块，
-     * 排除后 Modulith 不再将其视为独立模块，避免对 AuthComponent/CacheComponent 等
-     * 的跨模块引用报违规。
+     * component 和 exception 包来自外部 Maven 模块（components/*、common），
+     * 不属于 app 内业务模块，排除后 Modulith 不再将其视为独立模块。
      */
     private static final ApplicationModules MODULES = ApplicationModules.of(
             WebStartLightApplication.class,
             JavaClass.Predicates.resideInAPackage("org.smm.archetype.component..")
+                    .or(JavaClass.Predicates.resideInAPackage("org.smm.archetype.exception.."))
     );
 
     @Test
@@ -33,13 +33,13 @@ class ModulithComplianceUTest extends UnitTestBase {
     void should_verifyModuleNames() {
         assertThat(MODULES.stream().map(m -> m.getDisplayName()).toList())
                 .containsExactlyInAnyOrder(
-                        "Authentication", "Exception",
+                        "Authentication",
                         "Operation Log", "System Configuration", "Shared Cross-Cutting");
     }
 
     @Test
     @DisplayName("应验证所有模块均使用 @ApplicationModule 显式声明")
     void should_verifyAllModulesExplicitlyDeclared() {
-        assertThat(MODULES.stream().count()).isEqualTo(5);
+        assertThat(MODULES.stream().count()).isEqualTo(4);
     }
 }

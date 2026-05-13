@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
         displayName = "System Configuration",
-        allowedDependencies = {"shared", "exception"}
+        allowedDependencies = {"shared"}
 )
 package org.smm.archetype.systemconfig;
