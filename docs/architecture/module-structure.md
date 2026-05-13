@@ -347,13 +347,18 @@ org.smm.archetype/
 
 ### Modulith 边界验证（ModulithComplianceUTest）
 
-| 验证项 | 守护的约束 | 说明 |
-|-------|-----------|------|
-| `modules.verify()` | 模块边界验证 | Spring Modulith 自动检测模块间依赖违规 |
-| exception OPEN 模块声明 | exception 模块声明为 OPEN | 允许跨模块访问异常类 |
-| component OPEN 模块声明 | component 模块声明为 OPEN | 允许跨模块访问组件接口 |
+测试通过 `JavaClass.Predicates.resideInAPackage()` 排除外部 Maven 模块（`exception..`、`component..`），仅验证 4 个 app 内业务模块：
 
-> **注意**：SourceScanner 从 `PROJECT_ROOT` 递归遍历，自动覆盖 `app/`、`components/`、`common/` 的 `src/main/java` 和 `src/test/java`。排除 `/target/` 目录和 `/generated/` 包。块注释 `/* */` 内的代码不会被误判。
+| 模块 | 包 | 声明 |
+|------|------|------|
+| Authentication | `auth/` | `allowedDependencies = {"shared", "systemconfig"}` |
+| Operation Log | `operationlog/` | `allowedDependencies = {"shared", "auth"}` |
+| System Configuration | `systemconfig/` | `allowedDependencies = {"shared"}` |
+| Shared Cross-Cutting | `shared/` | `type = OPEN` |
+
+**排除策略**：`exception` 和 `component` 包来自外部 Maven 模块（common、components），不属于 app 内业务模块。`ModulithComplianceUTest` 通过 `ApplicationModules.of(Class, DescribedPredicate)` 排除这些包，Modulith 不将其视为模块，也不会检查对它们的依赖引用。
+
+**运行时兼容**：`@SpringBootApplication(excludeName=...)` 排除了 4 个 Modulith 自动配置（事件发布/JDBC 事件持久化/事件外部化/Moments），因为这些功能不支持 SQLite。
 
 ## Domain Event 架构
 
@@ -453,3 +458,4 @@ Phase 6 引入了领域事件机制，用于模块间的异步/同步通信，�
 | 2026-04-15 | `shared/logging/` 合并到 `shared/util/logging/`，统一 shared 下 aspect/util 两个维度 |
 | 2026-05-11 | `entity/api/` → `entity/base/`；`shared/util/context/` 修正为仅含 BizContext；中间件→组件措辞修正；MapStruct→手写 Converter |
 | 2026-05-13 | Phase 6+7 同步：MapStruct 迁移完成（@Mapper(config=CentralMapperConfig)替代手写@Component）；Domain Event 架构（shared/event/ + 模块根包 Event record）；infrastructure/ 两层分包；ArchUnit 规则扩展至 44 条（C-01~C-16/M-01~M-10/S-01/T-01~T-06/四层架构 6 条/全局禁止 3 条/Modulith 3 条）；移除已删除的 Configure 类 |
+| 2026-05-13 | Modulith 模块精简：exception/component 不再作为独立 Modulith 模块（package-info.java 删除），改为通过 JavaClass.Predicates.resideInAPackage() 排除外部 Maven 模块；模块数从 6 降为 4；@SpringBootApplication(excludeName) 排除 4 个不支持 SQLite 的 Modulith 自动配置 |

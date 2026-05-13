@@ -89,214 +89,52 @@ web-quick-start-light/                     (根 POM, packaging=pom)
 └── app/                                   (主应用, 依赖 common + 组件 component-*)
 ```
 
-> **注意**：app 模块内部只有业务模块（auth/operationlog/systemconfig）和 shared 两个顶层概念。所有公共基础设施按功能域自包含在 `shared/` 下：
-> - `shared/ratelimit/` — 限流（注解 + 切面 + 配置 + 属性）
-> - `shared/idempotent/` — 幂等（注解 + 切面 + Key 解析 + 配置）
-> - `shared/logging/` — 日志（配置 + 属性 + 过滤器 + 拦截器 + 工具）
-> - `shared/operationlog/` — 操作日志切面
-> - `shared/context/` — 业务上下文（BizContext）
-> - `shared/dal/` — 数据访问基础设施（BaseDO + TypeHandler + MetaObjectHandler）
-> - `shared/generated/` — 代码生成器
-> - `shared/mybatis/` — MyBatis-Plus 配置
-> - `shared/threadpool/` — 线程池配置
-> - `shared/web/` — Web 层基础设施（配置 + 过滤器 + 异常处理 + 测试端点）
-> - `shared/pagination/` + `shared/result/` — 分页与响应模型
->
-> 业务模块的专属配置在各模块 `internal/` 下（如 AuthConfigure、SystemConfigConfigure）。详见 [模块结构](docs/architecture/module-structure.md)。
+> app 模块内含业务模块（auth/operationlog/systemconfig）和 shared/ 两个顶层概念。shared/ 含 15 个自包含功能域（ratelimit/idempotent/logging/context/dal/…），详见 [模块结构](docs/architecture/module-structure.md)。
 
 ## 快速开始
 
 ```bash
-# 构建（跳过测试）
-mvn clean package -DskipTests
-
-# 运行全部测试
-mvn test
-
-# 仅单元测试（*UTest）
-mvn test -Dtest="*UTest"
-
-# 仅集成测试（*ITest）
-mvn test -Dtest="*ITest"
-
-# 启动应用（开发环境）—— 必须指定 -pl app
-mvn spring-boot:run -pl app
-
-# 启动应用（生产环境）
-scripts/start.sh prod
-
-# 停止应用
-scripts/stop.sh
-
-# 测试 + 覆盖率报告
-mvn clean verify
-# 报告：app/target/site/jacoco-aggregate/index.html
+mvn clean package -DskipTests          # 构建
+mvn spring-boot:run -pl app            # 启动（开发环境）
+mvn test -pl app                       # 全量测试
+mvn test -pl app -Dtest="*UTest"       # 仅单元测试
+mvn test -pl app -Dtest="*ITest"       # 仅集成测试
+mvn clean verify                       # 测试 + 覆盖率报告
 ```
 
-## ⛔ ArchUnit 守护规则（自动化合规检查）
+## ⛔ ArchUnit 守护规则
 
-> 以下 15 条规则由 ArchUnit + 源码扫描自动守护，位于 `app/src/test/java/org/smm/archetype/support/basic/` 下。
-> **所有规则均为 MUST（严格 FAIL），违反即 CI 红灯。** 修改相关代码前必须确保不引入违规。
+> 项目通过 ArchUnit + SourceScanner + Spring Modulith 自动守护架构约束，测试文件位于 `app/.../support/basic/` 下。所有规则均为 MUST，违反即 CI 红灯。
 
-### 测试文件与检测方式
+### 高频触犯红线
+- **禁止 `@Data`** → 用 `@Builder` + `@RequiredArgsConstructor`
+- **禁止 `@Autowired` 字段注入** → 构造器注入 + `@RequiredArgsConstructor`
+- **禁止 `LocalDateTime` / `java.util.Date`** → 统一 `Instant`
+- **Controller 不得直接调用 Repository/Mapper** → 必须经 Facade → Service
+- **Facade 不得暴露 Entity** → 转为 VO/DTO（record）
+- **测试类禁止 `Thread.sleep`** → Awaitility 或 CountDownLatch
+- **模块间零循环依赖** → 通过 Facade 或 Domain Event 通信
 
-| 文件 | 规则数 | 检测方式 |
-|------|--------|---------|
-| `CodingConventionComplianceUTest.java` | C-01~C-07 | ArchUnit API + SourceScanner |
-| `ModuleArchitectureComplianceUTest.java` | M-01~M-09 | ArchUnit API |
-| `SpringConfigComplianceUTest.java` | S-01 | ArchUnit API |
-| `TestConventionComplianceUTest.java` | T-01~T-06 | SourceScanner |
-| `ArchitectureComplianceUTest.java` | 四层架构合规（6 条规则） | ArchUnit API |
-| `NoDataAnnotationUTest.java` | 全项目禁止 `@Data` | SourceScanner |
-| `NoValueInjectionUTest.java` | 禁止 `@Value` 注入 | SourceScanner |
-| `NoRedundantConfigureUTest.java` | 禁止冗余 Configure 类 | SourceScanner |
-| `SourceScannerUTest.java` | — | SourceScanner 单元测试 |
-| `ApplicationStartupITest.java` | — | 应用启动集成测试 |
-| `SourceScanner.java` | — | 源码扫描工具类（块注释感知） |
-
-### 编码规范（C-01~C-07）
-
-| ID | 规则 | 说明 |
-|----|------|------|
-| C-01 | entity/repository 包禁止 LocalDateTime 和 java.util.Date | 时间字段统一使用 `Instant` |
-| C-02 | 禁止 JPA/Hibernate 注解 | ORM 仅用 MyBatis-Plus，禁止 `@Entity`/`@Table`/`@Column` 等 |
-| C-03 | 禁止 `BeanUtils.copyProperties` | 对象转换用 MapStruct 或手写 Converter |
-| C-04 | 禁止 `System.out`/`System.err` | 日志用 SLF4J（`@Slf4j`），排除 `generated` 包 |
-| C-05 | 禁止 Lombok `@With` | 用 `@Builder` 的 `withXxx()` 代替 |
-| C-06 | facade 包下 VO/DTO 必须用 record | 见"Record 规范"第 11 条 |
-| C-07 | Properties/Configure 类禁止 `@Data` | 用 `@Getter` + `@Setter` |
-| C-08 | 禁止 @Autowired 字段注入 | 使用构造器注入 + @RequiredArgsConstructor |
-| C-09 | 禁止抛出泛型异常 | 必须使用 BizException/ClientException/SysException + ErrorCode |
-| C-10 | Controller 返回值必须 BaseResult/BasePageResult | 统一响应包装 |
-| C-11 | 非 DO 类禁止 MyBatis-Plus 持久化注解 | 仅 DO（infrastructure/）可使用 @TableName/@TableId 等 |
-| C-12 | 禁止 java.util.logging | 统一使用 SLF4J (@Slf4j) |
-| C-13 | 禁止使用 @Deprecated API | 避免使用已废弃 API |
-| C-14 | @Service 类字段必须 final | 确保使用构造器注入 |
-| C-15 | Utility 类方法必须 static | 防止工具类被实例化 |
-| C-16 | Logger 字段必须是 private static final | SLF4J Logger 规范 |
-
-### 模块架构（M-01~M-09）
-
-| ID | 规则 | 说明 |
-|----|------|------|
-| M-01 | exception 包零 Spring 依赖 | common 模块不依赖 Spring Framework |
-| M-02 | 组件模块间零互相依赖 | component 下各子模块互不引用（`component.dto` 共享子包除外） |
-| M-03 | Facade 方法不得返回内部 Entity | public 方法返回类型不得在 `.entity.` 包下（`.entity.base.` 通用基类除外，VO/DTO 除外） |
-| M-04 | Controller 路径前缀必须符合规范（API→/api, Web→/web） | API Controller 的 `@RequestMapping` 的 value/path 必须以 `/api` 起始，Web Controller 必须以 `/web` 起始 |
-| M-05 | 模块 internal/ 包零 Spring 依赖（Controller/Service/Converter/RepositoryImpl/FacadeImpl/Configure/ITest/ETest 除外） | 降低框架耦合 |
-| M-06 | Repository 接口方法签名不得出现 MyBatis-Plus 类型 | 接口框架无关 |
-| M-07 | 模块间不得直接访问其他模块的 internal/ 包 | 模块边界隔离 |
-| M-08 | Facade 接口不得依赖 MyBatis-Plus 类型 | 公开 API 框架无关 |
-| M-09 | 业务模块间通过根包 Facade 接口通信 | 模块间解耦 |
-| M-10 | 业务模块间零循环依赖 | slices 独立检测，双保险（Modulith + ArchUnit） |
-
-### Spring 配置（S-01）
-
-| ID | 规则 | 说明 |
-|----|------|------|
-| S-01 | 组件 Properties 前缀以 `component.` 开头 | `@ConfigurationProperties(prefix = "component.xxx")` |
-
-### 测试规范（T-01~T-05）
-
-| ID | 规则 | 说明 |
-|----|------|------|
-| T-01 | 含 `@Test` 的文件必须以 `UTest.java` 或 `ITest.java` 结尾 | 排除测试基础设施类（`*Configuration.java`/`*Application.java`） |
-| T-02 | UTest 禁止 `@SpringBootTest` | 纯单元测试不启动 Spring 上下文 |
-| T-03 | ITest 禁止 `@Mock` | 集成测试使用真实依赖，不用 Mockito mock |
-| T-05 | ETest 禁止 `@Mock` | 端到端测试使用真实依赖 |
-| T-06 | 测试类禁止 Thread.sleep | 使用 Awaitility 或 CountDownLatch（@Disabled 检查点） |
-
-### 新增规则注意事项
-
-- SourceScanner 从 `PROJECT_ROOT` 递归遍历，自动覆盖 `app/`、`components/`、`common/` 的 `src/main/java` 和 `src/test/java`
-- 排除 `/target/` 目录和 `/generated/` 包
-- 块注释 `/* */` 内的代码不会被误判（BlockCommentTracker 状态机）
+### 完整规则清单
+详见 [模块结构 - ArchUnit 守护规则](docs/architecture/module-structure.md#archunit-守护规则)、[Java 编码规范](docs/conventions/java-conventions.md)、[测试规范](docs/conventions/testing-conventions.md)
 
 ---
 
 ## 核心编码规则
 
-### 1. 四层架构约束（仅 app 模块）
-- **Controller** → **Facade** → **Service** → **Repository**（Mapper），依赖方向严格单向
-- Controller **禁止**直接注入/调用 Repository（Mapper），ArchUnit 守护此规则
-- Facade 层负责 Entity→VO 转换，**禁止直接暴露 Entity 到 Controller**
-- Service 层处理业务逻辑，返回 Entity 给 Facade
-- Entity 层禁止依赖 Spring Framework
+> 详细规则见 [Java 编码规范](docs/conventions/java-conventions.md)、[错误处理](docs/conventions/error-handling.md)、[配置规范](docs/conventions/configuration.md)。
 
-### 2. Lombok 规范
-- **禁止 `@Data`**，使用 `@Builder` + `@RequiredArgsConstructor` + 手动 getter/setter
-- 原因：`@Data` 含 `@EqualsAndHashCode` / `@ToString` 可能导致意外行为
+### 必知红线
+- **四层架构方向**：Controller → Facade → Service → Repository，严格单向
+- **Facade 不得暴露 Entity**，必须转为 VO/DTO
+- **BizContext** 传 userId（基于 Java 25 ScopedValue），traceId 由 OTel Span 管理
+- **异步传播**：`ThreadPoolConfigure.ContextPropagatingTaskDecorator`（三合一：BizContext + OTel + MDC）
+- **异常体系**：`BizException`/`ClientException`/`SysException` + `ErrorCode`（禁止泛型异常）
+- **对象转换**：MapStruct（`@Mapper(config = CentralMapperConfig.class)`），禁止 `BeanUtils.copyProperties`
 
-### 3. 测试命名
-- 单元测试：`*UTest`（继承 `UnitTestBase`，Mockito 环境）
-- 集成测试：`*ITest`（继承 `IntegrationTestBase`，Spring 上下文）
-
-### 4. 异常体系（common 模块，`org.smm.archetype.exception`）
-- `ErrorCode` — 接口（`code()` + `message()` + `messageKey()`）
-- `CommonErrorCode` — 枚举（通用错误码，含 i18n messageKey）
-- `BaseException` — 异常基类
-- `BizException` — 业务异常（可预期，前端展示）
-- `ClientException` — 客户端参数异常（400 类）
-- `SysException` — 系统内部异常（500 类）
-
-### 5. 日志规范
-
-- 使用 `@BusinessLog` 注解记录业务方法日志（SLF4J + OTel 指标）
-- `@BusinessLog` 扩展属性：`module`（业务模块）、`operation`（操作类型）、`samplingRate`（采样率，默认 1.0）
-- 操作日志持久化：`OperationLogWriter` 接口 + `OperationLogRecord`，`OperationType` 枚举（CREATE/UPDATE/DELETE/QUERY/EXPORT/IMPORT）
-- 使用 `@Slf4j` + 参数化日志，**禁止 `System.out.println`**
-
-### 6. 依赖约束
-- ORM 仅允许 MyBatis-Plus（禁止 JPA / Hibernate）
-- 工具库优先：Hutool / Apache Commons / Guava
-- 序列化：Jackson（JSON）、Kryo（二进制）
-- 对象转换：MapStruct（编译期安全）/ 手写 @Component Converter（当前使用方式）
-
-### 7. 线程上下文
-- 使用 `BizContext`（基于 Java 25 ScopedValue）传递 userId（traceId 由 OTel Span 管理）
-- 异步场景通过 `ThreadPoolConfigure.ContextPropagatingTaskDecorator`（三合一：BizContext + OTel Context + MDC）传播
-
-### 8. 配置管理
-- 多环境：`application-dev.yaml` / `application-prod.yaml` / `application-component.yaml`
-- 配置类使用 `@ConfigurationProperties`，禁止 `@Value`
-
-### 9. 技术组件规范（components 模块）
-- 每个组件模块独立 artifactId，依赖 `common`
-- **Template Method 模式**：`AbstractXxxComponent` 的公开方法为 `final`（参数校验+日志），子类实现 `do*` 扩展点
-- **条件装配**：`@AutoConfiguration` + `@ConditionalOnClass` + `@ConditionalOnProperty`
-- **Properties 前缀统一**：`component.*`（component.cache / component.oss / component.email / component.sms / component.search / component.ratelimit / component.auth），日志前缀为 `logging`（对接 Spring Boot 日志配置惯例）。幂等模块不再有独立 Properties（参数在 @Idempotent 注解上定义）
-
-### 10. 时间类型规范
-- 所有时间存储与传输统一使用 `java.time.Instant`
-- 禁止使用 `LocalDateTime`、`Long`（时间戳毫秒）作为时间字段类型
-
-### 11. Record 规范
-- 新增的 DTO/VO/Result 使用 Java record
-- 有继承链的基类（BaseResult、BaseRequest、BaseDO）保持 class
-- 值对象简化为 record（如 ConfigKey、ConfigValue、DisplayName），含静态工厂 of() 和校验
-
-### 12. 代码生成器规范
-- 代码生成器位置：`app/.../generated/` 包
-- 生成的代码禁止手动修改
-
-### 13. API 路径规范
-- 统一 `/api` 前缀：所有控制器使用 `/api` 路径前缀
-- API 版本通过 HTTP Header `API-Version` 控制
-
-### 14. 限流规范
-- 使用 `@RateLimit` 注解标记需要限流的接口
-- 支持 SpEL 表达式自定义限流 Key
-- `LimitFallback` 策略：REJECT / WAIT / FALLBACK
-
-### 15. 幂等规范
-- 使用 `@Idempotent` 注解标记需要幂等保护的接口
-- 基于 CacheComponent 实现幂等 Key 存储（通过 TTL 过期机制）
-- 支持自定义幂等 Key 解析
-
-### 16. 国际化规范（i18n）
-- 错误消息国际化：使用 `ErrorCode.messageKey()` + `MessageSource` 解析
-- 资源文件：`messages.properties` + `messages_en.properties`
-- `WebExceptionAdvise` 根据 `Accept-Language` Header 自动切换语言
+### 限流与幂等
+- `@RateLimit` 注解标记限流接口，支持 SpEL Key，策略：REJECT/WAIT/FALLBACK
+- `@Idempotent` 注解标记幂等接口，基于 CacheComponent + TTL 过期
 
 ## 文档维护职责
 
@@ -325,8 +163,6 @@ mvn clean verify
 
 ### 编码规范（docs/conventions/）
 
-**编码规范必须强制遵守！！！**
-
 | 强度     | 文档        | 路径                                                                | 一句话描述               |
 |--------|-----------|-------------------------------------------------------------------|---------------------|
 | ⛔ MUST | Java 编码规范 | [java-conventions.md](docs/conventions/java-conventions.md)       | Lombok/时间/Record/依赖 |
@@ -348,8 +184,6 @@ mvn clean verify
 | 💡 MAY | 搜索组件 | [component-search.md](docs/modules/component-search.md) | 内存搜索 + 15 方法 |
 | ⚠️ SHOULD | 认证组件 | [component-auth.md](docs/modules/component-auth.md) | AuthComponent 接口 + Sa-Token |
 
-> **注意**：限流、幂等、操作日志横切关注点已移至 app 模块 `shared/` 包下，对应的旧文档（component-ratelimit.md、component-idempotent.md、component-log.md）已删除。
-
 ### 文档系统说明
 
 | 强度 | 文档 | 路径 | 一句话描述 |
@@ -363,11 +197,3 @@ mvn clean verify
 ## graphify
 
 > 暂未生成。`graphify-out/` 目录不存在时，忽略以下规则，使用 grep/glob 探索代码库。
-
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
-
-Rules:
-- ALWAYS read graphify-out/GRAPH_REPORT.md before reading any source files, running grep/glob searches, or answering codebase questions. The graph is your primary map of the codebase.
-- IF graphify-out/wiki/index.md EXISTS, navigate it instead of reading raw files
-- For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` over grep — these traverse the graph's EXTRACTED + INFERRED edges instead of scanning files
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
