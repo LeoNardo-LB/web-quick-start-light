@@ -316,6 +316,14 @@ org.smm.archetype/
 |---------|---------|-----------|------|
 | S-01 | — | 组件 Properties 前缀以 `component.` 开头 | `@ConfigurationProperties(prefix = "component.xxx")` |
 
+### shared/ 功能域隔离（SharedIsolationUTest）
+
+| 规则 ID | 规则方法 | 守护的约束 | 说明 |
+|---------|---------|-----------|------|
+| S-02 | `shared_bottom_packages_should_not_depend_on_each_other` | 底层包之间零互相依赖 | 底层 8 包（context/event/idempotent/logging/operationlog/pagination/ratelimit/util）互不 import |
+| S-02 | `shared_bottom_packages_should_not_depend_on_top_packages` | 底层包不得依赖上层包 | 底层不依赖上层（dal/generated/mybatis/result/threadpool/web） |
+| S-02 | `all_shared_subpackages_should_be_classified` | 所有 shared/ 子包必须被分类 | 防止新增功能域被静默忽略（排除 internal） |
+
 ### 测试规范（TestConventionComplianceUTest）
 
 | 规则 ID | 规则方法 | 守护的约束 | 说明 |
@@ -459,3 +467,4 @@ Phase 6 引入了领域事件机制，用于模块间的异步/同步通信，�
 | 2026-05-11 | `entity/api/` → `entity/base/`；`shared/util/context/` 修正为仅含 BizContext；中间件→组件措辞修正；MapStruct→手写 Converter |
 | 2026-05-13 | Phase 6+7 同步：MapStruct 迁移完成（@Mapper(config=CentralMapperConfig)替代手写@Component）；Domain Event 架构（shared/event/ + 模块根包 Event record）；infrastructure/ 两层分包；ArchUnit 规则扩展至 44 条（C-01~C-16/M-01~M-10/S-01/T-01~T-06/四层架构 6 条/全局禁止 3 条/Modulith 3 条）；移除已删除的 Configure 类 |
 | 2026-05-13 | Modulith 模块精简：exception/component 不再作为独立 Modulith 模块（package-info.java 删除），改为通过 JavaClass.Predicates.resideInAPackage() 排除外部 Maven 模块；模块数从 6 降为 4；@SpringBootApplication(excludeName) 排除 4 个不支持 SQLite 的 Modulith 自动配置 |
+| 2026-05-14 | S-02 shared/ 功能域分层隔离：底层 8 包零互依赖 + 底层不依赖上层 + 未分类功能域检测；ArchUnit 规则 44→45 条（+3 个测试方法） |
