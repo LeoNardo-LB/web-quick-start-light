@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.smm.archetype.WebStartLightApplication;
 import org.smm.archetype.support.UnitTestBase;
+import org.springframework.modulith.core.ApplicationModule;
 import org.springframework.modulith.core.ApplicationModules;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +32,7 @@ class ModulithComplianceUTest extends UnitTestBase {
     @Test
     @DisplayName("应验证模块命名符合约定")
     void should_verifyModuleNames() {
-        assertThat(MODULES.stream().map(m -> m.getDisplayName()).toList())
+        assertThat(MODULES.stream().map(ApplicationModule::getDisplayName).toList())
                 .containsExactlyInAnyOrder(
                         "Authentication",
                         "Operation Log", "System Configuration", "Shared Cross-Cutting");
